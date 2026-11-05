@@ -1,0 +1,6 @@
+{
+  "status": "older-version",
+  "build": "split-v31",
+  "supersededBy": "split-v32",
+  "note": "Older-version ABI, still valid for the Nov 4 live contracts. New integrations should use split-v32."
+}

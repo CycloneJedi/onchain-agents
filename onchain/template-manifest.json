@@ -65,8 +65,7 @@
         "With dispute hold on, after close the buyer can dispute a held remainder of the final batch inside the claim window."
       ],
       "docs": "/onchain/ppu.html",
-      "abi": "/abi/onchain/ppu-v19/OnChainMeterV1.json",
-      "abiNote": "Published ABI folder still named ppu-v19; confirm selectors on chain for ppu-v20."
+      "abi": "/abi/onchain/ppu-v20/OnChainMeterV1.json"
     },
     {
       "id": "stream",
@@ -136,8 +135,7 @@
         "Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Read ARBITER_THRESHOLD()."
       ],
       "docs": "/onchain/split.html",
-      "abi": "/abi/onchain/split-v31/OnChainSplitV25.json",
-      "abiNote": "Published ABI folder still named split-v31; confirm selectors on chain for split-v32."
+      "abi": "/abi/onchain/split-v32/OnChainSplitV25.json"
     },
     {
       "id": "jobboard",
@@ -173,10 +171,9 @@
       "mcp": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
       "docs": "/onchain/jobboard.html",
       "abi": [
-        "/abi/onchain/jobboard-v30/OnChainJobBoardV2.json",
-        "/abi/onchain/jobboard-v30/JobBoardEscrowV1.json"
-      ],
-      "abiNote": "Published ABI folder still named jobboard-v30; confirm selectors on chain for jobboard-v31 (includes postQualifiedJob)."
+        "/abi/onchain/jobboard-v31/OnChainJobBoardV2.json",
+        "/abi/onchain/jobboard-v31/JobBoardEscrowV1.json"
+      ]
     }
   ],
   "olderVersions": [
@@ -198,7 +195,8 @@
         "version": "1.9",
         "chainId": 84532,
         "verifyingContract": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
-      }
+      },
+      "abi": "/abi/onchain/ppu-v19/OnChainMeterV1.json"
     },
     {
       "id": "split",
@@ -219,7 +217,8 @@
         "version": "3.1",
         "chainId": 84532,
         "verifyingContract": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD"
-      }
+      },
+      "abi": "/abi/onchain/split-v31/OnChainSplitV25.json"
     },
     {
       "id": "jobboard",
@@ -240,7 +239,11 @@
         "version": "3.0",
         "chainId": 84532,
         "verifyingContract": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec"
-      }
+      },
+      "abi": [
+        "/abi/onchain/jobboard-v30/OnChainJobBoardV2.json",
+        "/abi/onchain/jobboard-v30/JobBoardEscrowV1.json"
+      ]
     }
   ],
   "retired": {
@@ -264,7 +267,7 @@
     "directTransfersRecoverable": false,
     "rule": "Pay only through the funding call. Tokens sent directly to the contract address are not credited to any deal and cannot be recovered."
   },
-  "ownerPowers": "No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v19 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer.",
+  "ownerPowers": "No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer.",
   "mcpServer": {
     "description": "draft open-source MCP server, test chain only, not published",
     "docs": "/onchain/mcp.html",
@@ -289,10 +292,10 @@
       "The job board's relay operator is currently the deployer address. The contract gives it no powers; it and its listed affiliates may not bid or act as arbiter. Its role is described in OWNER-POWERS.md."
     ],
     "stream-v20": [
-      "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
+      "On stream-v20 and ppu-v20, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
     ],
     "ppu-v20": [
-      "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
+      "On stream-v20 and ppu-v20, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
     ],
     "split-v32": [
       "No trust gate is deployed on this testnet. Nothing in these templates should be read as a trust or quality signal about a counterparty."
@@ -302,6 +305,9 @@
       "A job board qualification based on minimum completed value can be met by deals between related wallets, so it does not prove real work.",
       "ERC-1271 vouchers (signed approvals from smart-contract wallets) cannot be revoked once issued.",
       "In a split, any one payee can refuse to sign a mutual settlement. The dispute route still works."
+    ],
+    "ppu-v19": [
+      "Older version. On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out."
     ]
   },
   "links": {

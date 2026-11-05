@@ -1,0 +1,6 @@
+{
+  "status": "older-version",
+  "build": "jobboard-v30",
+  "supersededBy": "jobboard-v31",
+  "note": "Older-version ABI, still valid for the Nov 4 live contracts. New integrations should use jobboard-v31."
+}

@@ -1,0 +1,6 @@
+{
+  "status": "current",
+  "build": "ppu-v20",
+  "sourceCommit": "57ef2d4e5854d9474d007eadd9cfc8a78d4b0f3a",
+  "note": "ABI for the current Base Sepolia testnet set. Pair with addresses in /deployments.json."
+}

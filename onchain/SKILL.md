@@ -83,7 +83,7 @@ status: "Testnet (Base Sepolia), no real value. Not audited. checked by Constitu
 
 ## Fees and owner powers (all four builds)
 - Fee preset 10 bps (0.1%) of what the provider is paid. No fee on refunds.
-- No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v19 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer. Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
+- No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer. Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
 
 ## MCP server
 - A draft open-source MCP server, test chain only, not published. See [/onchain/mcp.html](/onchain/mcp.html).
@@ -97,8 +97,8 @@ status: "Testnet (Base Sepolia), no real value. Not audited. checked by Constitu
 - A buyer can pass over fake or unwanted bids immediately, but can also pass over any genuine bid, so the lowest bid is not guaranteed to win. Every skip is recorded publicly.
 - The job board's relay operator is currently the deployer address. The contract gives it no powers; it and its listed affiliates may not bid or act as arbiter. Its role is described in OWNER-POWERS.md.
 
-**Stream and pay-per-use (stream-v20, ppu-v19 / ppu-v20)**
-- On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes.
+**Stream and pay-per-use (stream-v20, ppu-v20)**
+- On stream-v20 and ppu-v20, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes.
 
 **Split (split-v32)**
 - No trust gate is deployed on this testnet. Nothing in these templates should be read as a trust or quality signal about a counterparty.

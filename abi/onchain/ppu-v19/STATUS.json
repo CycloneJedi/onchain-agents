@@ -1,0 +1,6 @@
+{
+  "status": "older-version",
+  "build": "ppu-v19",
+  "supersededBy": "ppu-v20",
+  "note": "Older-version ABI, still valid for the Nov 4 live contracts. New integrations should use ppu-v20."
+}

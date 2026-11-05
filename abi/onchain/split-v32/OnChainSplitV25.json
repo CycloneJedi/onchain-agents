@@ -1,0 +1,3423 @@
+[
+ {
+  "type": "constructor",
+  "inputs": [
+   {
+    "name": "token_",
+    "type": "address",
+    "internalType": "contract IERC20"
+   },
+   {
+    "name": "policy_",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   },
+   {
+    "name": "recorder_",
+    "type": "address",
+    "internalType": "contract ISplitOutcomeRecorder"
+   },
+   {
+    "name": "marsDelay_",
+    "type": "uint32",
+    "internalType": "uint32"
+   },
+   {
+    "name": "maxTotalFeeBps_",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "arbiterThreshold_",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "ACCEPT_TYPEHASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "ARBITER_ACCEPTANCE_TYPEHASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "ARBITER_THRESHOLD",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "CHAIN_FEE_CAP_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "COMPLETED_MIN_PROVIDER_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "DEAL_TYPEHASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "DEFAULT_DISPUTE_TIMEOUT",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "DEFAULT_SPLIT_PROVIDER_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "FEE_AT_ROOT_ONLY",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "FEE_GUARD_CEILING_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "FEE_POLICY",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "FEE_TERMS_TYPEHASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MARS_DELAY",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MAX_CHAIN_DEPTH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MAX_PAYEES",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MAX_PRICE",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MAX_SKIM_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MAX_TOTAL_FEE_BPS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "MIN_DISPUTE_TIMEOUT",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "OWNER_POWERS_HASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "RECORDER",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract ISplitOutcomeRecorder"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "SETTLE_TYPEHASH",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "SIGNATURE_WINDOW",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "TIME_FLOOR",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "TIME_MARGIN",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "TOKEN",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IERC20"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "TRUST_HOOK_GAS",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "VERSION",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "accept",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedTermsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "acceptWithSignature",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "signer",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "sig",
+    "type": "bytes",
+    "internalType": "bytes"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "approve",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "arbiterAccept",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedTermsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "sig",
+    "type": "bytes",
+    "internalType": "bytes"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "arbiterAcceptanceDigest",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "arbiterAccepted",
+  "inputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "arbiterRule",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "rulingHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "blockedAt",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "bumpSigNonce",
+  "inputs": [],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "cancelUnfunded",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "cascadeGap",
+  "inputs": [
+   {
+    "name": "reviewWindow",
+    "type": "uint32",
+    "internalType": "uint32"
+   },
+   {
+    "name": "disputeTimeout",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "chainFeeCommitted",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "chainPaidOut",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "claimFeeBond",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "claimable",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "custodyOk",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "deliver",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deliverableHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "specEcho",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "depthOf",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "uint8"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "dispute",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "reasonHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "domainSeparator",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "escrowedOf",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "expire",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "feeBondOf",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeBondTaken",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeBondTopOf",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeBondTopTaken",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeBondTopTotal",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeBondTotal",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "feeTermsFor",
+  "inputs": [
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "subDeal",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.FeeTerms",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ]
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "fund",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "fundingLead",
+  "inputs": [
+   {
+    "name": "minDeliveryDelay",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "getDeal",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.Terms",
+    "components": [
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsVersion",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "parentEscrow",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "parentId",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "offerExpiry",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deliveryDeadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minDeliveryDelay",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "timeoutFallback",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "fallbackProviderBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "payees",
+      "type": "address[]",
+      "internalType": "address[]"
+     },
+     {
+      "name": "shareBps",
+      "type": "uint16[]",
+      "internalType": "uint16[]"
+     }
+    ]
+   },
+   {
+    "name": "",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.FeeTerms",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ]
+   },
+   {
+    "name": "",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.Progress",
+    "components": [
+     {
+      "name": "state",
+      "type": "uint8",
+      "internalType": "enum IOnChainSplitV21.State"
+     },
+     {
+      "name": "depth",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "nonce",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "acceptedMask",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "requiredMask",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "proposer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "fundedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deliveredAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "reviewEndsAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "disputedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "disputeEndsAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "everDisputed",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "deliverableHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "paidToPayees",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "feeCharged",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "refundedToBuyer",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "worstFee",
+      "type": "uint256",
+      "internalType": "uint256"
+     }
+    ]
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "hashDeal",
+  "inputs": [
+   {
+    "name": "t",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.Terms",
+    "components": [
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsVersion",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "parentEscrow",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "parentId",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "offerExpiry",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deliveryDeadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minDeliveryDelay",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "timeoutFallback",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "fallbackProviderBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "payees",
+      "type": "address[]",
+      "internalType": "address[]"
+     },
+     {
+      "name": "shareBps",
+      "type": "uint16[]",
+      "internalType": "uint16[]"
+     }
+    ]
+   },
+   {
+    "name": "f",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.FeeTerms",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ]
+   },
+   {
+    "name": "proposer",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "nonce",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "liveSubs",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "mutualSettle",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "sigs",
+    "type": "bytes[]",
+    "internalType": "bytes[]"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "mutualSettleDigest",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "nextId",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "optInDigest",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "signer",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "parentDealId",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "previewPayout",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   },
+   {
+    "name": "",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   },
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "previewPayout",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "res",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.Resolution"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   },
+   {
+    "name": "",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   },
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "previewSubFunding",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "subPrice",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "bond",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "total",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "propose",
+  "inputs": [
+   {
+    "name": "t",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.Terms",
+    "components": [
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsVersion",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "parentEscrow",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "parentId",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "offerExpiry",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deliveryDeadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minDeliveryDelay",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "timeoutFallback",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "fallbackProviderBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "payees",
+      "type": "address[]",
+      "internalType": "address[]"
+     },
+     {
+      "name": "shareBps",
+      "type": "uint16[]",
+      "internalType": "uint16[]"
+     }
+    ]
+   },
+   {
+    "name": "termsURI",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "proposerNonce",
+  "inputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "quoteFeeTerms",
+  "inputs": [
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "internalType": "struct IOnChainSplitV21.FeeTerms",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ]
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "refundAfterDeadline",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "releaseAfterReview",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "rootOf",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "sigNonce",
+  "inputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "stateOf",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "subCommitted",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "termsHashOf",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "timeoutFallback",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "timesOf",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "fundingCutoff",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "latestAccept",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "totalBonds",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "totalClaimable",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "totalEscrowed",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "withdraw",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "event",
+  "name": "AllAccepted",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ArbiterAccepted",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "arbiter",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ArbiterRuled",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerBps",
+    "type": "uint16",
+    "indexed": false,
+    "internalType": "uint16"
+   },
+   {
+    "name": "rulingHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ArbiterThresholdSet",
+  "inputs": [
+   {
+    "name": "threshold",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "BlockedTimeExtended",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "blockedFor",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "newEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ChainFeeFromBond",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ChainFeeShort",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ChainFeeTopUp",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "paidBelow",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "topUp",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "ChainLead",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "lead",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Credited",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "token",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Delivered",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "deliverableHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "reviewEndsAt",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Disputed",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "by",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "reasonHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "FeeBondPosted",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "subId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "bond",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "FeeBondReturned",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Funded",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Outcome",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": true,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "outcome",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IOnChainSplitV21.State"
+   },
+   {
+    "name": "resolution",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IOnChainSplitV21.Resolution"
+   },
+   {
+    "name": "toPayees",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "toBuyer",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "wasDisputed",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "PartyAccepted",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "party",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "PayeeCredited",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "payee",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "gross",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "net",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Proposed",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": true,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "proposer",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "buyer",
+    "type": "address",
+    "indexed": false,
+    "internalType": "address"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "payeeCount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "parentEscrow",
+    "type": "address",
+    "indexed": false,
+    "internalType": "address"
+   },
+   {
+    "name": "parentId",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "depth",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "uint8"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "SigNonceBumped",
+  "inputs": [
+   {
+    "name": "signer",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "newNonce",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "TermsPointer",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "uri",
+    "type": "string",
+    "indexed": false,
+    "internalType": "string"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "TrustRecordFailed",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "Withdrawal",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "token",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "error",
+  "name": "AcceptWindowClosed",
+  "inputs": [
+   {
+    "name": "latestAccept",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "AlreadyAccepted",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ArbiterNotAccepted",
+  "inputs": [
+   {
+    "name": "arbiter",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ArbiterRequired",
+  "inputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "threshold",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadArbiter",
+  "inputs": [
+   {
+    "name": "arbiter",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadOption",
+  "inputs": [
+   {
+    "name": "field",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "value",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadParent",
+  "inputs": [
+   {
+    "name": "parentEscrow",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "parentId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadPayee",
+  "inputs": [
+   {
+    "name": "payee",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadRecorder",
+  "inputs": [
+   {
+    "name": "recorder",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadSignature",
+  "inputs": [
+   {
+    "name": "signer",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadSignatureCount",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "needed",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadState",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   },
+   {
+    "name": "expected",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "BadStateRange",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   },
+   {
+    "name": "from",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   },
+   {
+    "name": "to",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "CascadeDeadline",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "latestAllowed",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ChainFeeAboveCap",
+  "inputs": [
+   {
+    "name": "chainWorstFee",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "cap",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ChainTooDeep",
+  "inputs": [
+   {
+    "name": "depth",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "DeadlineNotPassed",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "DeadlineOutOfRange",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "min",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "max",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "DeadlinePassed",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "DeliveryCheckFailed",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "DisputeTimedOut",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "DisputeTimeoutNotReached",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "DuplicatePayee",
+  "inputs": [
+   {
+    "name": "payee",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "DurationOutOfRange",
+  "inputs": [
+   {
+    "name": "field",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "value",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "EmptyDeliverable",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "FeeAboveCap",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "FeeModelUnsupported",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "GuardOutOfRange",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "InsufficientGasForHook",
+  "inputs": [
+   {
+    "name": "needed",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "InvalidSplit",
+  "inputs": [
+   {
+    "name": "providerBps",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "IssuedAtOutOfRange",
+  "inputs": [
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "MarsDelayOutOfRange",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "MinDeliveryDelayTooLong",
+  "inputs": [
+   {
+    "name": "value",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "NoFeeBond",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "NotArbiter",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NotBuyer",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NotParentLead",
+  "inputs": [
+   {
+    "name": "caller",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "NotParty",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NotProposerParty",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NotProvider",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NothingToWithdraw",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "OfferExpired",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "OfferExpiryOutOfRange",
+  "inputs": [
+   {
+    "name": "expiry",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "min",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "max",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "OfferNotExpired",
+  "inputs": [
+   {
+    "name": "expiresAt",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ParentNotLive",
+  "inputs": [
+   {
+    "name": "parentId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "state",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "PayeeCount",
+  "inputs": [
+   {
+    "name": "count",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "PayeeLengthMismatch",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "PriceTooLarge",
+  "inputs": [
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ReentrancyGuardReentrantCall",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ReviewWindowClosed",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ReviewWindowOpen",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "RootNotFinal",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "RootNotFunded",
+  "inputs": [
+   {
+    "name": "rootId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "state",
+    "type": "uint8",
+    "internalType": "enum IOnChainSplitV21.State"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SafeERC20FailedOperation",
+  "inputs": [
+   {
+    "name": "token",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SharesSum",
+  "inputs": [
+   {
+    "name": "sum",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SigWindowTooShort",
+  "inputs": [
+   {
+    "name": "issuedAt",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SignatureExpired",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SubDealsExceedParent",
+  "inputs": [
+   {
+    "name": "committedTotal",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "parentPrice",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "SubDealsOpen",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "open",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "TermsHashMismatch",
+  "inputs": [
+   {
+    "name": "expected",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "actual",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "TooCloseToDeadline",
+  "inputs": [
+   {
+    "name": "fundingCutoff",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "TooEarlyToDeliver",
+  "inputs": [
+   {
+    "name": "earliest",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "TotalFeeTooHigh",
+  "inputs": [
+   {
+    "name": "maxTotalFee",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "TransferAmountMismatch",
+  "inputs": [
+   {
+    "name": "expected",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "received",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "UnknownAgreement",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "WrongToken",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "expected",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "ZeroAddress",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ZeroHash",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ZeroPrice",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "ZeroShare",
+  "inputs": [
+   {
+    "name": "index",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ }
+]
