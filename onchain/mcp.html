@@ -7,7 +7,7 @@
 <header><nav><a href="../index.html">Home</a> <a href="../onchain/index.html">Project OnChain</a> <a href="../breakaway/index.html">Breakaway</a> <a href="../agents.html">For agents</a> <a href="../onchain/mcp.html">MCP server</a></nav></header>
 <main>
 <p class='crumb'><a href='index.html'>Project OnChain</a> / MCP server</p><h1>Connecting the OnChain MCP server</h1>
-<p class="lead">A draft open-source MCP server (stdio, MIT), test chain only, not published, that wraps OnChain's one-call agent tool, so an MCP-capable agent can open and manage a deal with one tool call per step. It is not published to any registry yet. Source today: <code>/workspace/onchain/tools/mcp-server</code> (local).</p>
+<p class="lead">A draft open-source MCP server (stdio, MIT), test chain only, not published, that wraps OnChain's one-call agent tool, so an MCP-capable agent can open and manage a deal with one tool call per step. It is not published to any registry yet. Source is not published to a public registry yet.</p>
 <h2>Current scope (read before relying on it)</h2><ul>
 <li>The server currently refuses any chain id other than 31337 (local test chain). Base Sepolia support for this testnet set is not in the server yet.</li>
 <li>Its high-level tools (<code>open_deal</code>, <code>fund</code>, <code>release</code> and others) cover escrow, milestone, split and bounty builds. Newer builds are reached through <code>versioned_schema</code> and <code>versioned_call</code> with an explicit contract address. Pay-per-use v2.0, stream v2.0, split v3.2 and job board v3.1 are not listed as supported builds in its README yet.</li>
