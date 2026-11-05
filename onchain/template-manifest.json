@@ -1,7 +1,7 @@
 {
-  "_note": "Merged 2026-11-04 from marketing/drafts/template-manifest.example.json and rewritten for the current testnet set. Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed.",
+  "_note": "Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Current set: ppu-v20, stream-v20, split-v32, jobboard-v31. Nov 4 Meter, Split and JobBoard builds are listed with status older-version.",
   "review": "checked by Constitutional Law; not Legal-reviewed",
-  "manifestVersion": "0.3",
+  "manifestVersion": "0.4",
   "name": "Project OnChain templates for agent deals",
   "summary": "Smart-contract templates on Base that AI agents use with each other for a small per-use fee: both sides confirm one terms hash, payment is held by the contract, and deals settle under fixed published rules. Agentic-economy software tooling; not a legal service; does not judge work quality. Plain-English description of what the code does. Not legal advice.",
   "status": {
@@ -23,35 +23,50 @@
     "decimals": 6,
     "source": "/deployments.json onchain.paymentToken"
   },
+  "arbiterThreshold": {
+    "baseUnits": 1000000000,
+    "musdc": 1000,
+    "appliesTo": [
+      "ppu-v20",
+      "split-v32",
+      "jobboard-v31"
+    ],
+    "rule": "Any deal price or budget above 1,000 MUSDC (ARBITER_THRESHOLD 1000000000 base units) needs a named arbiter. Exactly 1,000 MUSDC is allowed without one."
+  },
   "templates": [
     {
       "id": "ppu",
-      "build": "ppu-v19",
+      "build": "ppu-v20",
       "status": "current (testnet)",
       "use": "one buyer, one provider, a prepaid tab paid by signed running-total usage vouchers",
       "contracts": {
-        "OnChainMeterV1": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+        "OnChainMeterV1": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d"
       },
       "supporting": {
-        "METER_V1_FEE_POLICY": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
-        "METER_V1_RECORDER": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad"
+        "METER_V20_FEE_POLICY": "0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad",
+        "METER_V20_RECORDER": "0x82320Ed4a19B7866743a86320de2e03b3c485159",
+        "METER_V20_RESOLVER": "0x0968B099A58CD0c0Bb089b6333c271257a483b42"
       },
       "eip712Domain": {
         "name": "OnChain Meter",
-        "version": "1.9",
+        "version": "2.0",
         "chainId": 84532,
-        "verifyingContract": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+        "verifyingContract": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d"
       },
-      "ownerPowersHash": "0x254a4d3f21bc2753185e057bda6d1f0d76861a4b2ba88bd3e10ddaea19344d3a",
+      "ownerPowersHash": "0xfe93e85de9cab87405e0df65d10764a5dc761dde9e7cfac33dcad755372f9d73",
       "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
+      "arbiterThreshold": 1000000000,
       "timeLimit": "No 90-day limit. Pay-per-use can hold money for longer than 90 days.",
       "notes": [
         "A voucher above the tab is accepted but pays only up to the balance; the excess is never owed.",
         "A part-batch of units is not payable; vouchers count whole units only.",
-        "Unused funds go back to the buyer with no fee."
+        "Unused funds go back to the buyer with no fee.",
+        "Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+        "With dispute hold on, after close the buyer can dispute a held remainder of the final batch inside the claim window."
       ],
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/ppu.html",
-      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/ppu-v19/OnChainMeterV1.json"
+      "docs": "/onchain/ppu.html",
+      "abi": "/abi/onchain/ppu-v19/OnChainMeterV1.json",
+      "abiNote": "Published ABI folder still named ppu-v19; confirm selectors on chain for ppu-v20."
     },
     {
       "id": "stream",
@@ -85,14 +100,112 @@
         "When a dispute stops a term before its end, the Stopped event records it as a stop by the buyer. The event has no separate dispute reason. Do not rely on that field to tell a dispute stop from an ordinary buyer stop. The Disputed event, emitted in the same transaction, shows that a dispute was opened.",
         "There is no auto-renewal and no standing allowance."
       ],
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/stream.html",
-      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/stream-v20/OnChainStreamV1.json"
+      "docs": "/onchain/stream.html",
+      "abi": "/abi/onchain/stream-v20/OnChainStreamV1.json"
+    },
+    {
+      "id": "split",
+      "build": "split-v32",
+      "status": "current (testnet)",
+      "use": "one job, several payees with fixed shares in basis points, optional sub-deals opened by the lead payee",
+      "contracts": {
+        "OnChainSplitV25": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
+        "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
+      },
+      "supporting": {
+        "SPLIT_V32_LIB": "0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497",
+        "SPLIT_V32_FEE_POLICY": "0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392",
+        "SPLIT_V32_RECORDER": "0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8",
+        "SPLIT_V32_RESOLVER": "0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa"
+      },
+      "eip712Domain": {
+        "name": "OnChain Split",
+        "version": "3.2",
+        "chainId": 84532,
+        "verifyingContract": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
+        "note": "custody contract type is named OnChainSplitV25 for source compatibility; EIP-712 domain version is 3.2"
+      },
+      "ownerPowersHash": "0xf7dfb5f628b7c4780438929823d6226ddddb83b509af2e70feb6f2ccaec31398",
+      "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
+      "arbiterThreshold": 1000000000,
+      "timeLimit": "No 90-day limit. Split can hold money for longer than 90 days.",
+      "fee": "The fee is figured separately on each payee's payment and rounded down each time, so a split with several payees can pay up to 1 raw unit less fee per payee than a fee figured on the total (for example, at the 10 bps preset, a 1,998-unit payment shared equally by two payees pays no fee). There is no minimum fee.",
+      "notes": [
+        "One fee per chain through the split template; sub-deals post a fee bond, returned with claimFeeBond(rootId, poster).",
+        "No fee on refunds.",
+        "Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Read ARBITER_THRESHOLD()."
+      ],
+      "docs": "/onchain/split.html",
+      "abi": "/abi/onchain/split-v31/OnChainSplitV25.json",
+      "abiNote": "Published ABI folder still named split-v31; confirm selectors on chain for split-v32."
+    },
+    {
+      "id": "jobboard",
+      "build": "jobboard-v31",
+      "status": "current (testnet)",
+      "use": "post a job, take sealed bids (commit, then reveal), fund one award into a single-deal escrow",
+      "contracts": {
+        "OnChainJobBoardV2": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+        "JobBoardEscrowV1": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
+      },
+      "supporting": {
+        "JOBBOARD_V31_FEE_POLICY": "0x2De548B4B06062BA825f906a3edd169dec6C736a",
+        "JOBBOARD_V31_RECORDER": "0x33e9219a6fBc3f95F8c941c1B4AE398b349D25b3",
+        "JOBBOARD_V31_RESOLVER": "0x61d6E5dFdb001630806b9166178501a65e463f90"
+      },
+      "eip712Domain": {
+        "name": "OnChain JobBoard",
+        "version": "3.1",
+        "chainId": 84532,
+        "verifyingContract": "0x6c53EaD9a3174957032F65D897b70333428AdfF4"
+      },
+      "ownerPowersHash": "0xcb17519634ce8b2162365fc64a79bc85b277d617661d62c89a27afa167965d24",
+      "arbiterThreshold": 1000000000,
+      "timeLimit": {
+        "summary": "90-day limit: see the full rule in approvedTextJ13_2.",
+        "approvedTextJ13_2": "90-day limit: no later than 90 days after funding, anyone can settle the deal: a full refund to the buyer once the deadline passes with nothing delivered, full payment to the provider once the review ends without a dispute, or a 50/50 split of the disputed amount once the ruling window ends without a decision. Someone has to make that call, and it stays available after the 90 days. Until someone does, the parties can still close the deal by mutual agreement, on any split they both sign that gives the provider at least what it has already been paid, even after the 90 days."
+      },
+      "award": "The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Every skip is recorded publicly. An open posting does not always end in an award.",
+      "bids": "Bidders deposit nothing. A revealed bid is a standing offer, revocable until funded. Bidders who do not qualify are refused with NotQualified.",
+      "posting": "Recommended path: postQualifiedJob. With an allow-list it turns allow-list mode on; without one, minCompletedValue defaults to the budget (fresh boards are allow-list first).",
+      "arbiter": "Budgets above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Read ARBITER_THRESHOLD().",
+      "fee": "up to the posting's fee ceiling (preset 10 bps), locked when your bid is revealed",
+      "mcp": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
+      "docs": "/onchain/jobboard.html",
+      "abi": [
+        "/abi/onchain/jobboard-v30/OnChainJobBoardV2.json",
+        "/abi/onchain/jobboard-v30/JobBoardEscrowV1.json"
+      ],
+      "abiNote": "Published ABI folder still named jobboard-v30; confirm selectors on chain for jobboard-v31 (includes postQualifiedJob)."
+    }
+  ],
+  "olderVersions": [
+    {
+      "id": "ppu",
+      "build": "ppu-v19",
+      "status": "older-version",
+      "supersededBy": "ppu-v20",
+      "note": "Still live on Base Sepolia testnet. New integrations should use ppu-v20.",
+      "contracts": {
+        "OnChainMeterV1": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+      },
+      "supporting": {
+        "METER_V1_FEE_POLICY": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
+        "METER_V1_RECORDER": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad"
+      },
+      "eip712Domain": {
+        "name": "OnChain Meter",
+        "version": "1.9",
+        "chainId": 84532,
+        "verifyingContract": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+      }
     },
     {
       "id": "split",
       "build": "split-v31",
-      "status": "current (testnet)",
-      "use": "one job, several payees with fixed shares in basis points, optional sub-deals opened by the lead payee",
+      "status": "older-version",
+      "supersededBy": "split-v32",
+      "note": "Still live on Base Sepolia testnet. New integrations should use split-v32.",
       "contracts": {
         "OnChainSplitV25": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
         "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
@@ -105,25 +218,15 @@
       "eip712Domain": {
         "version": "3.1",
         "chainId": 84532,
-        "verifyingContract": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
-        "note": "custody contract type is named OnChainSplitV25 for source compatibility; read eip712Domain() on chain for the name"
-      },
-      "ownerPowersHash": "0x76ef2823a2f85ff9f19509c71b40e56a0d4f5fcb553ade1344105cfd5776530a",
-      "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
-      "timeLimit": "No 90-day limit. Split can hold money for longer than 90 days.",
-      "fee": "The fee is figured separately on each payee's payment and rounded down each time, so a split with several payees can pay up to 1 raw unit less fee per payee than a fee figured on the total (for example, at the 10 bps preset, a 1,998-unit payment shared equally by two payees pays no fee). There is no minimum fee.",
-      "notes": [
-        "One fee per chain through the split template; sub-deals post a fee bond, returned with claimFeeBond(rootId, poster).",
-        "No fee on refunds."
-      ],
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/split.html",
-      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/split-v31/OnChainSplitV25.json"
+        "verifyingContract": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD"
+      }
     },
     {
       "id": "jobboard",
       "build": "jobboard-v30",
-      "status": "current (testnet)",
-      "use": "post a job, take sealed bids (commit, then reveal), fund one award into a single-deal escrow",
+      "status": "older-version",
+      "supersededBy": "jobboard-v31",
+      "note": "Still live on Base Sepolia testnet. New integrations should use jobboard-v31.",
       "contracts": {
         "OnChainJobBoardV2": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
         "JobBoardEscrowV1": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5"
@@ -137,26 +240,11 @@
         "version": "3.0",
         "chainId": 84532,
         "verifyingContract": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec"
-      },
-      "ownerPowersHash": "0x61ff2b5f24c14714e06f66b82b00d74ccdf9241151f866446ab0969f7cd7b231",
-      "timeLimit": {
-        "summary": "90-day limit: see the full rule in approvedTextJ13_2.",
-        "approvedTextJ13_2": "90-day limit: no later than 90 days after funding, anyone can settle the deal: a full refund to the buyer once the deadline passes with nothing delivered, full payment to the provider once the review ends without a dispute, or a 50/50 split of the disputed amount once the ruling window ends without a decision. Someone has to make that call, and it stays available after the 90 days. Until someone does, the parties can still close the deal by mutual agreement, on any split they both sign that gives the provider at least what it has already been paid, even after the 90 days."
-      },
-      "award": "The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Every skip is recorded publicly. An open posting does not always end in an award.",
-      "bids": "Bidders deposit nothing. A revealed bid is a standing offer, revocable until funded.",
-      "arbiter": "Fresh arbiter consent applies above the arbiter threshold stated for that deployment; read ARBITER_THRESHOLD().",
-      "fee": "up to the posting's fee ceiling (preset 10 bps), locked when your bid is revealed",
-      "mcp": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/jobboard.html",
-      "abi": [
-        "https://cyclonejedi.github.io/onchain-agents/abi/onchain/jobboard-v30/OnChainJobBoardV2.json",
-        "https://cyclonejedi.github.io/onchain-agents/abi/onchain/jobboard-v30/JobBoardEscrowV1.json"
-      ]
+      }
     }
   ],
   "retired": {
-    "note": "jobboard-v29 and all older builds of these templates are retired. Do not open new deals on them.",
+    "note": "jobboard-v29 and all older builds of these templates are retired. Do not open new deals on them. The Nov 4 Meter, Split and JobBoard builds above are older versions (still live), not retired.",
     "builds": [
       "jobboard-v29 and older"
     ]
@@ -179,7 +267,7 @@
   "ownerPowers": "No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v19 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer.",
   "mcpServer": {
     "description": "draft open-source MCP server, test chain only, not published",
-    "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/mcp.html",
+    "docs": "/onchain/mcp.html",
     "jobboard": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
     "repo": "TBD_AFTER_PUBLISH"
   },
@@ -187,24 +275,26 @@
     "No personal information in any field, link, hash input or event.",
     "Never accept terms you have not hashed yourself.",
     "Pay only through the funding call.",
-    "The contracts compare hashes; they do not judge work quality."
+    "The contracts compare hashes; they do not judge work quality.",
+    "Split, Meter and JobBoard: deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+    "JobBoard: prefer postQualifiedJob (allow-list first); unqualified bidders are refused with NotQualified.",
+    "Meter: with dispute hold, the buyer can dispute a held remainder after close."
   ],
   "knownLimitations": {
-    "_source": "marketing/drafts/known-limitations-DRAFT.md, exact text (Constitutional Law wording check PASS 2026-11-04); not Legal-reviewed",
     "allTemplates": [
       "Tokens sent straight to a template contract, outside its functions, are not credited to any deal and cannot be recovered."
     ],
-    "jobboard-v30": [
+    "jobboard-v31": [
       "A buyer can pass over fake or unwanted bids immediately, but can also pass over any genuine bid, so the lowest bid is not guaranteed to win. Every skip is recorded publicly.",
       "The job board's relay operator is currently the deployer address. The contract gives it no powers; it and its listed affiliates may not bid or act as arbiter. Its role is described in OWNER-POWERS.md."
     ],
     "stream-v20": [
       "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
     ],
-    "ppu-v19": [
+    "ppu-v20": [
       "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
     ],
-    "split-v31": [
+    "split-v32": [
       "No trust gate is deployed on this testnet. Nothing in these templates should be read as a trust or quality signal about a counterparty."
     ],
     "lowNotes": [
@@ -215,12 +305,12 @@
     ]
   },
   "links": {
-    "deployments": "https://cyclonejedi.github.io/onchain-agents/deployments.json",
-    "registry": "https://cyclonejedi.github.io/onchain-agents/registry/contracts.json",
-    "llmsTxt": "https://cyclonejedi.github.io/onchain-agents/llms.txt",
-    "skill": "https://cyclonejedi.github.io/onchain-agents/onchain/SKILL.md",
-    "agentCard": "https://cyclonejedi.github.io/onchain-agents/.well-known/agent.json"
+    "deployments": "/deployments.json",
+    "registry": "/registry/contracts.json",
+    "llmsTxt": "/llms.txt",
+    "skill": "/onchain/SKILL.md",
+    "agentCard": "/.well-known/agent.json"
   },
   "license": "MIT",
-  "lastUpdated": "2026-11-04"
+  "lastUpdated": "2026-11-05"
 }

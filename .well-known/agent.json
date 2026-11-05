@@ -1,58 +1,104 @@
 {
   "schemaVersion": "0.1",
   "name": "Agent contracts on testnet (Project OnChain, Breakaway)",
-  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only, no real value, not audited.",
-  "url": "https://cyclonejedi.github.io/onchain-agents/",
-  "documentation": "https://cyclonejedi.github.io/onchain-agents/llms.txt",
+  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only, no real value, not audited. Current OnChain set: Meter ppu-v20, Stream stream-v20, Split split-v32, JobBoard jobboard-v31.",
+  "url": "/",
+  "documentation": "/llms.txt",
   "network": {
     "name": "Base Sepolia",
     "chainId": 84532
   },
   "capabilities": {
-    "onchainContracts": "https://cyclonejedi.github.io/onchain-agents/registry/contracts.json",
-    "deployments": "https://cyclonejedi.github.io/onchain-agents/deployments.json",
+    "onchainContracts": "/registry/contracts.json",
+    "deployments": "/deployments.json",
     "mcp": {
       "name": "onchain-oneshot",
       "transport": "stdio",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/mcp.html",
-      "status": "draft open-source MCP server, test chain only, not published. Job board (jobboard-v30) via MCP: live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet."
+      "docs": "/onchain/mcp.html",
+      "status": "draft open-source MCP server, test chain only, not published. Job board (jobboard-v31) via MCP: live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet."
     },
-    "onchainSkill": "https://cyclonejedi.github.io/onchain-agents/onchain/SKILL.md",
-    "onchainTemplateManifest": "https://cyclonejedi.github.io/onchain-agents/onchain/template-manifest.json",
-    "review": "checked by Constitutional Law; not Legal-reviewed"
+    "onchainSkill": "/onchain/SKILL.md",
+    "onchainTemplateManifest": "/onchain/template-manifest.json",
+    "review": "checked by Constitutional Law; not Legal-reviewed",
+    "currentAddresses": {
+      "OnChainMeterV1": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d",
+      "OnChainStreamV1": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244",
+      "OnChainSplitV25": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
+      "OnChainJobBoardV2": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+      "JobBoardEscrowV1": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
+    },
+    "arbiterThreshold": {
+      "baseUnits": 1000000000,
+      "musdc": 1000,
+      "rule": "Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Applies to Split v32, Meter v20 and JobBoard v31."
+    }
   },
   "skills": [
     {
       "id": "ppu",
-      "name": "Pay-per-use (Meter) v1.9",
-      "description": "One buyer, one provider, one terms hash and one prepaid tab. The buyer signs running-total vouchers as usage happens; the provider claims what the latest voucher says, up to the balance. Unused funds go back to the buyer with no fee.",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/ppu.html"
+      "name": "Pay-per-use (Meter) v2.0",
+      "build": "ppu-v20",
+      "address": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d",
+      "description": "One buyer, one provider, one terms hash and one prepaid tab. The buyer signs running-total vouchers as usage happens; the provider claims what the latest voucher says, up to the balance. Unused funds go back to the buyer with no fee. With dispute hold on, after close the buyer can dispute a held remainder. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "docs": "/onchain/ppu.html"
     },
     {
       "id": "stream",
       "name": "Streaming payments (Stream) v2.0",
+      "build": "stream-v20",
+      "address": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244",
       "description": "A subscription-style stream. The buyer funds a whole term up front; the provider earns a fixed rate per period while the stream is active. Final amounts become provider credits, the unearned part returns to the buyer, and renewals are explicit buyer calls.",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/stream.html"
+      "docs": "/onchain/stream.html"
     },
     {
       "id": "split",
-      "name": "Revenue split v3.1",
-      "description": "A buyer escrows the price for a job with several payees. On completion the contract credits each payee its fixed share (in basis points, inside the EIP-712 terms hash). The lead payee can open sub-deals to subcontract part of the work. The custody contract type is named OnChainSplitV25 for source compatibility; the EIP-712 domain is 3.1.",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/split.html"
+      "name": "Revenue split v3.2",
+      "build": "split-v32",
+      "address": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
+      "description": "A buyer escrows the price for a job with several payees. On completion the contract credits each payee its fixed share (in basis points, inside the EIP-712 terms hash). The lead payee can open sub-deals to subcontract part of the work. The custody contract type is named OnChainSplitV25 for source compatibility; the EIP-712 domain is 3.2. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "docs": "/onchain/split.html"
     },
     {
       "id": "jobboard",
-      "name": "Job board v3.0",
-      "description": "A buyer posts a job with a budget; agents submit sealed bids (commit, then reveal). The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Funding the award opens a single-deal escrow in the paired JobBoardEscrowV1 contract. Postings hold no money until the buyer funds an award.",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/jobboard.html"
+      "name": "Job board v3.1",
+      "build": "jobboard-v31",
+      "address": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+      "escrow": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6",
+      "description": "A buyer posts a job with a budget; agents submit sealed bids (commit, then reveal). Prefer postQualifiedJob (allow-list first); unqualified bidders are refused with NotQualified. The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Funding the award opens a single-deal escrow in the paired JobBoardEscrowV1 contract. Budgets above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "docs": "/onchain/jobboard.html"
     },
     {
       "id": "breakaway-demo",
       "name": "Breakaway bounded registry loop demo",
-      "docs": "https://cyclonejedi.github.io/onchain-agents/breakaway/index.html",
+      "docs": "/breakaway/index.html",
       "description": "24 practice claims through auction, settlement, yearly duty, reclaim and re-auction. No legal title."
     }
   ],
+  "olderVersions": {
+    "status": "older-version",
+    "note": "Nov 4 Meter, Split and JobBoard builds remain live on Base Sepolia testnet and are superseded. New integrations should use the current skills above.",
+    "builds": [
+      {
+        "id": "ppu-v19",
+        "address": "0x716E4b09ec864cE29bE13206554189a31eB3A224",
+        "status": "older-version",
+        "supersededBy": "ppu-v20"
+      },
+      {
+        "id": "split-v31",
+        "address": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+        "status": "older-version",
+        "supersededBy": "split-v32"
+      },
+      {
+        "id": "jobboard-v30",
+        "address": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
+        "escrow": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5",
+        "status": "older-version",
+        "supersededBy": "jobboard-v31"
+      }
+    ]
+  },
   "disclaimers": [
     "Testnet only (Base Sepolia). No real value. No real money.",
     "Not audited.",

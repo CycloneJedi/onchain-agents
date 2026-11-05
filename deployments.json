@@ -1,5 +1,5 @@
 {
-  "_note": "Fill in each address after deploy. Pages and the registry read addresses from this file. 0x0 placeholders mean not deployed.",
+  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, JobBoard v31 (Nov 5). Stream v20 and MockUSDC unchanged from Nov 4. Nov 4 Meter, Split and JobBoard stay live under previousVersions.",
   "network": {
     "name": "Base Sepolia",
     "chainId": 84532,
@@ -11,35 +11,112 @@
       "address": "0xb16660860D6fB4a871722aFd2CC52E461A77eC65"
     },
     "ppu": {
-      "OnChainMeterV1": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+      "OnChainMeterV1": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d"
     },
     "stream": {
       "OnChainStreamV1": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244"
     },
     "split": {
-      "OnChainSplitV25": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+      "OnChainSplitV25": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
       "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
     },
     "jobboard": {
-      "OnChainJobBoardV2": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
-      "JobBoardEscrowV1": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5"
+      "OnChainJobBoardV2": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+      "JobBoardEscrowV1": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
     },
     "mcpServerRepo": "TBD_AFTER_PUBLISH",
     "supporting": {
-      "METER_V1_FEE_POLICY": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
-      "METER_V1_RECORDER": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad",
       "STREAM_V1_LIB_STREAMMATH": "0x5A4DE5CCDF7A9994a9d57768597f9C7C0dbBF5c1",
       "STREAM_V1_FEE_POLICY": "0x4573a6aa82E09d487e74ef9728081dc7d12BB592",
       "STREAM_V1_RECORDER": "0x5a02b60347ac258e1f7bc1d5e1A8B75F28548156",
-      "JOBBOARD_V30_FEE_POLICY": "0xB3B8FE51528A959587165b491AD56a06c65F6354",
-      "JOBBOARD_V30_RECORDER": "0xD7bE503174C5545B9EFa305df446be801dE87681",
-      "SPLIT_V31_LIB": "0x8E490C448Ac5C253c6a08c883818097DAF70bF0b",
-      "SPLIT_V31_FEE_POLICY": "0x4dEc3749e4759456AcB7625796A5beBFBAC7961f",
-      "SPLIT_V31_RECORDER": "0x37dC7268b328C820292D5FA6A0AFE42672Ac5A9e"
+      "METER_V20_FEE_POLICY": "0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad",
+      "METER_V20_RECORDER": "0x82320Ed4a19B7866743a86320de2e03b3c485159",
+      "METER_V20_RESOLVER": "0x0968B099A58CD0c0Bb089b6333c271257a483b42",
+      "JOBBOARD_V31_FEE_POLICY": "0x2De548B4B06062BA825f906a3edd169dec6C736a",
+      "JOBBOARD_V31_RECORDER": "0x33e9219a6fBc3f95F8c941c1B4AE398b349D25b3",
+      "JOBBOARD_V31_RESOLVER": "0x61d6E5dFdb001630806b9166178501a65e463f90",
+      "SPLIT_V32_LIB": "0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497",
+      "SPLIT_V32_FEE_POLICY": "0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392",
+      "SPLIT_V32_RECORDER": "0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8",
+      "SPLIT_V32_RESOLVER": "0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa"
     },
     "deployer": "0x68ce334aC945dFd07DF9437886389150a5A41493",
-    "deployedAt": "2026-11-04, Base Sepolia blocks 54524543 to 54524682",
-    "_note": "SplitUsabilityLens was not part of this deploy set and stays TBD. Breakaway addresses pending."
+    "deployedAt": "Stream and payment token: 2026-11-04, blocks 54524543 to 54524682. Meter v20, JobBoard v31, Split v32: 2026-11-05, blocks 54890349 to 54890449",
+    "versions": {
+      "ppu": "ppu-v20 (VERSION per contract)",
+      "stream": "stream-v20 (unchanged, live Nov 4 deploy)",
+      "split": "split-v32 (split-v3.2)",
+      "jobboard": "jobboard-v31 (escrow jobboard-escrow-v3.1)"
+    },
+    "arbiterThreshold": {
+      "baseUnits": 1000000000,
+      "musdc": 1000,
+      "appliesTo": "Split v32, Meter v20, JobBoard v31 (Stream v20 unchanged)",
+      "rule": "price above threshold needs a named arbiter; equality allowed without one"
+    },
+    "jobboardPostingDefault": "postQualifiedJob: with an allow-list it enables allow-list mode; without one, minCompletedValue defaults to the budget (fresh boards are allow-list-first)",
+    "previousVersions": {
+      "status": "older-version",
+      "note": "Nov 4 set, still live on Base Sepolia testnet, superseded. New integrations should use the current addresses above.",
+      "supersededBy": "current onchain.ppu / onchain.split / onchain.jobboard and supporting METER_V20_*, JOBBOARD_V31_*, SPLIT_V32_*",
+      "contracts": {
+        "OnChainMeterV1 (ppu-v19)": {
+          "address": "0x716E4b09ec864cE29bE13206554189a31eB3A224",
+          "status": "older-version",
+          "supersededBy": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d"
+        },
+        "OnChainSplitV25 (split-v31)": {
+          "address": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+          "status": "older-version",
+          "supersededBy": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E"
+        },
+        "OnChainJobBoardV2 (jobboard-v30)": {
+          "address": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
+          "status": "older-version",
+          "supersededBy": "0x6c53EaD9a3174957032F65D897b70333428AdfF4"
+        },
+        "JobBoardEscrowV1 (jobboard-v30)": {
+          "address": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5",
+          "status": "older-version",
+          "supersededBy": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
+        },
+        "METER_V1_FEE_POLICY": {
+          "address": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
+          "status": "older-version",
+          "supersededBy": "0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad"
+        },
+        "METER_V1_RECORDER": {
+          "address": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad",
+          "status": "older-version",
+          "supersededBy": "0x82320Ed4a19B7866743a86320de2e03b3c485159"
+        },
+        "JOBBOARD_V30_FEE_POLICY": {
+          "address": "0xB3B8FE51528A959587165b491AD56a06c65F6354",
+          "status": "older-version",
+          "supersededBy": "0x2De548B4B06062BA825f906a3edd169dec6C736a"
+        },
+        "JOBBOARD_V30_RECORDER": {
+          "address": "0xD7bE503174C5545B9EFa305df446be801dE87681",
+          "status": "older-version",
+          "supersededBy": "0x33e9219a6fBc3f95F8c941c1B4AE398b349D25b3"
+        },
+        "SPLIT_V31_LIB": {
+          "address": "0x8E490C448Ac5C253c6a08c883818097DAF70bF0b",
+          "status": "older-version",
+          "supersededBy": "0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497"
+        },
+        "SPLIT_V31_FEE_POLICY": {
+          "address": "0x4dEc3749e4759456AcB7625796A5beBFBAC7961f",
+          "status": "older-version",
+          "supersededBy": "0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392"
+        },
+        "SPLIT_V31_RECORDER": {
+          "address": "0x37dC7268b328C820292D5FA6A0AFE42672Ac5A9e",
+          "status": "older-version",
+          "supersededBy": "0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8"
+        }
+      }
+    }
   },
   "breakaway": {
     "DemoTreasury": "TBD_AFTER_DEPLOY",
