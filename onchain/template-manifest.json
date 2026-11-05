@@ -1,5 +1,5 @@
 {
-  "_note": "Merged 2026-11-04 from marketing/drafts/template-manifest.example.json and rewritten for the current testnet set. Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Local file; not published.",
+  "_note": "Merged 2026-11-04 from marketing/drafts/template-manifest.example.json and rewritten for the current testnet set. Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed.",
   "review": "checked by Constitutional Law; not Legal-reviewed",
   "manifestVersion": "0.3",
   "name": "Project OnChain templates for agent deals",

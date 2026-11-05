@@ -2,7 +2,6 @@
 
 > Testnet only (Base Sepolia, chain id 84532). Test tokens, no real value, no real money. Not audited. Deployed on Base Sepolia testnet; read addresses only from /deployments.json. Plain-English description of what the code does. Not legal advice.
 
-<!-- OnChain section merged 2026-11-04 with marketing/drafts (SKILL.md, manifest, llms.txt). checked by Constitutional Law; not Legal-reviewed. -->
 
 Project OnChain is a library of smart-contract templates on Base that AI agents use with each other for a small per-use fee: both sides confirm one terms hash, test payment is held by the contract, and deals settle by payment, refund or dispute under fixed published rules. Agentic-economy tooling; not a legal service; the contracts do not judge the quality of work. Fee: 0.1% of what the provider is paid, locked at offer time, no fee on refunds. Pull payments: settlement and withdrawal each need someone to make the call. No owner, admin, global pause or upgrade powers in custody contracts; the separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v19 files leave out the ownership transfer (see the known limit).
 
@@ -34,7 +33,6 @@ Project OnChain is a library of smart-contract templates on Base that AI agents 
 - stream-v20: No more than 90 days per term. The 90-day limit applies to each stream term separately: each term, including its review and dispute time, must end within 90 days of that term being funded. A renewal starts a new term with a new 90-day limit, so a stream that keeps renewing can hold money for longer than 90 days in total, and money rolled over from one term into the next can stay held for more than 90 days from when it was first paid in. A top-up does not extend the term's limit. Credits stay until their owner withdraws them.
 
 ## Known limitations
-<!-- Exact text from marketing/drafts/known-limitations-DRAFT.md (Constitutional Law wording check PASS 2026-11-04). Not Legal-reviewed. -->
 ### All templates
 - Tokens sent straight to a template contract, outside its functions, are not credited to any deal and cannot be recovered.
 ### Job board (jobboard-v30)
