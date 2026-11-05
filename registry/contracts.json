@@ -731,7 +731,7 @@
    "id": "breakaway",
    "name": "Breakaway bounded registry loop demo",
    "page": "https://cyclonejedi.github.io/onchain-agents/breakaway/index.html",
-   "notes": "Classification from the repository demo-manifest.json. 24 fixed claim IDs; fixed 0.05 test ETH minimum.",
+   "notes": "Live bounded demo on Base Sepolia (chain id 84532). Testnet only, no real value, no legal title. Addresses are the breakaway entries in deployments.json. 24 fixed claim IDs; fixed 0.05 test ETH minimum.",
    "claimIds": [
     12,
     35,

@@ -71,7 +71,7 @@
       "id": "breakaway-demo",
       "name": "Breakaway bounded registry loop demo",
       "docs": "/breakaway/index.html",
-      "description": "24 practice claims through auction, settlement, yearly duty, reclaim and re-auction. No legal title."
+      "description": "Live bounded demo on Base Sepolia (testnet only, no real value, no legal title): 24 practice claims through auction, settlement, yearly duty, reclaim and re-auction. Contract and attestor addresses are the breakaway entries in /deployments.json."
     }
   ],
   "olderVersions": {
