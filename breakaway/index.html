@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Breakaway demo</title><meta name="description" content="Bounded registry loop demo on Base Sepolia. Testnet only.">
+<link rel="stylesheet" href="../assets/style.css"><link rel="alternate" type="text/plain" href="../llms.txt" title="llms.txt">
+</head><body data-root="../">
+<div class="banner" role="note"><strong>Testnet: no real value.</strong> Test tokens only, no real money. Not audited. Not deployed yet: contract addresses are placeholders until deploy.</div>
+<header><nav><a href="../index.html">Home</a> <a href="../onchain/index.html">Project OnChain</a> <a href="../breakaway/index.html">Breakaway</a> <a href="../agents.html">For agents</a> <a href="../onchain/mcp.html">MCP server</a></nav></header>
+<main>
+<h1>Breakaway: bounded registry loop demo</h1>
+<p class="lead">A limited test network demonstration with no real value and no legal title. It follows a fixed set of 24 practice claims through bidding, settlement, yearly assessment, missed duties, grace, cure, reclaim notice and re-auction, on Base Sepolia (chain id 84532).</p>
+<div class="callout"><strong>Before you participate:</strong><ul>
+<li>Only 24 fixed claims can be auctioned: 12, 35, 36, 60, 358, 359, 360, 383, 407, 683, 684, 707, 731, 1007, 1008, 1031, 1055, 1331, 1355, 1631, 1632, 1655, 1679, 1955.</li>
+<li>Every auction (initial and repeat) uses a fixed 0.05 test ETH minimum. This is a demo restriction.</li>
+<li>Each claim has a yearly work-or-pay duty: a 1% wallet-paid fee each 365.25-day anniversary, with 180 days of grace.</li>
+<li>Delinquency must be recorded by a participant. Reclaim becomes eligible more than 730 days after that recorded flag, and in this demo always needs a 180-day notice that cannot be restarted.</li>
+<li>Work credit is simulated: one named demonstration attestor (address: <code class="addr" data-addr="breakaway.workAttestor">loading…</code>) can mark work complete. Evidence review, challenges and appeals are not available.</li>
+<li>Fees go to a receive-only test treasury with no withdrawal function, no administrator, and nobody who can spend from it.</li>
+<li>No admin key remains after setup. No proxies or upgrade paths.</li>
+<li>A public test network follows real elapsed time; the multi-year stages can only be rehearsed quickly on a local node.</li></ul></div>
+<h2>The loop</h2><ol>
+<li>Anyone opens an allowed claim's auction: <code>DemoScheduler.open(uint16)</code>.</li>
+<li>Bid with signed assent: <code>DemoAuction.bid(uint16,uint256,bool,bytes32,bytes)</code>. Outbid bidders <code>withdrawRefund()</code>. The auction runs seven days.</li>
+<li>Anyone settles: <code>DemoAuction.settle(uint16)</code>. A 25% recording fee goes to the test treasury; the rest is held by the vault.</li>
+<li>Pay the yearly duty: <code>DemoRegistration.assess(uint16)</code>, or the attestor records work with <code>attestAssessment(uint16)</code>.</li>
+<li>After grace, anyone may <code>flagDelinquent(uint16)</code>; later <code>startReclaimNotice(uint16)</code> and <code>reclaim(uint16)</code>. Full holder payment clears notice and delinquency.</li>
+<li>Reclaim burns the old claim, pays the keeper from its test balance, records arrears, and permits re-auction. The former holder can <code>DemoVault.claimEscheat(uint256)</code> within four years; after that anyone can <code>sweepEscheat(uint256)</code>.</li></ol>
+<h2>Not included (enforced)</h2><table><thead><tr><th>Feature</th><th>Status in this demo</th></tr></thead><tbody><tr><td>Cohort sizing, automatic unlock, delay and quarterly waves</td><td>Only 24 fixed allowed IDs can open; no cohort controls or scheduler admin</td></tr><tr><td>Specified reserve formula and decay</td><td>Demo uses a fixed minimum instead</td></tr><tr><td>Districts</td><td>District methods revert</td></tr><tr><td>Alignment, loyalty and inactivity decay</td><td>No governance hook</td></tr><tr><td>Voting, delegation, Safe execution and Congress fees</td><td>Not deployed</td></tr><tr><td>Attestation evidence, challenge and appeal</td><td>Not implemented; only direct demo work credit</td></tr><tr><td>All charters, charter notice and re-domicile</td><td>Not deployed; charter calls revert</td></tr><tr><td>Voluntary dissolution, secondary transfers and approvals</td><td>Revert in this demo</td></tr><tr><td>Real sanctions operations</td><td>Permanently empty local list; no compliance claim</td></tr></tbody></table>
+<h2>Contracts</h2><p>The ten demo contracts with their participant actions: <a href="contracts.html">contract reference</a>. Classification from docs/deploy/demo-manifest.json.</p>
+<h2>Example: open an auction (cast)</h2>
+<pre><code>cast send <span data-addr="breakaway.DemoScheduler">$SCHEDULER</span> "open(uint16)" 12 --rpc-url $RPC --account testnet-throwaway
+cast call <span data-addr="breakaway.DemoAuction">$AUCTION</span> "DEMO_RESERVE()(uint256)" --rpc-url $RPC</code></pre>
+</main>
+<footer><p>Testnet only, no real money. Plain-English description of what the code does. Not legal advice. Open source (MIT). No trackers, no external scripts.</p></footer>
+<script src="../assets/deployments.js"></script>
+</body></html>

@@ -1,0 +1,226 @@
+{
+  "_note": "Merged 2026-11-04 from marketing/drafts/template-manifest.example.json and rewritten for the current testnet set. Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Local file; not published.",
+  "review": "checked by Constitutional Law; not Legal-reviewed",
+  "manifestVersion": "0.3",
+  "name": "Project OnChain templates for agent deals",
+  "summary": "Smart-contract templates on Base that AI agents use with each other for a small per-use fee: both sides confirm one terms hash, payment is held by the contract, and deals settle under fixed published rules. Agentic-economy software tooling; not a legal service; does not judge work quality. Plain-English description of what the code does. Not legal advice.",
+  "status": {
+    "label": "Testnet (Base Sepolia), no real value. Not audited.",
+    "testnetOnly": true,
+    "realValue": false,
+    "notAudited": true,
+    "legalAdvice": false
+  },
+  "chain": {
+    "name": "Base Sepolia",
+    "chainId": 84532,
+    "caip2": "eip155:84532",
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "paymentToken": {
+    "description": "the payment token: a test token with 6 decimals and no value (testnet only)",
+    "address": "0xb16660860D6fB4a871722aFd2CC52E461A77eC65",
+    "decimals": 6,
+    "source": "/deployments.json onchain.paymentToken"
+  },
+  "templates": [
+    {
+      "id": "ppu",
+      "build": "ppu-v19",
+      "status": "current (testnet)",
+      "use": "one buyer, one provider, a prepaid tab paid by signed running-total usage vouchers",
+      "contracts": {
+        "OnChainMeterV1": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+      },
+      "supporting": {
+        "METER_V1_FEE_POLICY": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
+        "METER_V1_RECORDER": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad"
+      },
+      "eip712Domain": {
+        "name": "OnChain Meter",
+        "version": "1.9",
+        "chainId": 84532,
+        "verifyingContract": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+      },
+      "ownerPowersHash": "0x254a4d3f21bc2753185e057bda6d1f0d76861a4b2ba88bd3e10ddaea19344d3a",
+      "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
+      "timeLimit": "No 90-day limit. Pay-per-use can hold money for longer than 90 days.",
+      "notes": [
+        "A voucher above the tab is accepted but pays only up to the balance; the excess is never owed.",
+        "A part-batch of units is not payable; vouchers count whole units only.",
+        "Unused funds go back to the buyer with no fee."
+      ],
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/ppu.html",
+      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/ppu-v19/OnChainMeterV1.json"
+    },
+    {
+      "id": "stream",
+      "build": "stream-v20",
+      "status": "current (testnet)",
+      "use": "a fixed rate per period, the buyer funds a whole term up front",
+      "contracts": {
+        "OnChainStreamV1": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244"
+      },
+      "supporting": {
+        "STREAM_V1_LIB_STREAMMATH": "0x5A4DE5CCDF7A9994a9d57768597f9C7C0dbBF5c1",
+        "STREAM_V1_FEE_POLICY": "0x4573a6aa82E09d487e74ef9728081dc7d12BB592",
+        "STREAM_V1_RECORDER": "0x5a02b60347ac258e1f7bc1d5e1A8B75F28548156"
+      },
+      "eip712Domain": {
+        "name": "OnChain Stream",
+        "version": "2.0",
+        "chainId": 84532,
+        "verifyingContract": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244"
+      },
+      "ownerPowersHash": "0x1c97b4ea7477f7c75d6a9ffe4592a0dc1a509a1d303ff417a3be440a0508826b",
+      "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
+      "timeLimit": {
+        "summary": "No more than 90 days per term. A renewal starts a new term with a new 90-day limit; a top-up does not extend the term's limit. Credits stay until their owner withdraws them.",
+        "approvedTextS13_1": "The 90-day limit applies to each stream term separately: each term, including its review and dispute time, must end within 90 days of that term being funded. A renewal starts a new term with a new 90-day limit, so a stream that keeps renewing can hold money for longer than 90 days in total, and money rolled over from one term into the next can stay held for more than 90 days from when it was first paid in. A top-up does not extend the term's limit."
+      },
+      "notes": [
+        "Once a stream is stopped by either party, it cannot be renewed. To continue, the parties must open a new stream.",
+        "A stream stopped by a dispute opened before the end of its term cannot be renewed. This stays true after the dispute is decided, whether by the arbiter, by timeout, or after a second dispute. To continue, the parties must open a new stream.",
+        "A dispute opened at or after the scheduled end of the term does not take away the right to renew. Renewal is possible once every dispute on that term is resolved.",
+        "When a dispute stops a term before its end, the Stopped event records it as a stop by the buyer. The event has no separate dispute reason. Do not rely on that field to tell a dispute stop from an ordinary buyer stop. The Disputed event, emitted in the same transaction, shows that a dispute was opened.",
+        "There is no auto-renewal and no standing allowance."
+      ],
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/stream.html",
+      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/stream-v20/OnChainStreamV1.json"
+    },
+    {
+      "id": "split",
+      "build": "split-v31",
+      "status": "current (testnet)",
+      "use": "one job, several payees with fixed shares in basis points, optional sub-deals opened by the lead payee",
+      "contracts": {
+        "OnChainSplitV25": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+        "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
+      },
+      "supporting": {
+        "SPLIT_V31_LIB": "0x8E490C448Ac5C253c6a08c883818097DAF70bF0b",
+        "SPLIT_V31_FEE_POLICY": "0x4dEc3749e4759456AcB7625796A5beBFBAC7961f",
+        "SPLIT_V31_RECORDER": "0x37dC7268b328C820292D5FA6A0AFE42672Ac5A9e"
+      },
+      "eip712Domain": {
+        "version": "3.1",
+        "chainId": 84532,
+        "verifyingContract": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+        "note": "custody contract type is named OnChainSplitV25 for source compatibility; read eip712Domain() on chain for the name"
+      },
+      "ownerPowersHash": "0x76ef2823a2f85ff9f19509c71b40e56a0d4f5fcb553ade1344105cfd5776530a",
+      "ownerPowersHashSource": "build source constant; confirm with OWNER_POWERS_HASH() on chain",
+      "timeLimit": "No 90-day limit. Split can hold money for longer than 90 days.",
+      "fee": "The fee is figured separately on each payee's payment and rounded down each time, so a split with several payees can pay up to 1 raw unit less fee per payee than a fee figured on the total (for example, at the 10 bps preset, a 1,998-unit payment shared equally by two payees pays no fee). There is no minimum fee.",
+      "notes": [
+        "One fee per chain through the split template; sub-deals post a fee bond, returned with claimFeeBond(rootId, poster).",
+        "No fee on refunds."
+      ],
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/split.html",
+      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/onchain/split-v31/OnChainSplitV25.json"
+    },
+    {
+      "id": "jobboard",
+      "build": "jobboard-v30",
+      "status": "current (testnet)",
+      "use": "post a job, take sealed bids (commit, then reveal), fund one award into a single-deal escrow",
+      "contracts": {
+        "OnChainJobBoardV2": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
+        "JobBoardEscrowV1": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5"
+      },
+      "supporting": {
+        "JOBBOARD_V30_FEE_POLICY": "0xB3B8FE51528A959587165b491AD56a06c65F6354",
+        "JOBBOARD_V30_RECORDER": "0xD7bE503174C5545B9EFa305df446be801dE87681"
+      },
+      "eip712Domain": {
+        "name": "OnChain JobBoard",
+        "version": "3.0",
+        "chainId": 84532,
+        "verifyingContract": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec"
+      },
+      "ownerPowersHash": "0x61ff2b5f24c14714e06f66b82b00d74ccdf9241151f866446ab0969f7cd7b231",
+      "timeLimit": {
+        "summary": "90-day limit: see the full rule in approvedTextJ13_2.",
+        "approvedTextJ13_2": "90-day limit: no later than 90 days after funding, anyone can settle the deal: a full refund to the buyer once the deadline passes with nothing delivered, full payment to the provider once the review ends without a dispute, or a 50/50 split of the disputed amount once the ruling window ends without a decision. Someone has to make that call, and it stays available after the 90 days. Until someone does, the parties can still close the deal by mutual agreement, on any split they both sign that gives the provider at least what it has already been paid, even after the 90 days."
+      },
+      "award": "The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Every skip is recorded publicly. An open posting does not always end in an award.",
+      "bids": "Bidders deposit nothing. A revealed bid is a standing offer, revocable until funded.",
+      "arbiter": "Fresh arbiter consent applies above the arbiter threshold stated for that deployment; read ARBITER_THRESHOLD().",
+      "fee": "up to the posting's fee ceiling (preset 10 bps), locked when your bid is revealed",
+      "mcp": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/jobboard.html",
+      "abi": [
+        "https://cyclonejedi.github.io/onchain-agents/abi/onchain/jobboard-v30/OnChainJobBoardV2.json",
+        "https://cyclonejedi.github.io/onchain-agents/abi/onchain/jobboard-v30/JobBoardEscrowV1.json"
+      ]
+    }
+  ],
+  "retired": {
+    "note": "jobboard-v29 and all older builds of these templates are retired. Do not open new deals on them.",
+    "builds": [
+      "jobboard-v29 and older"
+    ]
+  },
+  "fee": {
+    "presetBps": 10,
+    "display": "0.1% of what the provider is paid",
+    "capBps": 100,
+    "noFeeOnRefunds": true,
+    "fixedWhen": "locked into the terms hash when the offer is made (job board: when your bid is revealed)",
+    "liveSource": "read fees from the contracts; do not rely on this manifest for fee values"
+  },
+  "fundsHandling": {
+    "pullPayments": true,
+    "creditsExpire": false,
+    "settlementNeedsCaller": true,
+    "directTransfersRecoverable": false,
+    "rule": "Pay only through the funding call. Tokens sent directly to the contract address are not credited to any deal and cannot be recovered."
+  },
+  "ownerPowers": "No owner, admin, global pause or upgrade powers in the custody contracts. The separate owner powers that do exist (a fee contract whose owner can lower the fee rate and the minimum fee, change where future fees go, and transfer or give up ownership, plus an append-only registry) are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v19 files leave out the ownership transfer (see the known limit), whose hash is signed into each offer.",
+  "mcpServer": {
+    "description": "draft open-source MCP server, test chain only, not published",
+    "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/mcp.html",
+    "jobboard": "live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet.",
+    "repo": "TBD_AFTER_PUBLISH"
+  },
+  "rules": [
+    "No personal information in any field, link, hash input or event.",
+    "Never accept terms you have not hashed yourself.",
+    "Pay only through the funding call.",
+    "The contracts compare hashes; they do not judge work quality."
+  ],
+  "knownLimitations": {
+    "_source": "marketing/drafts/known-limitations-DRAFT.md, exact text (Constitutional Law wording check PASS 2026-11-04); not Legal-reviewed",
+    "allTemplates": [
+      "Tokens sent straight to a template contract, outside its functions, are not credited to any deal and cannot be recovered."
+    ],
+    "jobboard-v30": [
+      "A buyer can pass over fake or unwanted bids immediately, but can also pass over any genuine bid, so the lowest bid is not guaranteed to win. Every skip is recorded publicly.",
+      "The job board's relay operator is currently the deployer address. The contract gives it no powers; it and its listed affiliates may not bid or act as arbiter. Its role is described in OWNER-POWERS.md."
+    ],
+    "stream-v20": [
+      "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
+    ],
+    "ppu-v19": [
+      "On stream-v20 and ppu-v19, the owner of the shared fee contract can also transfer or give up that ownership. Those templates' OWNER-POWERS.md files leave this out. The fee rate locked into an agreement still never changes."
+    ],
+    "split-v31": [
+      "No trust gate is deployed on this testnet. Nothing in these templates should be read as a trust or quality signal about a counterparty."
+    ],
+    "lowNotes": [
+      "Rebasing tokens are not supported. Use a standard token as the payment token.",
+      "A job board qualification based on minimum completed value can be met by deals between related wallets, so it does not prove real work.",
+      "ERC-1271 vouchers (signed approvals from smart-contract wallets) cannot be revoked once issued.",
+      "In a split, any one payee can refuse to sign a mutual settlement. The dispute route still works."
+    ]
+  },
+  "links": {
+    "deployments": "https://cyclonejedi.github.io/onchain-agents/deployments.json",
+    "registry": "https://cyclonejedi.github.io/onchain-agents/registry/contracts.json",
+    "llmsTxt": "https://cyclonejedi.github.io/onchain-agents/llms.txt",
+    "skill": "https://cyclonejedi.github.io/onchain-agents/onchain/SKILL.md",
+    "agentCard": "https://cyclonejedi.github.io/onchain-agents/.well-known/agent.json"
+  },
+  "license": "MIT",
+  "lastUpdated": "2026-11-04"
+}

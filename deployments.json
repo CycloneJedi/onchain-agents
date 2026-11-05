@@ -1,0 +1,57 @@
+{
+  "_note": "Fill in each address after deploy. Pages and the registry read addresses from this file. 0x0 placeholders mean not deployed.",
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": 84532,
+    "explorer": "https://sepolia.basescan.org"
+  },
+  "onchain": {
+    "paymentToken": {
+      "name": "payment token (testnet test token, 6 decimals, no value)",
+      "address": "0xb16660860D6fB4a871722aFd2CC52E461A77eC65"
+    },
+    "ppu": {
+      "OnChainMeterV1": "0x716E4b09ec864cE29bE13206554189a31eB3A224"
+    },
+    "stream": {
+      "OnChainStreamV1": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244"
+    },
+    "split": {
+      "OnChainSplitV25": "0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD",
+      "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
+    },
+    "jobboard": {
+      "OnChainJobBoardV2": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
+      "JobBoardEscrowV1": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5"
+    },
+    "mcpServerRepo": "TBD_AFTER_PUBLISH",
+    "supporting": {
+      "METER_V1_FEE_POLICY": "0x76C7C58E1b28b19027D40218311b5Ea052ec708e",
+      "METER_V1_RECORDER": "0xEDe0ef3874ffd8768A1B31AA01a5Ca5Dafa811Ad",
+      "STREAM_V1_LIB_STREAMMATH": "0x5A4DE5CCDF7A9994a9d57768597f9C7C0dbBF5c1",
+      "STREAM_V1_FEE_POLICY": "0x4573a6aa82E09d487e74ef9728081dc7d12BB592",
+      "STREAM_V1_RECORDER": "0x5a02b60347ac258e1f7bc1d5e1A8B75F28548156",
+      "JOBBOARD_V30_FEE_POLICY": "0xB3B8FE51528A959587165b491AD56a06c65F6354",
+      "JOBBOARD_V30_RECORDER": "0xD7bE503174C5545B9EFa305df446be801dE87681",
+      "SPLIT_V31_LIB": "0x8E490C448Ac5C253c6a08c883818097DAF70bF0b",
+      "SPLIT_V31_FEE_POLICY": "0x4dEc3749e4759456AcB7625796A5beBFBAC7961f",
+      "SPLIT_V31_RECORDER": "0x37dC7268b328C820292D5FA6A0AFE42672Ac5A9e"
+    },
+    "deployer": "0x68ce334aC945dFd07DF9437886389150a5A41493",
+    "deployedAt": "2026-11-04, Base Sepolia blocks 54524543 to 54524682",
+    "_note": "SplitUsabilityLens was not part of this deploy set and stays TBD. Breakaway addresses pending."
+  },
+  "breakaway": {
+    "DemoTreasury": "TBD_AFTER_DEPLOY",
+    "SanctionsOracle": "TBD_AFTER_DEPLOY",
+    "DemoGeometry": "TBD_AFTER_DEPLOY",
+    "TileRegistry": "TBD_AFTER_DEPLOY",
+    "DemoClaim": "TBD_AFTER_DEPLOY",
+    "DemoVault": "TBD_AFTER_DEPLOY",
+    "DemoNoCharters": "TBD_AFTER_DEPLOY",
+    "DemoAuction": "TBD_AFTER_DEPLOY",
+    "DemoRegistration": "TBD_AFTER_DEPLOY",
+    "DemoScheduler": "TBD_AFTER_DEPLOY",
+    "workAttestor": "TBD_AFTER_DEPLOY"
+  }
+}

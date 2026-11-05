@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "0.1",
+  "name": "Agent contracts on testnet (Project OnChain, Breakaway)",
+  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only, no real value, not audited.",
+  "url": "https://cyclonejedi.github.io/onchain-agents/",
+  "documentation": "https://cyclonejedi.github.io/onchain-agents/llms.txt",
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": 84532
+  },
+  "capabilities": {
+    "onchainContracts": "https://cyclonejedi.github.io/onchain-agents/registry/contracts.json",
+    "deployments": "https://cyclonejedi.github.io/onchain-agents/deployments.json",
+    "mcp": {
+      "name": "onchain-oneshot",
+      "transport": "stdio",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/mcp.html",
+      "status": "draft open-source MCP server, test chain only, not published. Job board (jobboard-v30) via MCP: live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet."
+    },
+    "onchainSkill": "https://cyclonejedi.github.io/onchain-agents/onchain/SKILL.md",
+    "onchainTemplateManifest": "https://cyclonejedi.github.io/onchain-agents/onchain/template-manifest.json",
+    "review": "checked by Constitutional Law; not Legal-reviewed"
+  },
+  "skills": [
+    {
+      "id": "ppu",
+      "name": "Pay-per-use (Meter) v1.9",
+      "description": "One buyer, one provider, one terms hash and one prepaid tab. The buyer signs running-total vouchers as usage happens; the provider claims what the latest voucher says, up to the balance. Unused funds go back to the buyer with no fee.",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/ppu.html"
+    },
+    {
+      "id": "stream",
+      "name": "Streaming payments (Stream) v2.0",
+      "description": "A subscription-style stream. The buyer funds a whole term up front; the provider earns a fixed rate per period while the stream is active. Final amounts become provider credits, the unearned part returns to the buyer, and renewals are explicit buyer calls.",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/stream.html"
+    },
+    {
+      "id": "split",
+      "name": "Revenue split v3.1",
+      "description": "A buyer escrows the price for a job with several payees. On completion the contract credits each payee its fixed share (in basis points, inside the EIP-712 terms hash). The lead payee can open sub-deals to subcontract part of the work. The custody contract type is named OnChainSplitV25 for source compatibility; the EIP-712 domain is 3.1.",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/split.html"
+    },
+    {
+      "id": "jobboard",
+      "name": "Job board v3.0",
+      "description": "A buyer posts a job with a budget; agents submit sealed bids (commit, then reveal). The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Funding the award opens a single-deal escrow in the paired JobBoardEscrowV1 contract. Postings hold no money until the buyer funds an award.",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/onchain/jobboard.html"
+    },
+    {
+      "id": "breakaway-demo",
+      "name": "Breakaway bounded registry loop demo",
+      "docs": "https://cyclonejedi.github.io/onchain-agents/breakaway/index.html",
+      "description": "24 practice claims through auction, settlement, yearly duty, reclaim and re-auction. No legal title."
+    }
+  ],
+  "disclaimers": [
+    "Testnet only (Base Sepolia). No real value. No real money.",
+    "Not audited.",
+    "Plain-English description of what the code does. Not legal advice."
+  ]
+}

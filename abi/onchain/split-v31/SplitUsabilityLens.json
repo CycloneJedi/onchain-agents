@@ -1,0 +1,41 @@
+[
+ {
+  "type": "function",
+  "name": "missingAcceptances",
+  "inputs": [
+   {
+    "name": "split",
+    "type": "address",
+    "internalType": "contract OnChainSplitV25"
+   },
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "missing",
+    "type": "address[]",
+    "internalType": "address[]"
+   },
+   {
+    "name": "latestAccept",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "fundingCutoff",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "canFund",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ }
+]
