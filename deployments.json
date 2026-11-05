@@ -1,5 +1,5 @@
 {
-  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, JobBoard v31 (Nov 5). Stream v20 and MockUSDC unchanged from Nov 4. Nov 4 Meter, Split and JobBoard stay live under previousVersions.",
+  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, JobBoard v31 (Nov 5). Stream v20 and MockUSDC unchanged from Nov 4. Nov 4 Meter, Split and JobBoard stay live under previousVersions. Breakaway is a live bounded demo on Base Sepolia (testnet only, no real value, no legal title); its addresses are under breakaway.",
   "network": {
     "name": "Base Sepolia",
     "chainId": 84532,
@@ -119,16 +119,16 @@
     }
   },
   "breakaway": {
-    "DemoTreasury": "TBD_AFTER_DEPLOY",
-    "SanctionsOracle": "TBD_AFTER_DEPLOY",
-    "DemoGeometry": "TBD_AFTER_DEPLOY",
-    "TileRegistry": "TBD_AFTER_DEPLOY",
-    "DemoClaim": "TBD_AFTER_DEPLOY",
-    "DemoVault": "TBD_AFTER_DEPLOY",
-    "DemoNoCharters": "TBD_AFTER_DEPLOY",
-    "DemoAuction": "TBD_AFTER_DEPLOY",
-    "DemoRegistration": "TBD_AFTER_DEPLOY",
-    "DemoScheduler": "TBD_AFTER_DEPLOY",
-    "workAttestor": "TBD_AFTER_DEPLOY"
+    "DemoTreasury": "0x030b3834397867b9ff8d550c9d5a4f11fe0260b4",
+    "SanctionsOracle": "0xe8fc9c4275e08754ad5f95217f977ab3d9319bc3",
+    "DemoGeometry": "0x2c2d240108fb0b10308ae23e57e49faaf08f61aa",
+    "TileRegistry": "0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9",
+    "DemoClaim": "0xc28d0818d3e83a677ef5336c70756a7e685a9f1a",
+    "DemoVault": "0xd3739ee76ac5d27e18f35e923e7e86a155cecb80",
+    "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb",
+    "DemoAuction": "0x6b70115e110f45ccd0f076b5147c5a10ad576c17",
+    "DemoRegistration": "0x6425c8df0bf745b46bce97318a6631e9f423c61f",
+    "DemoScheduler": "0xe623e0f767f47ee38026576de82ba0f7cc4656cc",
+    "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5"
   }
 }
