@@ -495,9 +495,10 @@ export function pruneLookback(state, head) {
   };
 }
 
-export function planEventReads(state, head) {
+export function planEventReads(state, head, cachedTo = state.to) {
   const lookback = lookbackFloor(head);
-  if (state.from == null || state.to == null || head + REORG_DEPTH < state.to || head < state.from || state.to < lookback) {
+  const deepRollback = cachedTo != null && head + REORG_DEPTH < cachedTo;
+  if (deepRollback || state.from == null || state.to == null || head < state.from || state.to < lookback) {
     return {lookback, pages: logWindows(lookback, head), reset: true};
   }
   const pages = [];
@@ -529,7 +530,22 @@ export function logCoverage() {
     if (min == null || item.blockNumber < min) min = item.blockNumber;
     if (max == null || item.blockNumber > max) max = item.blockNumber;
   }
-  return {from: logState.from, to: logState.to, count: items.length, min, max};
+  return {
+    from: logState.from,
+    to: logState.to,
+    count: items.length,
+    min,
+    max,
+    hashes: items.map((item) => item.transactionHash),
+  };
+}
+
+export function seedLogCache(state) {
+  logState = {
+    from: state.from,
+    to: state.to,
+    items: state.items.map((item) => ({...item})),
+  };
 }
 
 export function armTestBudget() {
@@ -806,10 +822,11 @@ async function loadWallets(blockNumber) {
 async function loadEvents(blockNumber) {
   const budget = active;
   const addresses = Object.keys(AB).filter((name) => name !== 'MUSDC' && A[name]).map((name) => A[name]);
-  if (logState.to != null && blockNumber < logState.to) logState = discardAboveHead(logState, blockNumber);
-  logState = pruneLookback(logState, blockNumber);
-  const plan = planEventReads(logState, blockNumber);
+  const originalTo = logState.to;
+  const plan = planEventReads(logState, blockNumber, originalTo);
   if (plan.reset) logState = createLogCache();
+  else if (originalTo != null && blockNumber < originalTo) logState = discardAboveHead(logState, blockNumber);
+  if (!plan.reset) logState = pruneLookback(logState, blockNumber);
   let stoppedEarly = false;
   for (const [start, end] of plan.pages) {
     let logs;

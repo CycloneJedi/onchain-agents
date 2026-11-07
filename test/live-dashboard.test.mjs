@@ -22,6 +22,7 @@ const {
   commitLogPage,
   visibleLogs,
   planEventReads,
+  seedLogCache,
   armTestBudget,
   openSection,
   enqueueRpc,
@@ -122,6 +123,7 @@ function installRpc(box) {
   let rpcCount = 0;
   let ethCalls = 0;
   let counts = {};
+  let ranges = [];
   const calls = [];
   const flags = {failBalances: false, calm: false};
 
@@ -167,9 +169,10 @@ function installRpc(box) {
     if (body.method === 'eth_getLogs') {
       const from = BigInt(body.params[0].fromBlock);
       const to = BigInt(body.params[0].toBlock);
+      ranges.push([from, to]);
       const key = from + ':' + to;
       if (!flags.calm && once('log429:' + key)) return rpcError({code: -32007, message: 'too many requests'}, 429);
-      if (!flags.calm && to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
+      if (to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
       return rpcResult([{
         address: cfg.addresses.JB,
         blockNumber: body.params[0].toBlock,
@@ -197,10 +200,12 @@ function installRpc(box) {
       rpcCount = 0;
       ethCalls = 0;
       counts = {};
+      ranges = [];
     },
     get rpcCount() { return rpcCount; },
     get calls() { return calls; },
     get counts() { return counts; },
+    get ranges() { return ranges; },
     flags,
   };
 }
@@ -397,6 +402,43 @@ assert(walletText.includes('Unavailable'), 'persistent wallet failure was shown 
 assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
 rpc.flags.failBalances = false;
 
+const deepTip = 5000n;
+const deepHead = 4900n;
+assert(deepHead + REORG_DEPTH < deepTip, 'fixture is not a deep rollback');
+const deepPlan = planEventReads({from: 2000n, to: deepTip, items: []}, deepHead, deepTip);
+assert(deepPlan.reset, 'planner kept coverage across a deep rollback');
+const shallowPlan = planEventReads({from: 2000n, to: deepTip, items: []}, deepTip - 5n, deepTip);
+assert(!shallowPlan.reset, 'a 5 block rollback was treated as deep');
+seedLogCache({
+  from: 2000n,
+  to: deepTip,
+  items: [log(4800n, 'orphan-4800'), log(deepTip, 'old-tip')],
+});
+chain.n = deepHead;
+let deepPartial = false;
+let deepDone = false;
+for (let step = 1; step <= 8; step += 1) {
+  rpc.begin();
+  await refresh();
+  const cov = logCoverage();
+  console.log('DEEP', step, cov.from?.toString(), cov.to?.toString(), view.text('#status'), cov.hashes);
+  assert(!cov.hashes.includes('orphan-4800'), 'orphan below the overlap survived refresh ' + step);
+  assert(!cov.hashes.includes('old-tip'), 'old tip survived refresh ' + step);
+  assert(cov.to === deepHead, 'deep rollback coverage ended at ' + cov.to);
+  assert(cov.min == null || cov.min >= cov.from, 'deep rollback cache escaped coverage');
+  if (view.text('#status') !== 'Live snapshot complete') deepPartial = true;
+  else assert(cov.from === deepHead - LOG_LOOKBACK, 'complete before the replacement window finished');
+  if (step === 1) assert(cov.from > 2000n, 'old coverage prefix was kept');
+  if (cov.from === deepHead - LOG_LOOKBACK && view.text('#status') === 'Live snapshot complete') {
+    deepDone = true;
+    break;
+  }
+}
+assert(deepPartial, 'deep rollback was marked complete immediately');
+assert(deepDone, 'replacement coverage did not finish');
+chain.n = head;
+resetLogCache();
+
 rpc.flags.calm = true;
 armTestBudget();
 const walletBudget = openSection('wallets');
@@ -422,7 +464,8 @@ assert(raceUsage.sections.events.spent === 1, 'event section spent ' + raceUsage
 assert(raceUsage.spent === 2, 'race spent ' + raceUsage.spent);
 assert(raced.slice(0, 3).every((item) => item.status === 'rejected'), 'queued balances ran on the event reserve');
 
-rpc.flags.calm = false;
+rpc.flags.calm = true;
+rpc.begin();
 armTestBudget();
 const splitBudget = openSection('events');
 splitBudget.left = 2;
@@ -433,10 +476,14 @@ try {
 } catch (error) {
   splitError = error;
 }
-console.log('SPLIT', splitBudget.spent, splitError && splitError.message);
+const leftTo = splitFrom + 99n;
+const rightFrom = splitFrom + 100n;
+console.log('SPLIT', splitBudget.spent, splitError && splitError.message, rpc.ranges.map(([from, to]) => from + ':' + to).join(' '));
 assert(splitError && /request budget/i.test(splitError.message), 'split did not stop on the budget');
 assert(splitBudget.spent === 2, 'split spent ' + splitBudget.spent);
 assert(splitBudget.left === 0, 'split left budget behind');
+assert(rpc.ranges.some(([from, to]) => from === splitFrom && to === leftTo), 'left child did not succeed');
+assert(!rpc.ranges.some(([from]) => from === rightFrom), 'right child was sent after the budget was gone');
 rpc.flags.calm = false;
 
 console.log('live dashboard checks passed');
