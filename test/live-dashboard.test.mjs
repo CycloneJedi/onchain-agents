@@ -407,8 +407,14 @@ const deepHead = 4900n;
 assert(deepHead + REORG_DEPTH < deepTip, 'fixture is not a deep rollback');
 const deepPlan = planEventReads({from: 2000n, to: deepTip, items: []}, deepHead, deepTip);
 assert(deepPlan.reset, 'planner kept coverage across a deep rollback');
-const shallowPlan = planEventReads({from: 2000n, to: deepTip, items: []}, deepTip - 5n, deepTip);
+const shallowHead = deepTip - 5n;
+const shallowPlan = planEventReads({from: 2000n, to: deepTip, items: []}, shallowHead, deepTip);
 assert(!shallowPlan.reset, 'a 5 block rollback was treated as deep');
+assert(shallowPlan.pages.some(([start, end]) => start === shallowHead - REORG_DEPTH && end === shallowHead), 'a 5 block rollback shortened the overlap: ' + shallowPlan.pages.map((page) => page.join('-')).join(','));
+const exactHead = deepTip - REORG_DEPTH;
+const exactPlan = planEventReads({from: 2000n, to: deepTip, items: []}, exactHead, deepTip);
+assert(!exactPlan.reset, 'a rollback of exactly 32 blocks was treated as deep');
+assert(exactPlan.pages.some(([start, end]) => start === exactHead - REORG_DEPTH && end === exactHead), 'a rollback of exactly 32 blocks shortened the overlap: ' + exactPlan.pages.map((page) => page.join('-')).join(','));
 seedLogCache({
   from: 2000n,
   to: deepTip,
@@ -436,6 +442,57 @@ for (let step = 1; step <= 8; step += 1) {
 }
 assert(deepPartial, 'deep rollback was marked complete immediately');
 assert(deepDone, 'replacement coverage did not finish');
+
+async function proveShallowRollback({label, tip, nextHead, orphanBlock, orphanHash}) {
+  const from = nextHead > LOG_LOOKBACK ? nextHead - LOG_LOOKBACK : 0n;
+  const keeper = 'keeper-' + label;
+  assert(nextHead < tip && nextHead + REORG_DEPTH >= tip, label + ' fixture is not a shallow rollback');
+  assert(orphanBlock >= nextHead - REORG_DEPTH && orphanBlock <= nextHead, label + ' orphan is outside the replacement overlap');
+  assert(orphanBlock < tip - REORG_DEPTH, label + ' orphan would already be inside the shortened overlap');
+  seedLogCache({
+    from,
+    to: tip,
+    items: [log(4000n, keeper), log(orphanBlock, orphanHash), log(tip, 'old-tip-' + label)],
+  });
+  chain.n = nextHead;
+  let done = false;
+  for (let step = 1; step <= 4; step += 1) {
+    rpc.begin();
+    await refresh();
+    const cov = logCoverage();
+    const ranges = rpc.ranges.map(([start, end]) => start + ':' + end).join(' ');
+    console.log('SHALLOW', label, step, cov.from?.toString(), cov.to?.toString(), view.text('#status'), cov.hashes, ranges);
+    assert(cov.hashes.includes(keeper), label + ' dropped a log below the overlap on refresh ' + step);
+    assert(!cov.hashes.includes('old-tip-' + label), label + ' kept a log above the new head on refresh ' + step);
+    assert(cov.to === nextHead, label + ' coverage ended at ' + cov.to);
+    assert(cov.from === from, label + ' reset coverage that was still inside the overlap');
+    const overlapRead = rpc.ranges.some(([start, end]) => start <= nextHead - REORG_DEPTH && end >= nextHead);
+    if (view.text('#status') === 'Live snapshot complete') {
+      assert(overlapRead, label + ' reported complete without rereading the full overlap');
+      assert(!cov.hashes.includes(orphanHash), label + ' reported complete while the overlap orphan remained');
+      done = true;
+      break;
+    }
+    assert(view.text('#status') === 'Some readings are incomplete', label + ' status was ' + view.text('#status'));
+  }
+  assert(done, label + ' replacement overlap did not finish');
+  assert(!logCoverage().hashes.includes(orphanHash), label + ' overlap orphan survived');
+}
+
+await proveShallowRollback({
+  label: '5',
+  tip: 5000n,
+  nextHead: 4995n,
+  orphanBlock: 4965n,
+  orphanHash: 'orphan-4965',
+});
+await proveShallowRollback({
+  label: '32',
+  tip: 5000n,
+  nextHead: 5000n - REORG_DEPTH,
+  orphanBlock: 4967n,
+  orphanHash: 'orphan-4967',
+});
 chain.n = head;
 resetLogCache();
 

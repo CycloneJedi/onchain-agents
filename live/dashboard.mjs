@@ -497,12 +497,14 @@ export function pruneLookback(state, head) {
 
 export function planEventReads(state, head, cachedTo = state.to) {
   const lookback = lookbackFloor(head);
+  // cachedTo is the tip before truncation. It decides a deep rollback only.
   const deepRollback = cachedTo != null && head + REORG_DEPTH < cachedTo;
   if (deepRollback || state.from == null || state.to == null || head < state.from || state.to < lookback) {
     return {lookback, pages: logWindows(lookback, head), reset: true};
   }
   const pages = [];
-  const rewind = state.to > REORG_DEPTH ? state.to - REORG_DEPTH : 0n;
+  const coveredTo = state.to < head ? state.to : head;
+  const rewind = coveredTo > REORG_DEPTH ? coveredTo - REORG_DEPTH : 0n;
   let tipFrom = rewind < lookback ? lookback : rewind;
   if (tipFrom > head) tipFrom = head;
   // Oldest missing slice first, so a head jump larger than one page still touches coverage.
