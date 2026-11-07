@@ -1,0 +1,12 @@
+{
+  "name": "onchain-agents",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:live": "node live/build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "viem": "2.38.3"
+  }
+}
