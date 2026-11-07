@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OnChain + Breakaway | Live testnet</title>
+<meta name="description" content="Read-only Base Sepolia view of Project OnChain and Breakaway. No wallet connection or signing.">
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#080f1a;color:#dfe8f7}
+body{max-width:1320px;margin:auto;padding:32px 20px 80px}
+h1{font-size:clamp(2rem,4vw,3.4rem);max-width:900px;letter-spacing:-.04em;margin:.3em 0}
+h2{margin-top:52px;font-size:1.5rem}
+h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#95aac8}
+p{color:#aebed6;line-height:1.6}
+a{color:#80c9ff}
+button{background:#76e1be;color:#07101a;border:0;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.badge{display:inline-block;padding:6px 10px;background:#153a36;color:#7de8c6;border-radius:30px;font-size:.8rem}
+.home{margin-left:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+article{background:#111d2e;border:1px solid #203047;border-radius:12px;padding:14px 20px}
+article strong{font-size:1.5rem}
+article p{font-size:.8rem}
+.scroll{overflow-x:auto;background:#101a29;border:1px solid #203047;border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #203047;white-space:nowrap}
+th{color:#94abc8;font-size:.75rem;text-transform:uppercase}
+#error{color:#ffbd9c}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.notice{border-left:3px solid #76e1be;padding-left:16px}
+.subtle{font-size:.85rem}
+footer{margin-top:50px;border-top:1px solid #203047;padding-top:24px}
+</style>
+</head>
+<body>
+<header>
+<div><span class="badge">TESTNET ONLY · NO REAL VALUE</span> <a class="home" href="../index.html">Site home</a></div>
+<button id="refresh" type="button">Refresh state</button>
+</header>
+<h1>Two projects.<br>One live testnet view.</h1>
+<p>Project OnChain work and payment activity, alongside Breakaway's 24 practice claims. Read-only. No wallet connection or signing.</p>
+<p class="notice" id="network">Connecting to Base Sepolia…</p>
+<p class="subtle"><span id="updated"></span> · <span id="status">Loading</span></p>
+<p id="error" role="alert"></p>
+<h2>Project OnChain</h2>
+<p class="subtle" id="onchain-block"></p>
+<div class="grid" id="metrics"></div>
+<p class="subtle" id="scope"></p>
+<div class="scroll" id="custody"></div>
+<h2>Breakaway</h2>
+<p class="subtle" id="breakaway-block"></p>
+<p>Bounded registry demonstration. Practice claims only, no real value or legal title. Auction activity follows the deployed contracts and their live timing.</p>
+<p id="bkstats"></p>
+<div class="scroll" id="claims"></div>
+<h2>Agent wallets</h2>
+<p class="subtle" id="wallets-block"></p>
+<div class="scroll" id="wallets"></div>
+<h2>Recent on-chain activity</h2>
+<p class="subtle" id="events-block"></p>
+<p class="subtle" id="eventscope"></p>
+<div class="scroll" id="recent"></div>
+<h2>Traffic runner</h2>
+<p class="subtle" id="runnernote">Checking for a runner snapshot…</p>
+<div class="grid" id="runner"></div>
+<div class="scroll" id="runrecent"></div>
+<h3>Active runner workflows</h3>
+<div class="scroll" id="active"></div>
+<h2>Deployed contracts</h2>
+<div class="scroll" id="addresses"></div>
+<footer>
+<p class="subtle">Base Sepolia 84532. Read-only calls to the public RPC. No wallet connection, no signing, and no private keys in this page. Contract addresses link to the Base Sepolia explorer. Updates every 60 seconds while this tab is visible. A rate limit or outage leaves the last good readings in place.</p>
+</footer>
+<script type="module" src="./dashboard.js"></script>
+</body>
+</html>
