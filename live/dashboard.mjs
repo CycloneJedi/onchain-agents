@@ -511,7 +511,7 @@ async function loadRunner() {
       item.phase,
       item.error?.message || 'None',
     ]));
-    note.textContent = 'Runner snapshot is local unless separately published. Check its MT timestamp. Chain panels above always read the public RPC.';
+    note.textContent = 'Runner figures come from a published snapshot file, not from the chain. They are only as current as the snapshot time shown. The chain panels above read the public Base Sepolia RPC; previously displayed values may be stale if a refresh fails.';
   } catch {
     note.textContent = 'Runner snapshot not published here. Chain panels remain live. No runner statistics are invented.';
   }
