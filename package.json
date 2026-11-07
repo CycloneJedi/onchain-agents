@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:live": "node live/build.mjs"
+    "build:live": "node live/build.mjs",
+    "check:live": "node test/live-dashboard.test.mjs"
   },
   "devDependencies": {
     "esbuild": "0.25.10",

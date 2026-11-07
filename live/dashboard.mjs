@@ -12,10 +12,14 @@ const MULTICALL = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const ZERO = '0x0000000000000000000000000000000000000000';
 const GAP_MS = 120;
 const CALL_BATCH = 20;
-const REQUEST_BUDGET = 64;
+// A clean read of the supported window fits in this cap. Record reads cannot spend the event share.
+export const REQUEST_BUDGET = 64;
+export const SECTION_RESERVES = {meta: 4, onchain: 30, breakaway: 5, wallets: 8, events: 17};
 const LOG_CHUNK = 200n;
 const LOG_LOOKBACK = 3000n;
 const REORG_DEPTH = 32n;
+export {LOG_LOOKBACK, REORG_DEPTH};
+const SUPPORTED_ID_CAP = 100n;
 const FILE_TIMEOUT_MS = 8000;
 const ADDR = /^0x[a-fA-F0-9]{40}$/;
 
@@ -89,15 +93,55 @@ function toHex(value) {
   return '0x' + BigInt(value).toString(16);
 }
 
-let requestsLeft = REQUEST_BUDGET;
+let reserveLeft = 0;
+let sharedLeft = 0;
+let spentTotal = 0;
+let gapMs = GAP_MS;
+let retryWait = sleep;
+let idCap = SUPPORTED_ID_CAP;
+
+export function setRequestGap(ms) {
+  gapMs = ms;
+}
+
+export function setRetryDelay(fn) {
+  retryWait = fn;
+}
+
+export function setIdCap(value) {
+  idCap = BigInt(value);
+}
+
+export function currentIdCap() {
+  return idCap;
+}
+
+export function budgetUsage() {
+  return {spent: spentTotal, reserveLeft, sharedLeft};
+}
 
 function armBudget() {
-  requestsLeft = REQUEST_BUDGET;
+  reserveLeft = 0;
+  sharedLeft = 0;
+  spentTotal = 0;
+}
+
+function useSection(name) {
+  sharedLeft += reserveLeft;
+  reserveLeft = SECTION_RESERVES[name] || 0;
+}
+
+function takeRequest() {
+  if (spentTotal >= REQUEST_BUDGET || (reserveLeft <= 0 && sharedLeft <= 0)) {
+    throw new Error('Public RPC request budget for this refresh is used up.');
+  }
+  if (reserveLeft > 0) reserveLeft -= 1;
+  else sharedLeft -= 1;
+  spentTotal += 1;
 }
 
 async function rpc(method, params) {
-  if (requestsLeft <= 0) throw new Error('Public RPC request budget for this refresh is used up.');
-  requestsLeft -= 1;
+  takeRequest();
   let response;
   try {
     response = await fetch(RPC, {
@@ -134,7 +178,7 @@ let lastCall = 0;
 
 function spaced(fn) {
   const run = gate.then(async () => {
-    const gap = GAP_MS - (Date.now() - lastCall);
+    const gap = gapMs - (Date.now() - lastCall);
     if (gap > 0) await sleep(gap);
     lastCall = Date.now();
     return rpcRetry(fn);
@@ -161,7 +205,7 @@ async function rpcRetry(fn) {
       const status = typeof document === 'undefined' ? null : $('#status');
       if (status) status.textContent = rateLimited(error) ? 'Public RPC rate limit. Retrying…' : 'Public RPC issue. Retrying…';
       const jitter = Math.floor(Math.random() * Math.floor(wait * 0.25 + 1));
-      await sleep(wait + jitter);
+      await retryWait(wait + jitter);
       wait = Math.min(wait * 2, 8000);
     }
   }
@@ -238,7 +282,7 @@ function call(contract, functionName, args = []) {
 
 function idRange(next) {
   const end = BigInt(next);
-  const from = end > 200n ? end - 200n : 1n;
+  const from = end > idCap ? end - idCap : 1n;
   const ids = [];
   for (let id = from; id < end; id += 1n) ids.push(id);
   return ids;
@@ -353,7 +397,7 @@ async function getLogsRange(addresses, fromBlock, toBlock) {
   }
 }
 
-function logWindows(from, to) {
+export function logWindows(from, to) {
   const windows = [];
   let end = to;
   while (end >= from) {
@@ -365,14 +409,87 @@ function logWindows(from, to) {
   return windows;
 }
 
+export function createLogCache() {
+  return {from: null, to: null, items: []};
+}
+
+export function discardAboveHead(state, head) {
+  if (state.from == null || state.to == null) return createLogCache();
+  if (head < state.from) return createLogCache();
+  const to = state.to > head ? head : state.to;
+  return {
+    from: state.from,
+    to,
+    items: state.items.filter((item) => item.blockNumber >= state.from && item.blockNumber <= to),
+  };
+}
+
+export function commitLogPage(state, start, end, logs) {
+  const page = [];
+  for (const item of logs) {
+    if (item.blockNumber < start || item.blockNumber > end) continue;
+    page.push(item);
+  }
+  let from = state.from;
+  let to = state.to;
+  if (from == null || to == null) {
+    from = start;
+    to = end;
+  } else if (start <= to + 1n && end >= from - 1n) {
+    if (start < from) from = start;
+    if (end > to) to = end;
+  } else {
+    return {ok: false, state};
+  }
+  const items = state.items
+    .filter((item) => item.blockNumber < start || item.blockNumber > end)
+    .concat(page)
+    .filter((item) => item.blockNumber >= from && item.blockNumber <= to);
+  return {ok: true, state: {from, to, items}};
+}
+
+export function visibleLogs(state) {
+  if (state.from == null || state.to == null) return [];
+  return state.items.filter((item) => item.blockNumber >= state.from && item.blockNumber <= state.to);
+}
+
+export function planEventReads(state, head) {
+  const lookback = head > LOG_LOOKBACK ? head - LOG_LOOKBACK : 0n;
+  if (state.from == null || state.to == null || head + REORG_DEPTH < state.to || head < state.from) {
+    return {lookback, pages: logWindows(lookback, head)};
+  }
+  const pages = [];
+  const rewind = state.to > REORG_DEPTH ? state.to - REORG_DEPTH : 0n;
+  let tipFrom = rewind < lookback ? lookback : rewind;
+  if (tipFrom > head) tipFrom = head;
+  pages.push(...logWindows(tipFrom, head));
+  if (state.from > lookback) pages.push(...logWindows(lookback, state.from - 1n));
+  return {lookback, pages};
+}
+
 let cfg;
 let A;
 let AB;
 let busy = false;
 let runnerTask = null;
-let logFrom = null;
-let logTo = null;
-let logItems = [];
+let logState = createLogCache();
+
+export function resetLogCache() {
+  logState = createLogCache();
+}
+
+export function logCoverage() {
+  return {from: logState.from, to: logState.to, count: visibleLogs(logState).length};
+}
+
+export function useConfig(next) {
+  requirePublicAddresses(next.addresses, 'Contract');
+  requirePublicAddresses(next.wallets, 'Wallet');
+  if (!next.abis || !Array.isArray(next.tiles)) throw new Error('Dashboard config is incomplete.');
+  cfg = next;
+  A = cfg.addresses;
+  AB = cfg.abis;
+}
 
 function requirePublicAddresses(map, kind) {
   for (const [name, value] of Object.entries(map || {})) {
@@ -404,13 +521,7 @@ async function fetchBounded(url, timeoutMs) {
 async function loadConfig() {
   const response = await fetchBounded('./config.json', FILE_TIMEOUT_MS);
   if (!response.ok) throw new Error('Dashboard config did not load (' + response.status + ').');
-  const next = JSON.parse(response.text);
-  requirePublicAddresses(next.addresses, 'Contract');
-  requirePublicAddresses(next.wallets, 'Wallet');
-  if (!next.abis || !Array.isArray(next.tiles)) throw new Error('Dashboard config is incomplete.');
-  cfg = next;
-  A = cfg.addresses;
-  AB = cfg.abis;
+  useConfig(JSON.parse(response.text));
 }
 
 function renderAddresses() {
@@ -549,7 +660,7 @@ async function loadOnchain(blockNumber) {
   const metrics = $('#metrics');
   metrics.replaceChildren();
   for (const [title, value, sub] of cards) card(metrics, title, value, sub);
-  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest 200 IDs per contract, not an unlimited history.";
+  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest " + idCap + " IDs per contract, not an unlimited history.";
   if (report.partial || custodyUnavailable) scope += ' Unavailable records are counted apart from zero.';
   $('#scope').textContent = scope;
   table($('#custody'), ['Service', 'Held in active work', 'Ready to withdraw'], serviceRows);
@@ -625,32 +736,33 @@ async function loadWallets(blockNumber) {
 
 async function loadEvents(blockNumber) {
   const addresses = Object.keys(AB).filter((name) => name !== 'MUSDC' && A[name]).map((name) => A[name]);
-  const lookback = blockNumber > LOG_LOOKBACK ? blockNumber - LOG_LOOKBACK : 0n;
-  const fullRescan = logTo == null || blockNumber + REORG_DEPTH < logTo;
-  let from = lookback;
-  if (!fullRescan) {
-    const rewind = logTo > REORG_DEPTH ? logTo - REORG_DEPTH : 0n;
-    from = rewind < lookback ? lookback : rewind;
+  if (logState.to != null && blockNumber + REORG_DEPTH < logState.to) logState = createLogCache();
+  else if (logState.to != null && blockNumber < logState.to) logState = discardAboveHead(logState, blockNumber);
+  const plan = planEventReads(logState, blockNumber);
+  let stoppedEarly = false;
+  for (const [start, end] of plan.pages) {
+    let logs;
+    try {
+      logs = await getLogsRange(addresses, start, end);
+    } catch (error) {
+      if (!budgetSpent(error) && logState.from == null) throw error;
+      stoppedEarly = true;
+      break;
+    }
+    const committed = commitLogPage(logState, start, end, logs);
+    if (!committed.ok) {
+      stoppedEarly = true;
+      break;
+    }
+    logState = committed.state;
   }
-  if (from > blockNumber) from = blockNumber;
-  const fresh = [];
-  for (const [start, end] of logWindows(from, blockNumber)) {
-    fresh.push(...await getLogsRange(addresses, start, end));
+  if (logState.from == null || logState.to == null) {
+    return {partial: true, detail: 'Recent events have not covered a block yet.'};
   }
-  if (fullRescan) {
-    logItems = fresh;
-    logFrom = from;
-  } else {
-    logItems = logItems.filter((item) => item.blockNumber < from || item.blockNumber > blockNumber).concat(fresh);
-    if (logFrom == null || from < logFrom) logFrom = from;
-  }
-  logTo = blockNumber;
-  const keepFrom = lookback;
-  logItems = logItems.filter((item) => item.blockNumber >= keepFrom);
-  if (logFrom == null || logFrom < keepFrom) logFrom = keepFrom;
+  const partial = stoppedEarly || logState.from > plan.lookback || logState.to < blockNumber;
   const rows = [];
   const seen = new Set();
-  const ordered = logItems.slice().sort((left, right) => Number(right.blockNumber - left.blockNumber) || Number(right.logIndex - left.logIndex));
+  const ordered = visibleLogs(logState).slice().sort((left, right) => Number(right.blockNumber - left.blockNumber) || Number(right.logIndex - left.logIndex));
   for (const log of ordered) {
     if (seen.has(log.transactionHash)) continue;
     seen.add(log.transactionHash);
@@ -673,9 +785,17 @@ async function loadEvents(blockNumber) {
   }
   if (!rows.length) rows.push(['None', 'No contract events in these blocks', '', '']);
   table($('#recent'), ['Block', 'Transaction', 'Contract', 'Action event'], rows);
-  markRead('events-block', blockNumber);
-  $('#eventscope').textContent = 'Contract events from blocks ' + logFrom + ' to ' + logTo + '. Newest pages are read first. A short overlap is read again in case of a reorg. This is not a complete transaction history.';
-  return {partial: false, detail: ''};
+  markRead('events-block', logState.to);
+  let scope = 'Covered blocks ' + logState.from + ' to ' + logState.to + '.';
+  if (logState.from > plan.lookback || logState.to < blockNumber) {
+    scope += ' Backfill target is ' + plan.lookback + ' to ' + blockNumber + '.';
+  }
+  scope += ' Newest pages are read first. A short overlap is read again in case of a reorg. This is not a complete transaction history.';
+  $('#eventscope').textContent = scope;
+  return {
+    partial,
+    detail: partial ? 'Event backfill covers blocks ' + logState.from + ' to ' + logState.to + '.' : '',
+  };
 }
 
 async function loadRunner() {
@@ -712,7 +832,7 @@ async function loadRunner() {
       note.textContent = 'Runner snapshot file timed out. Chain panels do not wait on it. No runner statistics are invented.';
       return;
     }
-    note.textContent = 'Runner snapshot not published here. Chain panels remain live. No runner statistics are invented.';
+    note.textContent = 'Runner snapshot not published here. Chain panels read the public RPC separately. No runner statistics are invented.';
   }
 }
 
@@ -727,7 +847,7 @@ function tabHidden() {
   return document.visibilityState === 'hidden';
 }
 
-async function refresh() {
+export async function refresh() {
   if (tabHidden()) return;
   if (busy) return;
   busy = true;
@@ -735,6 +855,7 @@ async function refresh() {
   $('#error').textContent = '';
   $('#status').textContent = 'Reading public RPC…';
   armBudget();
+  useSection('meta');
   startRunner();
   const problems = [];
   try {
@@ -748,13 +869,14 @@ async function refresh() {
     });
     $('#network').textContent = 'Base Sepolia · chain 84532 · head block ' + blockNumber;
     const sections = [
-      ['Project OnChain', () => loadOnchain(blockNumber)],
-      ['Breakaway', () => loadBreakaway(blockNumber)],
-      ['Wallets', () => loadWallets(blockNumber)],
-      ['Recent activity', () => loadEvents(blockNumber)],
+      ['Project OnChain', 'onchain', () => loadOnchain(blockNumber)],
+      ['Breakaway', 'breakaway', () => loadBreakaway(blockNumber)],
+      ['Wallets', 'wallets', () => loadWallets(blockNumber)],
+      ['Recent activity', 'events', () => loadEvents(blockNumber)],
     ];
     let allOk = true;
-    for (const [name, run] of sections) {
+    for (const [name, section, run] of sections) {
+      useSection(section);
       try {
         const result = await run();
         if (result?.partial) {
@@ -809,4 +931,4 @@ async function start() {
   }, 60000);
 }
 
-if (typeof document !== 'undefined') await start();
+if (typeof document !== 'undefined' && !globalThis.LIVE_DASHBOARD_TEST) await start();
