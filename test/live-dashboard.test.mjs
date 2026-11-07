@@ -22,6 +22,10 @@ const {
   commitLogPage,
   visibleLogs,
   planEventReads,
+  armTestBudget,
+  openSection,
+  enqueueRpc,
+  readLogWindow,
 } = dash;
 
 const cfg = JSON.parse(readFileSync(new URL('../live/config.json', import.meta.url), 'utf8'));
@@ -109,7 +113,7 @@ function installDom() {
   };
 }
 
-function installRpc(head) {
+function installRpc(box) {
   const abiByAddress = {};
   for (const [name, address] of Object.entries(cfg.addresses)) {
     abiByAddress[address.toLowerCase()] = cfg.abis[name];
@@ -117,7 +121,9 @@ function installRpc(head) {
   const seen = new Set();
   let rpcCount = 0;
   let ethCalls = 0;
+  let counts = {};
   const calls = [];
+  const flags = {failBalances: false, calm: false};
 
   function rpcResult(result) {
     return {ok: true, status: 200, async text() { return JSON.stringify({jsonrpc: '2.0', id: 1, result}); }};
@@ -148,20 +154,22 @@ function installRpc(head) {
     if (href.includes('stats.json')) return {ok: false, status: 404, async text() { return ''; }};
     const body = JSON.parse(options.body);
     rpcCount += 1;
+    counts[body.method] = (counts[body.method] || 0) + 1;
     calls.push(body.method);
     if (body.method === 'eth_chainId') return rpcResult('0x14a34');
-    if (body.method === 'eth_blockNumber') return rpcResult('0x' + head.toString(16));
+    if (body.method === 'eth_blockNumber') return rpcResult('0x' + box.n.toString(16));
     if (body.method === 'eth_getBlockByNumber') return rpcResult({timestamp: '0x64'});
     if (body.method === 'eth_getBalance') {
-      if (once('balance')) return rpcError({code: -32007, message: 'too many requests'}, 429);
+      if (flags.failBalances) return rpcError({code: -32000, message: 'balance unavailable'});
+      if (!flags.calm && once('balance')) return rpcError({code: -32007, message: 'too many requests'}, 429);
       return rpcResult('0x1');
     }
     if (body.method === 'eth_getLogs') {
       const from = BigInt(body.params[0].fromBlock);
       const to = BigInt(body.params[0].toBlock);
       const key = from + ':' + to;
-      if (once('log429:' + key)) return rpcError({code: -32007, message: 'too many requests'}, 429);
-      if (to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
+      if (!flags.calm && once('log429:' + key)) return rpcError({code: -32007, message: 'too many requests'}, 429);
+      if (!flags.calm && to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
       return rpcResult([{
         address: cfg.addresses.JB,
         blockNumber: body.params[0].toBlock,
@@ -188,9 +196,12 @@ function installRpc(head) {
     begin() {
       rpcCount = 0;
       ethCalls = 0;
+      counts = {};
     },
     get rpcCount() { return rpcCount; },
     get calls() { return calls; },
+    get counts() { return counts; },
+    flags,
   };
 }
 
@@ -215,6 +226,7 @@ assert(reserveTotal === REQUEST_BUDGET, 'section reserves must add up to the har
 assert(source.includes('Chain panels read the public RPC separately'), 'runner fallback text missing');
 assert(!source.includes('Chain panels remain live'), 'old runner fallback is still present');
 assert(!source.includes('eth_sendRawTransaction'), 'dashboard source mentions a transaction send');
+assert(source.includes('No contract events in the covered blocks'), 'empty event wording missing');
 
 const view = installDom();
 useConfig(cfg);
@@ -223,7 +235,8 @@ setRetryDelay(async () => {});
 
 const head = 5000000n;
 const lookback = head - LOG_LOOKBACK;
-const rpc = installRpc(head);
+const chain = {n: head};
+const rpc = installRpc(chain);
 setIdCap(100);
 resetLogCache();
 
@@ -246,6 +259,8 @@ for (let attempt = 1; attempt <= 8; attempt += 1) {
   });
   assert(usage.spent <= REQUEST_BUDGET, 'refresh ' + attempt + ' spent ' + usage.spent);
   assert(usage.spent === rpc.rpcCount, 'refresh ' + attempt + ' budget ' + usage.spent + ' vs rpc ' + rpc.rpcCount);
+  const sectionSpent = Object.values(usage.sections).reduce((sum, item) => sum + item.spent, 0);
+  assert(sectionSpent === usage.spent, 'per-section spends do not add up to ' + usage.spent);
   assert(coverage.to === head, 'coverage moved off the head');
   assert(coverage.from != null && coverage.from <= coverage.to, 'coverage is not a range');
   if (attempt === 1) {
@@ -272,6 +287,45 @@ for (let attempt = 1; attempt <= 8; attempt += 1) {
 console.log(JSON.stringify(progress, null, 2));
 assert(finished >= 2, 'backfill did not complete across refreshes');
 assert(rpc.calls.filter((method) => method === 'eth_call').length > 20, 'maximum record reads were not exercised');
+
+const bridged = {from: 1000n, to: 4000n, items: [log(4000n, 'cached')]};
+const bridgePlan = planEventReads(bridged, 4201n);
+assert(!bridgePlan.reset, 'a 201 block gap should bridge');
+assert(bridgePlan.pages[0][0] <= 4001n, 'newest page starts past the cached tip: ' + bridgePlan.pages[0][0]);
+const bridgedPage = commitLogPage(bridged, bridgePlan.pages[0][0], bridgePlan.pages[0][1], []);
+assert(bridgedPage.ok, 'bridging page was rejected');
+const farPlan = planEventReads(bridged, 4000n + 3500n);
+assert(farPlan.reset, 'a gap past the lookback should start a new coverage');
+
+const jumped = head + 201n;
+chain.n = jumped;
+rpc.begin();
+await refresh();
+let moved = logCoverage();
+console.log('JUMP201', moved.from?.toString(), moved.to?.toString(), budgetUsage().spent, view.text('#status'));
+assert(moved.to === jumped, '201 block head jump left coverage at ' + moved.to);
+assert(moved.from === jumped - LOG_LOOKBACK, 'lookback was not pruned: ' + moved.from);
+assert(moved.min == null || moved.min >= moved.from, 'cached event is older than coverage');
+assert(moved.max == null || moved.max <= moved.to, 'cached event is newer than coverage');
+
+const far = jumped + 3500n;
+chain.n = far;
+rpc.begin();
+await refresh();
+moved = logCoverage();
+console.log('JUMP3500', moved.from?.toString(), moved.to?.toString(), budgetUsage().spent, view.text('#status'));
+assert(moved.to === far, '3500 block head jump left coverage at ' + moved.to);
+assert(moved.from > far - LOG_LOOKBACK, 'far jump kept a full old window');
+assert(moved.min == null || moved.min >= far - LOG_LOOKBACK, 'far jump kept events outside the lookback');
+assert(moved.max == null || moved.max <= far, 'far jump displayed a block past the head');
+const farFrom = moved.from;
+rpc.begin();
+await refresh();
+moved = logCoverage();
+assert(moved.to === far, 'second far refresh left the new head');
+assert(moved.from < farFrom, 'second far refresh did not continue the backfill');
+chain.n = head;
+resetLogCache();
 
 setIdCap(200);
 resetLogCache();
@@ -327,4 +381,70 @@ assert(!emptied.state.items.some((item) => item.blockNumber >= rolled - REORG_DE
 assert(emptied.state.items.some((item) => item.transactionHash === 'old'), 'empty replacement dropped older logs');
 assert(visibleLogs(emptied.state).every((item) => item.blockNumber <= rolled), 'empty rollback displayed a future block');
 
+rpc.flags.failBalances = true;
+resetLogCache();
+setIdCap(100);
+rpc.begin();
+await refresh();
+const failedWallets = budgetUsage();
+const walletText = collectText(document.querySelector('#wallets'));
+console.log('WALLETS', failedWallets.sections.wallets, failedWallets.sections.events, rpc.counts, walletText);
+assert(failedWallets.sections.wallets.spent <= SECTION_RESERVES.wallets, 'wallets spent ' + failedWallets.sections.wallets.spent);
+assert(failedWallets.sections.wallets.spent >= rpc.counts.eth_getBalance, 'balance reads were not charged to wallets');
+assert(failedWallets.sections.events.spent === rpc.counts.eth_getLogs, 'event reserve paid for ' + rpc.counts.eth_getLogs + ' logs but recorded ' + failedWallets.sections.events.spent);
+assert(rpc.counts.eth_getBalance === 5, 'persistent balance failures were retried or skipped: ' + rpc.counts.eth_getBalance);
+assert(walletText.includes('Unavailable'), 'persistent wallet failure was shown as a value');
+assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
+rpc.flags.failBalances = false;
+
+rpc.flags.calm = true;
+armTestBudget();
+const walletBudget = openSection('wallets');
+walletBudget.left = 1;
+const firstBalance = enqueueRpc('eth_getBalance', [cfg.addresses.JB, '0x1']);
+await firstBalance;
+const queued = [
+  enqueueRpc('eth_getBalance', [cfg.addresses.JB, '0x1']),
+  enqueueRpc('eth_getBalance', [cfg.addresses.JB, '0x1']),
+  enqueueRpc('eth_getBalance', [cfg.addresses.JB, '0x1']),
+];
+openSection('events');
+queued.push(enqueueRpc('eth_getLogs', [{
+  address: [cfg.addresses.JB],
+  fromBlock: '0x20',
+  toBlock: '0x20',
+}]));
+const raced = await Promise.allSettled(queued);
+const raceUsage = budgetUsage();
+console.log('RACE', raceUsage.sections, raced.map((item) => item.status));
+assert(raceUsage.sections.wallets.spent === 1, 'outstanding balances spent ' + raceUsage.sections.wallets.spent);
+assert(raceUsage.sections.events.spent === 1, 'event section spent ' + raceUsage.sections.events.spent);
+assert(raceUsage.spent === 2, 'race spent ' + raceUsage.spent);
+assert(raced.slice(0, 3).every((item) => item.status === 'rejected'), 'queued balances ran on the event reserve');
+
+rpc.flags.calm = false;
+armTestBudget();
+const splitBudget = openSection('events');
+splitBudget.left = 2;
+const splitFrom = 8000000n;
+let splitError = null;
+try {
+  await readLogWindow([cfg.addresses.JB], splitFrom, splitFrom + 199n, splitBudget);
+} catch (error) {
+  splitError = error;
+}
+console.log('SPLIT', splitBudget.spent, splitError && splitError.message);
+assert(splitError && /request budget/i.test(splitError.message), 'split did not stop on the budget');
+assert(splitBudget.spent === 2, 'split spent ' + splitBudget.spent);
+assert(splitBudget.left === 0, 'split left budget behind');
+rpc.flags.calm = false;
+
 console.log('live dashboard checks passed');
+
+function collectText(node, out = []) {
+  if (!node) return out.join(' ');
+  if (node.children?.length) {
+    for (const child of node.children) collectText(child, out);
+  } else if (node.textContent) out.push(node.textContent);
+  return out.join(' ');
+}

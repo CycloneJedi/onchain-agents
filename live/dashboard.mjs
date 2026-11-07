@@ -93,9 +93,11 @@ function toHex(value) {
   return '0x' + BigInt(value).toString(16);
 }
 
-let reserveLeft = 0;
+let active = null;
+let sectionBudgets = {};
 let sharedLeft = 0;
 let spentTotal = 0;
+let reserveOverrides = null;
 let gapMs = GAP_MS;
 let retryWait = sleep;
 let idCap = SUPPORTED_ID_CAP;
@@ -117,31 +119,54 @@ export function currentIdCap() {
 }
 
 export function budgetUsage() {
-  return {spent: spentTotal, reserveLeft, sharedLeft};
+  const sections = {};
+  for (const [name, budget] of Object.entries(sectionBudgets)) {
+    sections[name] = {spent: budget.spent, left: budget.left, closed: budget.closed};
+  }
+  return {spent: spentTotal, reserveLeft: active ? active.left : 0, sharedLeft, sections};
+}
+
+export function setSectionReserves(overrides) {
+  reserveOverrides = overrides;
+}
+
+function reserveFor(name) {
+  if (reserveOverrides && Object.prototype.hasOwnProperty.call(reserveOverrides, name)) return reserveOverrides[name];
+  return SECTION_RESERVES[name] || 0;
 }
 
 function armBudget() {
-  reserveLeft = 0;
+  active = null;
+  sectionBudgets = {};
   sharedLeft = 0;
   spentTotal = 0;
 }
 
 function useSection(name) {
-  sharedLeft += reserveLeft;
-  reserveLeft = SECTION_RESERVES[name] || 0;
+  if (active && !active.closed) {
+    sharedLeft += active.left;
+    active.left = 0;
+    active.closed = true;
+  }
+  const budget = {name, left: reserveFor(name), spent: 0, closed: false};
+  sectionBudgets[name] = budget;
+  active = budget;
+  return budget;
 }
 
-function takeRequest() {
-  if (spentTotal >= REQUEST_BUDGET || (reserveLeft <= 0 && sharedLeft <= 0)) {
+function takeRequest(budget) {
+  const owner = budget || active;
+  if (!owner || owner.closed || spentTotal >= REQUEST_BUDGET || (owner.left <= 0 && sharedLeft <= 0)) {
     throw new Error('Public RPC request budget for this refresh is used up.');
   }
-  if (reserveLeft > 0) reserveLeft -= 1;
+  if (owner.left > 0) owner.left -= 1;
   else sharedLeft -= 1;
+  owner.spent += 1;
   spentTotal += 1;
 }
 
-async function rpc(method, params) {
-  takeRequest();
+async function rpc(method, params, budget) {
+  takeRequest(budget || active);
   let response;
   try {
     response = await fetch(RPC, {
@@ -224,12 +249,12 @@ function rowValue(row) {
   return {success, payload};
 }
 
-async function multicall(contracts, blockNumber) {
+async function multicall(contracts, blockNumber, budget = active) {
   if (!contracts.length) return [];
   if (contracts.length > CALL_BATCH) {
     const out = [];
     for (let index = 0; index < contracts.length; index += CALL_BATCH) {
-      out.push(...await multicall(contracts.slice(index, index + CALL_BATCH), blockNumber));
+      out.push(...await multicall(contracts.slice(index, index + CALL_BATCH), blockNumber, budget));
     }
     return out;
   }
@@ -241,7 +266,7 @@ async function multicall(contracts, blockNumber) {
         callData: encodeFunctionData({abi: item.abi, functionName: item.functionName, args: item.args || []}),
       }));
       const data = encodeFunctionData({abi: multicallAbi, functionName: 'aggregate3', args: [calls]});
-      const raw = await rpc('eth_call', [{to: MULTICALL, data}, toHex(blockNumber)]);
+      const raw = await rpc('eth_call', [{to: MULTICALL, data}, toHex(blockNumber)], budget);
       const rows = decodeMulticall(raw);
       return contracts.map((item, index) => {
         const {success, payload} = rowValue(rows?.[index]);
@@ -261,8 +286,8 @@ async function multicall(contracts, blockNumber) {
   } catch (error) {
     if (contracts.length === 1 || retryable(error) || budgetSpent(error)) throw error;
     const mid = Math.floor(contracts.length / 2);
-    const left = await multicall(contracts.slice(0, mid), blockNumber);
-    const right = await multicall(contracts.slice(mid), blockNumber);
+    const left = await multicall(contracts.slice(0, mid), blockNumber, budget);
+    const right = await multicall(contracts.slice(mid), blockNumber, budget);
     return left.concat(right);
   }
 }
@@ -370,14 +395,14 @@ function rangeTooWide(error) {
   return text.includes('block range') || text.includes('more than') || text.includes('query returned') || text.includes('too large') || text.includes('exceed') || text.includes('10000') || text.includes('10,000');
 }
 
-async function getLogsRange(addresses, fromBlock, toBlock) {
+async function getLogsRange(addresses, fromBlock, toBlock, budget = active) {
   try {
     return await spaced(async () => {
       const raw = await rpc('eth_getLogs', [{
         address: addresses,
         fromBlock: toHex(fromBlock),
         toBlock: toHex(toBlock),
-      }]);
+      }], budget);
       if (!Array.isArray(raw)) throw new Error('Log page was not a list');
       return raw.map((log) => ({
         address: log.address,
@@ -391,8 +416,8 @@ async function getLogsRange(addresses, fromBlock, toBlock) {
   } catch (error) {
     if (!rangeTooWide(error) || budgetSpent(error) || fromBlock >= toBlock) throw error;
     const mid = fromBlock + (toBlock - fromBlock) / 2n;
-    const older = await getLogsRange(addresses, fromBlock, mid);
-    const newer = await getLogsRange(addresses, mid + 1n, toBlock);
+    const older = await getLogsRange(addresses, fromBlock, mid, budget);
+    const newer = await getLogsRange(addresses, mid + 1n, toBlock, budget);
     return older.concat(newer);
   }
 }
@@ -453,18 +478,36 @@ export function visibleLogs(state) {
   return state.items.filter((item) => item.blockNumber >= state.from && item.blockNumber <= state.to);
 }
 
+export function lookbackFloor(head) {
+  return head > LOG_LOOKBACK ? head - LOG_LOOKBACK : 0n;
+}
+
+export function pruneLookback(state, head) {
+  const lookback = lookbackFloor(head);
+  if (state.from == null || state.to == null || state.to < lookback) return createLogCache();
+  const to = state.to > head ? head : state.to;
+  const from = state.from < lookback ? lookback : state.from;
+  if (from > to) return createLogCache();
+  return {
+    from,
+    to,
+    items: state.items.filter((item) => item.blockNumber >= from && item.blockNumber <= to),
+  };
+}
+
 export function planEventReads(state, head) {
-  const lookback = head > LOG_LOOKBACK ? head - LOG_LOOKBACK : 0n;
-  if (state.from == null || state.to == null || head + REORG_DEPTH < state.to || head < state.from) {
-    return {lookback, pages: logWindows(lookback, head)};
+  const lookback = lookbackFloor(head);
+  if (state.from == null || state.to == null || head + REORG_DEPTH < state.to || head < state.from || state.to < lookback) {
+    return {lookback, pages: logWindows(lookback, head), reset: true};
   }
   const pages = [];
   const rewind = state.to > REORG_DEPTH ? state.to - REORG_DEPTH : 0n;
   let tipFrom = rewind < lookback ? lookback : rewind;
   if (tipFrom > head) tipFrom = head;
-  pages.push(...logWindows(tipFrom, head));
+  // Oldest missing slice first, so a head jump larger than one page still touches coverage.
+  pages.push(...logWindows(tipFrom, head).reverse());
   if (state.from > lookback) pages.push(...logWindows(lookback, state.from - 1n));
-  return {lookback, pages};
+  return {lookback, pages, reset: false};
 }
 
 let cfg;
@@ -479,7 +522,31 @@ export function resetLogCache() {
 }
 
 export function logCoverage() {
-  return {from: logState.from, to: logState.to, count: visibleLogs(logState).length};
+  const items = visibleLogs(logState);
+  let min = null;
+  let max = null;
+  for (const item of items) {
+    if (min == null || item.blockNumber < min) min = item.blockNumber;
+    if (max == null || item.blockNumber > max) max = item.blockNumber;
+  }
+  return {from: logState.from, to: logState.to, count: items.length, min, max};
+}
+
+export function armTestBudget() {
+  armBudget();
+}
+
+export function openSection(name) {
+  return useSection(name);
+}
+
+export function enqueueRpc(method, params) {
+  const budget = active;
+  return spaced(async () => rpc(method, params, budget));
+}
+
+export function readLogWindow(addresses, fromBlock, toBlock, budget) {
+  return getLogsRange(addresses, fromBlock, toBlock, budget || active);
 }
 
 export function useConfig(next) {
@@ -709,16 +776,18 @@ async function loadBreakaway(blockNumber) {
 }
 
 async function loadWallets(blockNumber) {
+  const budget = active;
   const entries = Object.entries(cfg.wallets);
-  const balances = await Promise.all(entries.map(async ([, address]) => {
-    try {
-      return await spaced(async () => BigInt(await rpc('eth_getBalance', [address, toHex(blockNumber)])));
-    } catch (error) {
-      if (budgetSpent(error)) throw error;
-      return null;
-    }
-  }));
-  const practice = await multicall(entries.map(([, address]) => call('MUSDC', 'balanceOf', [address])), blockNumber);
+  const balances = await Promise.all(entries.map(([, address]) => spaced(async () => {
+    return BigInt(await rpc('eth_getBalance', [address, toHex(blockNumber)], budget));
+  }).then((value) => value, () => null)));
+  let practice;
+  try {
+    practice = await multicall(entries.map(([, address]) => call('MUSDC', 'balanceOf', [address])), blockNumber, budget);
+  } catch (error) {
+    if (!budgetSpent(error)) throw error;
+    practice = entries.map(() => ({status: 'failure', error}));
+  }
   const unavailable = countWalletGaps(balances, practice);
   const rows = entries.map(([name, address], index) => [
     name,
@@ -735,26 +804,30 @@ async function loadWallets(blockNumber) {
 }
 
 async function loadEvents(blockNumber) {
+  const budget = active;
   const addresses = Object.keys(AB).filter((name) => name !== 'MUSDC' && A[name]).map((name) => A[name]);
-  if (logState.to != null && blockNumber + REORG_DEPTH < logState.to) logState = createLogCache();
-  else if (logState.to != null && blockNumber < logState.to) logState = discardAboveHead(logState, blockNumber);
+  if (logState.to != null && blockNumber < logState.to) logState = discardAboveHead(logState, blockNumber);
+  logState = pruneLookback(logState, blockNumber);
   const plan = planEventReads(logState, blockNumber);
+  if (plan.reset) logState = createLogCache();
   let stoppedEarly = false;
   for (const [start, end] of plan.pages) {
     let logs;
     try {
-      logs = await getLogsRange(addresses, start, end);
+      logs = await getLogsRange(addresses, start, end, budget);
     } catch (error) {
       if (!budgetSpent(error) && logState.from == null) throw error;
       stoppedEarly = true;
       break;
     }
-    const committed = commitLogPage(logState, start, end, logs);
+    let committed = commitLogPage(logState, start, end, logs);
     if (!committed.ok) {
+      committed = commitLogPage(createLogCache(), start, end, logs);
+      logState = pruneLookback(committed.state, blockNumber);
       stoppedEarly = true;
       break;
     }
-    logState = committed.state;
+    logState = pruneLookback(committed.state, blockNumber);
   }
   if (logState.from == null || logState.to == null) {
     return {partial: true, detail: 'Recent events have not covered a block yet.'};
@@ -783,14 +856,14 @@ async function loadEvents(blockNumber) {
     ]);
     if (rows.length >= 30) break;
   }
-  if (!rows.length) rows.push(['None', 'No contract events in these blocks', '', '']);
+  if (!rows.length) rows.push(['None', 'No contract events in the covered blocks', '', '']);
   table($('#recent'), ['Block', 'Transaction', 'Contract', 'Action event'], rows);
   markRead('events-block', logState.to);
   let scope = 'Covered blocks ' + logState.from + ' to ' + logState.to + '.';
   if (logState.from > plan.lookback || logState.to < blockNumber) {
     scope += ' Backfill target is ' + plan.lookback + ' to ' + blockNumber + '.';
   }
-  scope += ' Newest pages are read first. A short overlap is read again in case of a reorg. This is not a complete transaction history.';
+  scope += ' Missing blocks are filled from the covered edge. A short overlap is read again in case of a reorg. This is not a complete transaction history.';
   $('#eventscope').textContent = scope;
   return {
     partial,
