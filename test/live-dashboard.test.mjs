@@ -232,6 +232,22 @@ assert(source.includes('Chain panels read the public RPC separately'), 'runner f
 assert(!source.includes('Chain panels remain live'), 'old runner fallback is still present');
 assert(!source.includes('eth_sendRawTransaction'), 'dashboard source mentions a transaction send');
 assert(source.includes('No contract events in the covered blocks'), 'empty event wording missing');
+assert(!source.includes('\u2014') && !source.includes('\u2013'), 'dashboard source has a dash that is not allowed');
+
+const directory = cfg.directory || [];
+function listed(address) {
+  return directory.find((item) => item.address.toLowerCase() === address.toLowerCase());
+}
+const currentBoard = listed('0x24e18B482CA215b5e85E0F375380301D13e61dEc');
+const olderBoard = listed('0x6c53EaD9a3174957032F65D897b70333428AdfF4');
+assert(currentBoard && currentBoard.status === 'current', 'JobBoard v32 is not marked current');
+assert(olderBoard && olderBoard.status === 'older', 'JobBoard v31 is not marked older');
+assert(cfg.addresses.JB.toLowerCase() === '0x24e18b482ca215b5e85e0f375380301d13e61dec', 'live reads are not on JobBoard v32');
+assert(cfg.addresses.ESC.toLowerCase() === '0x85c12b6ba25fc8fd2b054aa4ba6df4d788c3bba7', 'live reads are not on the v32 escrow');
+assert(listed('0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b')?.status === 'current', 'RegistryNext is not marked current');
+assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
+assert(cfg.addresses.TileRegistry.toLowerCase() === '0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b', 'live reads are not on RegistryNext');
+assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');
 
 const view = installDom();
 useConfig(cfg);
