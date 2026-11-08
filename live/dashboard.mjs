@@ -599,10 +599,12 @@ function statusCell(status) {
   return el('span', status === 'older' ? 'Older' : 'Current', status === 'older' ? 'older' : 'current');
 }
 
-function contractLabel(address) {
-  const item = directoryEntries().find((row) => row.address.toLowerCase() === String(address).toLowerCase());
+export function contractLabel(address) {
+  const key = String(address).toLowerCase();
+  const matches = directoryEntries().filter((row) => row.address.toLowerCase() === key);
+  const item = matches.find((row) => row.status === 'older') || matches[0];
   if (item) return item.status === 'older' ? item.name + ' (older)' : item.name;
-  const name = Object.keys(A).find((key) => A[key].toLowerCase() === String(address).toLowerCase());
+  const name = Object.keys(A).find((entry) => A[entry].toLowerCase() === key);
   return labelOf(name || 'Contract');
 }
 
