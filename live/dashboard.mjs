@@ -571,9 +571,55 @@ export function useConfig(next) {
   requirePublicAddresses(next.addresses, 'Contract');
   requirePublicAddresses(next.wallets, 'Wallet');
   if (!next.abis || !Array.isArray(next.tiles)) throw new Error('Dashboard config is incomplete.');
+  if (next.directory != null) requireDirectory(next);
   cfg = next;
   A = cfg.addresses;
   AB = cfg.abis;
+}
+
+function requireDirectory(next) {
+  if (!Array.isArray(next.directory) || !next.directory.length) throw new Error('Dashboard directory is empty.');
+  for (const item of next.directory) {
+    const label = (item?.name || '') + (item?.group || '');
+    if (!item || typeof item.name !== 'string' || !item.name.trim()) throw new Error('Directory contract name is missing.');
+    if (typeof item.address !== 'string' || !ADDR.test(item.address)) throw new Error('Directory address is not public.');
+    if (item.status !== 'current' && item.status !== 'older') throw new Error('Directory status must be current or older.');
+    if (item.group != null && typeof item.group !== 'string') throw new Error('Directory group is not text.');
+    if (item.abiKey != null && !next.abis[item.abiKey]) throw new Error('Directory contract has no ABI.');
+    if (label.includes('\u2014') || label.includes('\u2013')) throw new Error('Directory text uses a dash that is not allowed.');
+  }
+}
+
+function directoryEntries() {
+  if (Array.isArray(cfg.directory) && cfg.directory.length) return cfg.directory;
+  return Object.entries(A).map(([name, address]) => ({group: '', name: labelOf(name), address, status: 'current'}));
+}
+
+function statusCell(status) {
+  return el('span', status === 'older' ? 'Older' : 'Current', status === 'older' ? 'older' : 'current');
+}
+
+export function contractLabel(address) {
+  const key = String(address).toLowerCase();
+  const matches = directoryEntries().filter((row) => row.address.toLowerCase() === key);
+  const item = matches.find((row) => row.status === 'older') || matches[0];
+  if (item) return item.status === 'older' ? item.name + ' (older)' : item.name;
+  const name = Object.keys(A).find((entry) => A[entry].toLowerCase() === key);
+  return labelOf(name || 'Contract');
+}
+
+function eventTargets() {
+  const listed = directoryEntries().filter((item) => item.abiKey && AB[item.abiKey]).map((item) => item.address);
+  const live = Object.keys(AB).filter((name) => name !== 'MUSDC' && A[name]).map((name) => A[name]);
+  const seen = new Set();
+  const out = [];
+  for (const address of [...live, ...listed]) {
+    const key = address.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(address);
+  }
+  return out;
 }
 
 function requirePublicAddresses(map, kind) {
@@ -610,8 +656,13 @@ async function loadConfig() {
 }
 
 function renderAddresses() {
-  const rows = Object.entries(A).map(([name, address]) => [labelOf(name), link('address', address, address)]);
-  table($('#addresses'), ['Contract', 'Base Sepolia explorer'], rows);
+  const rows = directoryEntries().map((item) => [
+    item.group || '',
+    item.name,
+    statusCell(item.status),
+    link('address', item.address, item.address),
+  ]);
+  table($('#addresses'), ['Set', 'Contract', 'Status', 'Base Sepolia explorer'], rows);
 }
 
 export function assembleOnchain({jobIds, records, services}) {
@@ -745,7 +796,7 @@ async function loadOnchain(blockNumber) {
   const metrics = $('#metrics');
   metrics.replaceChildren();
   for (const [title, value, sub] of cards) card(metrics, title, value, sub);
-  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest " + idCap + " IDs per contract, not an unlimited history.";
+  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest " + idCap + " IDs per contract, not an unlimited history. These readings use the current contracts, including JobBoard v32.";
   if (report.partial || custodyUnavailable) scope += ' Unavailable records are counted apart from zero.';
   $('#scope').textContent = scope;
   table($('#custody'), ['Service', 'Held in active work', 'Ready to withdraw'], serviceRows);
@@ -823,7 +874,7 @@ async function loadWallets(blockNumber) {
 
 async function loadEvents(blockNumber) {
   const budget = active;
-  const addresses = Object.keys(AB).filter((name) => name !== 'MUSDC' && A[name]).map((name) => A[name]);
+  const addresses = eventTargets();
   const originalTo = logState.to;
   const plan = planEventReads(logState, blockNumber, originalTo);
   if (plan.reset) logState = createLogCache();
@@ -858,7 +909,8 @@ async function loadEvents(blockNumber) {
   for (const log of ordered) {
     if (seen.has(log.transactionHash)) continue;
     seen.add(log.transactionHash);
-    const name = Object.keys(A).find((key) => A[key].toLowerCase() === log.address.toLowerCase());
+    const listed = directoryEntries().find((row) => row.address.toLowerCase() === log.address.toLowerCase());
+    const name = listed?.abiKey || Object.keys(A).find((key) => A[key].toLowerCase() === log.address.toLowerCase());
     let event = 'Contract event';
     if (name && AB[name]) {
       try {
@@ -870,7 +922,7 @@ async function loadEvents(blockNumber) {
     rows.push([
       log.blockNumber,
       link('tx', log.transactionHash, small(log.transactionHash)),
-      labelOf(name || 'Contract'),
+      contractLabel(log.address),
       event,
     ]);
     if (rows.length >= 30) break;

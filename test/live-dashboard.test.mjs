@@ -10,6 +10,7 @@ const {
   LOG_LOOKBACK,
   REORG_DEPTH,
   refresh,
+  contractLabel,
   setRequestGap,
   setRetryDelay,
   setIdCap,
@@ -174,7 +175,7 @@ function installRpc(box) {
       if (!flags.calm && once('log429:' + key)) return rpcError({code: -32007, message: 'too many requests'}, 429);
       if (to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
       return rpcResult([{
-        address: cfg.addresses.JB,
+        address: flags.activityAddress || cfg.addresses.JB,
         blockNumber: body.params[0].toBlock,
         logIndex: '0x0',
         transactionHash: '0x' + to.toString(16).padStart(64, '0'),
@@ -232,6 +233,30 @@ assert(source.includes('Chain panels read the public RPC separately'), 'runner f
 assert(!source.includes('Chain panels remain live'), 'old runner fallback is still present');
 assert(!source.includes('eth_sendRawTransaction'), 'dashboard source mentions a transaction send');
 assert(source.includes('No contract events in the covered blocks'), 'empty event wording missing');
+assert(!source.includes('\u2014') && !source.includes('\u2013'), 'dashboard source has a dash that is not allowed');
+
+const directory = cfg.directory || [];
+function listed(address) {
+  return directory.find((item) => item.address.toLowerCase() === address.toLowerCase());
+}
+const currentBoard = listed('0x24e18B482CA215b5e85E0F375380301D13e61dEc');
+const olderBoard = listed('0x6c53EaD9a3174957032F65D897b70333428AdfF4');
+assert(currentBoard && currentBoard.status === 'current', 'JobBoard v32 is not marked current');
+assert(olderBoard && olderBoard.status === 'older', 'JobBoard v31 is not marked older');
+assert(cfg.addresses.JB.toLowerCase() === '0x24e18b482ca215b5e85e0f375380301d13e61dec', 'live reads are not on JobBoard v32');
+assert(cfg.addresses.ESC.toLowerCase() === '0x85c12b6ba25fc8fd2b054aa4ba6df4d788c3bba7', 'live reads are not on the v32 escrow');
+assert(listed('0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b')?.status === 'current', 'RegistryNext is not marked current');
+assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
+assert(cfg.addresses.TileRegistry.toLowerCase() === '0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b', 'live reads are not on RegistryNext');
+assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');
+const page = readFileSync(new URL('../live/index.html', import.meta.url), 'utf8');
+const bundle = readFileSync(new URL('../live/dashboard.js', import.meta.url), 'utf8');
+const wording = 'The counts, claim table and wallet panel read the current contracts. Recent activity also includes older contracts, marked (older). Older contracts remain on Base Sepolia.';
+assert(page.includes(wording), 'contract list wording missing');
+assert(page.includes('DemoTreasury, SanctionsOracle, DemoGeometry, and DemoNoCharters are shared by both Breakaway sets.'), 'shared contract sentence missing');
+assert(!page.includes('Current rows are what the panels above read'), 'old contract list wording remains');
+assert(source.includes("item.name + ' (older)'"), 'recent activity omits the older marker');
+assert(bundle.includes('(older)'), 'bundled dashboard omits the older marker');
 
 const view = installDom();
 useConfig(cfg);
@@ -541,6 +566,20 @@ assert(splitBudget.spent === 2, 'split spent ' + splitBudget.spent);
 assert(splitBudget.left === 0, 'split left budget behind');
 assert(rpc.ranges.some(([from, to]) => from === splitFrom && to === leftTo), 'left child did not succeed');
 assert(!rpc.ranges.some(([from]) => from === rightFrom), 'right child was sent after the budget was gone');
+rpc.flags.calm = false;
+
+rpc.flags.calm = true;
+rpc.flags.activityAddress = '0x6c53EaD9a3174957032F65D897b70333428AdfF4';
+chain.n = head;
+resetLogCache();
+rpc.begin();
+await refresh();
+const recent = collectText(document.querySelector('#recent'));
+console.log('OLDER ACTIVITY', recent);
+assert(recent.includes('JobBoard v31 (older)'), recent);
+assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32', contractLabel(cfg.addresses.JB));
+assert(!recent.includes('JobBoard v32 (older)'), recent);
+rpc.flags.activityAddress = '';
 rpc.flags.calm = false;
 
 console.log('live dashboard checks passed');

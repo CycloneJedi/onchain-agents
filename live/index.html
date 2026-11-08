@@ -29,6 +29,8 @@ th{color:#94abc8;font-size:.75rem;text-transform:uppercase}
 header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .notice{border-left:3px solid #76e1be;padding-left:16px}
 .subtle{font-size:.85rem}
+.current{color:#7de8c6;font-weight:700}
+.older{color:#e7c27a}
 footer{margin-top:50px;border-top:1px solid #203047;padding-top:24px}
 </style>
 </head>
@@ -43,13 +45,14 @@ footer{margin-top:50px;border-top:1px solid #203047;padding-top:24px}
 <p class="subtle"><span id="updated"></span> · <span id="status">Loading</span></p>
 <p id="error" role="alert"></p>
 <h2>Project OnChain</h2>
+<p class="subtle">Counts below read the current contracts, including JobBoard v32. JobBoard v31 stays in the older rows.</p>
 <p class="subtle" id="onchain-block"></p>
 <div class="grid" id="metrics"></div>
 <p class="subtle" id="scope"></p>
 <div class="scroll" id="custody"></div>
 <h2>Breakaway</h2>
 <p class="subtle" id="breakaway-block"></p>
-<p>Bounded registry demonstration. Practice claims only, no real value or legal title. Auction activity follows the deployed contracts and their live timing.</p>
+<p>Bounded registry demonstration. Practice claims only, no real value or legal title. The claim table reads the current registry and auction. Auction activity follows the deployed contracts and their live timing.</p>
 <p id="bkstats"></p>
 <div class="scroll" id="claims"></div>
 <h2>Agent wallets</h2>
@@ -66,6 +69,7 @@ footer{margin-top:50px;border-top:1px solid #203047;padding-top:24px}
 <h3>Active runner workflows</h3>
 <div class="scroll" id="active"></div>
 <h2>Deployed contracts</h2>
+<p class="subtle">The counts, claim table and wallet panel read the current contracts. Recent activity also includes older contracts, marked (older). Older contracts remain on Base Sepolia. DemoTreasury, SanctionsOracle, DemoGeometry, and DemoNoCharters are shared by both Breakaway sets.</p>
 <div class="scroll" id="addresses"></div>
 <footer>
 <p class="subtle">Base Sepolia 84532. Read-only calls to the public RPC. No wallet connection, no signing, and no private keys in this page. Contract addresses link to the Base Sepolia explorer. Updates every 60 seconds while this tab is visible. A rate limit or outage leaves the last good readings in place.</p>
