@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {decodeFunctionData, encodeFunctionResult} from 'viem';
+import {decodeFunctionData, encodeAbiParameters, encodeEventTopics, encodeFunctionResult, keccak256, toBytes} from 'viem';
 
 globalThis.LIVE_DASHBOARD_TEST = true;
 const dash = await import('../live/dashboard.mjs');
@@ -148,6 +148,12 @@ function installRpc(box) {
     const fn = abi.find((item) => item.type === 'function' && item.name === decoded.functionName);
     let result = fn.outputs.length === 1 ? zeroFor(fn.outputs[0]) : fn.outputs.map((output) => zeroFor(output));
     if (decoded.functionName === 'nextJobId' || decoded.functionName === 'nextId') result = currentIdCap() + 1n;
+    if (decoded.functionName === 'getAuction') {
+      const tile = Number(decoded.args[0]);
+      if (flags.failAuctions && flags.failAuctions.has(tile)) return {fail: true};
+      const custom = flags.auctionByTile && (flags.auctionByTile[tile] || flags.auctionByTile[String(tile)]);
+      if (custom) result = [BigInt(custom.endTime), custom.highestBidder, BigInt(custom.seed), BigInt(custom.reserve)];
+    }
     const payload = encodeFunctionResult({abi, functionName: decoded.functionName, result});
     return payload;
   }
@@ -161,7 +167,11 @@ function installRpc(box) {
     calls.push(body.method);
     if (body.method === 'eth_chainId') return rpcResult('0x14a34');
     if (body.method === 'eth_blockNumber') return rpcResult('0x' + box.n.toString(16));
-    if (body.method === 'eth_getBlockByNumber') return rpcResult({timestamp: '0x64'});
+    if (body.method === 'eth_getBlockByNumber') {
+      const blockNo = BigInt(body.params[0]);
+      const ts = flags.timestampFor ? flags.timestampFor(blockNo) : 100n;
+      return rpcResult({timestamp: '0x' + BigInt(ts).toString(16)});
+    }
     if (body.method === 'eth_getBalance') {
       if (flags.failBalances) return rpcError({code: -32000, message: 'balance unavailable'});
       if (!flags.calm && once('balance')) return rpcError({code: -32007, message: 'too many requests'}, 429);
@@ -174,6 +184,11 @@ function installRpc(box) {
       const key = from + ':' + to;
       if (!flags.calm && once('log429:' + key)) return rpcError({code: -32007, message: 'too many requests'}, 429);
       if (to - from + 1n > 100n) return rpcError({code: -32005, message: 'query returned more than 10000 results'});
+      const extras = [];
+      for (const item of flags.extraLogs || []) {
+        const blockNo = BigInt(item.blockNumber);
+        if (blockNo >= from && blockNo <= to) extras.push(item);
+      }
       return rpcResult([{
         address: flags.activityAddress || cfg.addresses.JB,
         blockNumber: body.params[0].toBlock,
@@ -181,16 +196,17 @@ function installRpc(box) {
         transactionHash: '0x' + to.toString(16).padStart(64, '0'),
         data: '0x',
         topics: ['0x' + '11'.repeat(32)],
-      }]);
+      }, ...extras]);
     }
     if (body.method === 'eth_call') {
       ethCalls += 1;
       if (ethCalls === 2) return rpcError({code: -32000, message: 'response too large'});
       const decoded = decodeFunctionData({abi: MULTICALL_ABI, data: body.params[0].data});
-      const rows = decoded.args[0].map((call) => ({
-        success: true,
-        payload: encodeInner(call.target, call.callData),
-      }));
+      const rows = decoded.args[0].map((call) => {
+        const inner = encodeInner(call.target, call.callData);
+        if (inner && typeof inner === 'object' && inner.fail) return {success: false, payload: '0x'};
+        return {success: true, payload: inner};
+      });
       return rpcResult(encodeFunctionResult({abi: MULTICALL_ABI, functionName: 'aggregate3', result: rows}));
     }
     throw new Error('Unexpected RPC method ' + body.method);
@@ -257,6 +273,40 @@ assert(page.includes('DemoTreasury, SanctionsOracle, DemoGeometry, and DemoNoCha
 assert(!page.includes('Current rows are what the panels above read'), 'old contract list wording remains');
 assert(source.includes("item.name + ' (older)'"), 'recent activity omits the older marker');
 assert(bundle.includes('(older)'), 'bundled dashboard omits the older marker');
+assert(bundle.includes('No live auctions in the current read'), 'bundled dashboard omits the live auction panel');
+assert(bundle.includes('RefundWithdrawn is counted separately'), 'bundled dashboard omits the refund definition');
+assert(bundle.includes('Not shown as zero'), 'bundled dashboard omits the unavailable wording');
+assert(!/blockscout/i.test(source + page), 'dashboard calls Blockscout');
+assert(!source.includes('innerHTML'), 'dashboard source uses innerHTML');
+assert(!/eth_send/i.test(source), 'dashboard source mentions a send method');
+assert(page.includes('id="live-auctions"'), 'live auctions panel missing');
+assert(page.includes('id="activity-stats"'), 'activity stats missing');
+assert(page.includes('not a full history'), 'covered-window wording missing');
+assert(page.includes('RefundWithdrawn is counted separately'), 'refund wording missing from the page');
+assert(cfg.addresses.DemoAuction.toLowerCase() === '0x7a2f1b3ba731aba07ae069cc3ef83e03f6b37557', 'DemoAuctionNext address drifted');
+
+const SNAPSHOT_SIGS = {
+  JobPosted: 'JobPosted(uint256,address,uint256,uint16,uint64,uint64,uint64,address,string,uint32,uint64,uint32,uint256)',
+  AuctionCreated: 'AuctionCreated(uint16,uint256,uint256,bool)',
+  BidPlaced: 'BidPlaced(uint16,address,uint256,uint256)',
+  BidRefunded: 'BidRefunded(uint16,address,uint256)',
+  RefundEscrowed: 'RefundEscrowed(uint16,address,uint256)',
+  RefundWithdrawn: 'RefundWithdrawn(address,uint256)',
+};
+function eventSignature(abi, name) {
+  const item = abi.find((entry) => entry.type === 'event' && entry.name === name);
+  return {item, text: name + '(' + item.inputs.map((input) => input.type).join(',') + ')'};
+}
+for (const [name, sig] of Object.entries(SNAPSHOT_SIGS)) {
+  const abi = name === 'JobPosted' ? cfg.abis.JB : cfg.abis.DemoAuction;
+  const built = eventSignature(abi, name);
+  const topic = encodeEventTopics({abi, eventName: name})[0];
+  assert(built.text === sig, name + ' signature is ' + built.text);
+  assert(topic.toLowerCase() === keccak256(toBytes(sig)).toLowerCase(), name + ' topic does not match the snapshot signature');
+}
+assert(eventSignature(cfg.abis.DemoAuction, 'BidPlaced').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'tileId,bidder', 'BidPlaced indexed fields drifted');
+assert(eventSignature(cfg.abis.DemoAuction, 'AuctionCreated').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'tileId', 'AuctionCreated indexed fields drifted');
+assert(eventSignature(cfg.abis.JB, 'JobPosted').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'jobId,buyer', 'JobPosted indexed fields drifted');
 
 const view = installDom();
 useConfig(cfg);
@@ -582,7 +632,301 @@ assert(!recent.includes('JobBoard v32 (older)'), recent);
 rpc.flags.activityAddress = '';
 rpc.flags.calm = false;
 
+const OLDER_AUCTION = '0x6b70115e110f45ccd0f076b5147c5a10ad576c17';
+const OLDER_BOARD = '0x6c53EaD9a3174957032F65D897b70333428AdfF4';
+const BIDDER_A = '0xAc4a57256fcaBDB241a18f565d89189Dbd692405';
+const BIDDER_B = '0x83487DEAD07AB45b2E1F335A636F1a3F09381040';
+const FIXTURE_HEAD = 199n;
+
+function encodeLog(abi, eventName, args) {
+  const item = abi.find((entry) => entry.type === 'event' && entry.name === eventName);
+  const topics = encodeEventTopics({abi, eventName, args});
+  const fields = item.inputs.filter((input) => !input.indexed);
+  const data = fields.length ? encodeAbiParameters(fields, fields.map((input) => args[input.name])) : '0x';
+  return {topics, data};
+}
+
+function rpcLog({address, blockNumber, logIndex, transactionHash, abi, eventName, args}) {
+  const encoded = encodeLog(abi, eventName, args);
+  return {
+    address,
+    blockNumber: '0x' + BigInt(blockNumber).toString(16),
+    logIndex: '0x' + BigInt(logIndex).toString(16),
+    transactionHash,
+    data: encoded.data,
+    topics: encoded.topics,
+  };
+}
+
+function auctionLog(address, blockNumber, logIndex, transactionHash, eventName, args) {
+  return rpcLog({address, blockNumber, logIndex, transactionHash, abi: cfg.abis.DemoAuction, eventName, args});
+}
+
+function jobArgs(jobId) {
+  return {
+    jobId,
+    buyer: '0x4bDE94B713e5B25ca1A244CE6196b4F61f6f8FE3',
+    budget: 1500000000n,
+    feeCeilingBps: 0,
+    commitEnd: 0n,
+    revealStart: 0n,
+    revealEnd: 0n,
+    arbiter: ZERO,
+    label: 'fixture',
+    arbiterWindow: 0,
+    longestHold: 0n,
+    lateReviewExtension: 0,
+    arbiterThreshold: 0n,
+  };
+}
+
+function clearFixtures() {
+  rpc.flags.extraLogs = [];
+  rpc.flags.auctionByTile = null;
+  rpc.flags.failAuctions = null;
+  rpc.flags.timestampFor = null;
+  rpc.flags.activityAddress = '';
+  rpc.flags.calm = true;
+  rpc.flags.failBalances = false;
+}
+
+async function refreshChecked() {
+  rpc.begin();
+  await refresh();
+  const usage = budgetUsage();
+  assert(usage.spent <= REQUEST_BUDGET, 'spent ' + usage.spent);
+  assert(usage.spent === rpc.rpcCount, 'budget ' + usage.spent + ' vs ' + rpc.rpcCount);
+  const sectionSpent = Object.values(usage.sections).reduce((sum, item) => sum + item.spent, 0);
+  assert(sectionSpent === usage.spent, 'section spends drifted');
+  return usage;
+}
+
+async function fullWindowRefresh() {
+  chain.n = FIXTURE_HEAD;
+  resetLogCache();
+  setIdCap(100);
+  const usage = await refreshChecked();
+  const cov = logCoverage();
+  assert(cov.from === 0n && cov.to === FIXTURE_HEAD, 'coverage ' + cov.from + ' to ' + cov.to);
+  return usage;
+}
+
+clearFixtures();
+rpc.flags.failAuctions = new Set([12]);
+chain.n = head;
+resetLogCache();
+setIdCap(100);
+await refreshChecked();
+assert(rpc.counts.eth_getBlockByNumber === 1, 'partial refresh fetched job block times: ' + rpc.counts.eth_getBlockByNumber);
+for (const title of ['OnChain jobs per day', 'Breakaway auctions', 'Breakaway bids', 'Breakaway refunds']) {
+  const card = cardAt(title);
+  assert(card.value === 'Unavailable', title + ' was ' + card.value);
+  assert(card.value !== '0', title + ' coerced a partial window to zero');
+  assert(card.sub.includes('incomplete'), title + ' ' + card.sub);
+  assert(card.sub.includes('Not shown as zero'), title + ' ' + card.sub);
+  assert(card.sub.includes('Not a full history'), title + ' ' + card.sub);
+}
+const failedLive = tableRows('#live-auctions');
+assert(failedLive.length === 1, JSON.stringify(failedLive));
+assert(failedLive[0][0] === '12' && failedLive[0][1] === 'Unavailable', JSON.stringify(failedLive));
+assert(failedLive[0][2] === 'Unavailable' && failedLive[0][2] !== '0 test ETH', failedLive[0][2]);
+assert(failedLive[0][3] === 'Unavailable' && failedLive[0][5] === 'Unavailable', JSON.stringify(failedLive));
+assert(!collectText(document.querySelector('#live-auctions')).includes('0 test ETH'), 'failed auction rendered a zero bid');
+assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
+
+clearFixtures();
+let usage = await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+let liveRows = tableRows('#live-auctions');
+assert(liveRows.length === 1 && liveRows[0][0] === 'None' && liveRows[0][1] === 'No live auctions in the current read', JSON.stringify(liveRows));
+assert(cardAt('Breakaway auctions').value === '0', 'complete empty window hid a real zero');
+assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
+assert(cardAt('OnChain jobs per day').value === '0');
+console.log('EMPTY WINDOW', usage.spent, usage.sections);
+
+clearFixtures();
+rpc.flags.auctionByTile = {
+  12: {endTime: 5000n, highestBidder: BIDDER_B, seed: 51000000000000000n, reserve: 50000000000000000n},
+  36: {endTime: 50n, highestBidder: BIDDER_A, seed: 10000000000000000n, reserve: 1n},
+  60: {endTime: 40n, highestBidder: ZERO, seed: 0n, reserve: 1n},
+};
+await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+liveRows = tableRows('#live-auctions');
+assert(liveRows.map((row) => row[0]).join(',') === '12,60,36', JSON.stringify(liveRows));
+assert(liveRows[0][1] === 'Live' && liveRows[0][5] === 'Unavailable', JSON.stringify(liveRows[0]));
+assert(liveRows[0][2].includes('test ETH') && liveRows[0][2] !== 'Unavailable', liveRows[0][2]);
+assert(liveRows[1][1] === 'Ended, no bids' && liveRows[1][3] === 'No bids' && liveRows[1][5] === 'Not counted', JSON.stringify(liveRows[1]));
+assert(liveRows[2][1] === 'Ended, settle pending' && liveRows[2][5] === 'Not counted', JSON.stringify(liveRows[2]));
+assert(!liveRows.some((row) => row[0] === '35'), 'unopened tile 35 was listed');
+assert(!collectText(document.querySelector('#live-auctions')).includes('(older)'), 'live panel marked a current auction older');
+
+clearFixtures();
+const headDay = BigInt(Math.floor(Date.parse('2026-11-09T18:00:00Z') / 1000));
+rpc.flags.timestampFor = () => headDay;
+rpc.flags.auctionByTile = {
+  12: {endTime: 1794849050n, highestBidder: BIDDER_B, seed: 51000000000000000n, reserve: 50000000000000000n},
+  35: {endTime: 1794849057n, highestBidder: BIDDER_A, seed: 50000000000000000n, reserve: 50000000000000000n},
+};
+rpc.flags.extraLogs = [
+  auctionLog(cfg.addresses.DemoAuction, 150, 0, '0x764bdbb0c337e03f7d1dbf6f2887305ae46c53e31a9aebae5683af4e56f51ef0', 'AuctionCreated', {tileId: 12, endTime: 1794849050n, reserve: 50000000000000000n, reEntry: false}),
+  auctionLog(cfg.addresses.DemoAuction, 151, 0, '0xa0809541f73f530cf02e6617b53dd91eeffdcd88282dbd63abc8db518e88a1ae', 'AuctionCreated', {tileId: 35, endTime: 1794849057n, reserve: 50000000000000000n, reEntry: false}),
+  auctionLog(cfg.addresses.DemoAuction, 152, 0, '0x9ab31faa0da43627fbaa15c05d0f3f3fb2094dada020631f5467953805cb6c1a', 'BidPlaced', {tileId: 12, bidder: BIDDER_A, seed: 50000000000000000n, newEndTime: 1794849050n}),
+  auctionLog(cfg.addresses.DemoAuction, 153, 0, '0x3b30682f061ab3cdb5badd5d72319c364efddffc64817733e0265f052e56fcc9', 'BidPlaced', {tileId: 12, bidder: BIDDER_B, seed: 51000000000000000n, newEndTime: 1794849050n}),
+  auctionLog(cfg.addresses.DemoAuction, 154, 0, '0xc1abb39bfafab6b5df07422d47e88fd20facf53d7a061fb0479853dd1012cb36', 'BidPlaced', {tileId: 35, bidder: BIDDER_A, seed: 50000000000000000n, newEndTime: 1794849057n}),
+  auctionLog(OLDER_AUCTION, 155, 0, keccak256(toBytes('older-create')), 'AuctionCreated', {tileId: 12, endTime: 1794849050n, reserve: 1n, reEntry: false}),
+  auctionLog(OLDER_AUCTION, 156, 0, keccak256(toBytes('older-bid')), 'BidPlaced', {tileId: 12, bidder: BIDDER_A, seed: 1n, newEndTime: 1799999999n}),
+  rpcLog({address: OLDER_BOARD, blockNumber: 157, logIndex: 0, transactionHash: keccak256(toBytes('v31-job')), abi: cfg.abis.JB, eventName: 'JobPosted', args: jobArgs(7n)}),
+];
+usage = await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+liveRows = tableRows('#live-auctions');
+assert(liveRows.map((row) => row[0]).join(',') === '12,35', JSON.stringify(liveRows));
+assert(liveRows.every((row) => row[1] === 'Live'), JSON.stringify(liveRows));
+assert(liveRows[0][5] === '0' && liveRows[1][5] === '0', 'snapshot bids were counted as extensions ' + liveRows.map((row) => row[5]).join(','));
+assert(liveRows[0][2].includes('0.051'), liveRows[0][2]);
+assert(liveRows[1][2].includes('0.05') && !liveRows[1][2].includes('0.051'), liveRows[1][2]);
+assert(liveRows[0][3].toLowerCase().includes('0x83487d'), liveRows[0][3]);
+assert(cardAt('Breakaway auctions').value === '2', cardAt('Breakaway auctions').value);
+assert(cardAt('Breakaway bids').value === '3', cardAt('Breakaway bids').value);
+assert(cardAt('Breakaway refunds').value === '0', cardAt('Breakaway refunds').value);
+assert(cardAt('Breakaway refunds').sub.includes('Withdrawn: 0'), cardAt('Breakaway refunds').sub);
+assert(cardAt('Breakaway refunds').sub.includes('RefundWithdrawn is counted separately'), cardAt('Breakaway refunds').sub);
+assert(cardAt('OnChain jobs per day').value === '0', cardAt('OnChain jobs per day').value);
+assert(cardAt('OnChain jobs per day').sub.includes('2026-11-09'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs per day').sub.includes('JobBoard v32'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs per day').sub.includes('Older JobBoard versions are not included'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('Breakaway auctions').sub.includes('DemoAuctionNext'), cardAt('Breakaway auctions').sub);
+assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
+assert(rpc.counts.eth_getBlockByNumber === 1, 'no JobPosted still fetched timestamps ' + rpc.counts.eth_getBlockByNumber);
+console.log('SNAPSHOT FIXTURE', usage.spent, JSON.stringify(usage.sections));
+
+clearFixtures();
+rpc.flags.auctionByTile = {
+  12: {endTime: 9000n, highestBidder: BIDDER_A, seed: 2000000000000000000n, reserve: 1n},
+  35: {endTime: 8000n, highestBidder: BIDDER_A, seed: 1000000000000000000n, reserve: 1n},
+};
+rpc.flags.extraLogs = [
+  auctionLog(cfg.addresses.DemoAuction, 140, 0, keccak256(toBytes('c12')), 'AuctionCreated', {tileId: 12, endTime: 1000n, reserve: 1n, reEntry: false}),
+  auctionLog(cfg.addresses.DemoAuction, 141, 0, keccak256(toBytes('b12')), 'BidPlaced', {tileId: 12, bidder: BIDDER_A, seed: 2000000000000000000n, newEndTime: 2000n}),
+  auctionLog(cfg.addresses.DemoAuction, 142, 0, keccak256(toBytes('b12-short')), 'BidPlaced', {tileId: 12, bidder: BIDDER_A, seed: 3000000000000000000n, newEndTime: 1500n}),
+  auctionLog(cfg.addresses.DemoAuction, 143, 0, keccak256(toBytes('b35-only')), 'BidPlaced', {tileId: 35, bidder: BIDDER_A, seed: 1n, newEndTime: 99999n}),
+];
+await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+liveRows = tableRows('#live-auctions');
+const byTile = Object.fromEntries(liveRows.map((row) => [row[0], row]));
+assert(byTile['12'][1] === 'Live' && byTile['12'][5] === '1', JSON.stringify(byTile['12']));
+assert(byTile['35'][1] === 'Live' && byTile['35'][5] === 'Unavailable', JSON.stringify(byTile['35']));
+assert(byTile['35'][5] !== '0', 'missing AuctionCreated was counted as zero extensions');
+
+clearFixtures();
+const sharedHash = keccak256(toBytes('same-tx'));
+rpc.flags.extraLogs = [
+  auctionLog(cfg.addresses.DemoAuction, 160, 0, sharedHash, 'AuctionCreated', {tileId: 12, endTime: 1000n, reserve: 1n, reEntry: false}),
+  auctionLog(cfg.addresses.DemoAuction, 160, 1, sharedHash, 'AuctionCreated', {tileId: 35, endTime: 1100n, reserve: 1n, reEntry: true}),
+];
+await fullWindowRefresh();
+assert(cardAt('Breakaway auctions').value === '2', 'same-transaction creates were collapsed');
+
+clearFixtures();
+rpc.flags.extraLogs = [
+  auctionLog(cfg.addresses.DemoAuction, 150, 0, keccak256(toBytes('br')), 'BidRefunded', {tileId: 12, bidder: BIDDER_A, amount: 50000000000000000n}),
+  auctionLog(cfg.addresses.DemoAuction, 151, 0, keccak256(toBytes('re')), 'RefundEscrowed', {tileId: 12, bidder: BIDDER_A, amount: 51000000000000000n}),
+  auctionLog(cfg.addresses.DemoAuction, 152, 0, keccak256(toBytes('rw')), 'RefundWithdrawn', {to: BIDDER_A, amount: 1n}),
+  auctionLog(OLDER_AUCTION, 153, 0, keccak256(toBytes('obr')), 'BidRefunded', {tileId: 12, bidder: BIDDER_A, amount: 9n}),
+  auctionLog(OLDER_AUCTION, 154, 0, keccak256(toBytes('ore')), 'RefundEscrowed', {tileId: 12, bidder: BIDDER_A, amount: 9n}),
+  auctionLog(OLDER_AUCTION, 155, 0, keccak256(toBytes('orw')), 'RefundWithdrawn', {to: BIDDER_A, amount: 9n}),
+];
+await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+assert(cardAt('Breakaway refunds').value === '2', cardAt('Breakaway refunds').value + ' ' + cardAt('Breakaway refunds').sub);
+assert(cardAt('Breakaway refunds').sub.includes('Withdrawn: 1'), cardAt('Breakaway refunds').sub);
+assert(cardAt('Breakaway auctions').value === '0' && cardAt('Breakaway bids').value === '0', 'refund logs inflated auction or bid counts');
+
+clearFixtures();
+rpc.flags.extraLogs = [
+  auctionLog(cfg.addresses.DemoAuction, 150, 0, keccak256(toBytes('only-w')), 'RefundWithdrawn', {to: BIDDER_A, amount: 4n}),
+];
+await fullWindowRefresh();
+assert(cardAt('Breakaway refunds').value === '0', cardAt('Breakaway refunds').value);
+assert(cardAt('Breakaway refunds').sub.includes('Withdrawn: 1'), cardAt('Breakaway refunds').sub);
+assert(cardAt('Breakaway refunds').value !== '1', 'a withdrawal was counted as a refund');
+
+clearFixtures();
+const today = BigInt(Math.floor(Date.parse('2026-11-09T18:00:00Z') / 1000));
+const yesterday = BigInt(Math.floor(Date.parse('2026-11-08T18:00:00Z') / 1000));
+rpc.flags.timestampFor = (block) => block === 150n ? yesterday : today;
+rpc.flags.extraLogs = [
+  rpcLog({address: cfg.addresses.JB, blockNumber: 150, logIndex: 0, transactionHash: keccak256(toBytes('job-y')), abi: cfg.abis.JB, eventName: 'JobPosted', args: jobArgs(1n)}),
+  rpcLog({address: cfg.addresses.JB, blockNumber: 151, logIndex: 0, transactionHash: keccak256(toBytes('job-t')), abi: cfg.abis.JB, eventName: 'JobPosted', args: jobArgs(2n)}),
+  rpcLog({address: OLDER_BOARD, blockNumber: 151, logIndex: 1, transactionHash: keccak256(toBytes('job-v31')), abi: cfg.abis.JB, eventName: 'JobPosted', args: jobArgs(7n)}),
+];
+usage = await fullWindowRefresh();
+assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
+assert(cardAt('OnChain jobs per day').value === '1', cardAt('OnChain jobs per day').value + ' ' + cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs per day').sub.includes('2026-11-09'), cardAt('OnChain jobs per day').sub);
+assert(rpc.counts.eth_getBlockByNumber === 3, 'timestamp reads ' + rpc.counts.eth_getBlockByNumber);
+assert(usage.sections.events.spent <= SECTION_RESERVES.events, 'events reserve overrun ' + usage.sections.events.spent);
+console.log('JOB DAY', usage.spent, usage.sections.events);
+
+clearFixtures();
+rpc.flags.timestampFor = () => today;
+rpc.flags.extraLogs = [];
+for (let index = 0; index < 9; index += 1) {
+  rpc.flags.extraLogs.push(rpcLog({
+    address: cfg.addresses.JB,
+    blockNumber: 100 + index,
+    logIndex: 0,
+    transactionHash: keccak256(toBytes('cap-' + index)),
+    abi: cfg.abis.JB,
+    eventName: 'JobPosted',
+    args: jobArgs(BigInt(index + 1)),
+  }));
+}
+await fullWindowRefresh();
+assert(cardAt('OnChain jobs per day').value === 'Unavailable', cardAt('OnChain jobs per day').value);
+assert(cardAt('OnChain jobs per day').value !== '0', 'stamp cap coerced the day count to zero');
+assert(cardAt('OnChain jobs per day').sub.includes('more than 8'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('Breakaway auctions').value === '0', 'stamp cap hid a complete auction count');
+assert(rpc.counts.eth_getBlockByNumber === 1, 'cap still fetched job blocks ' + rpc.counts.eth_getBlockByNumber);
+assert(view.text('#status') === 'Some readings are incomplete', view.text('#status') + ' ' + view.text('#error'));
+
+clearFixtures();
+const badJob = encodeLog(cfg.abis.JB, 'JobPosted', jobArgs(1n));
+rpc.flags.extraLogs = [{
+  address: cfg.addresses.JB,
+  blockNumber: '0x96',
+  logIndex: '0x0',
+  transactionHash: keccak256(toBytes('bad-job')),
+  data: '0x',
+  topics: badJob.topics,
+}];
+await fullWindowRefresh();
+assert(cardAt('OnChain jobs per day').value === 'Unavailable', cardAt('OnChain jobs per day').value);
+assert(cardAt('OnChain jobs per day').sub.includes('could not be decoded'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs per day').value !== '0', 'a failed JobPosted decode was counted as zero');
+assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
+
+clearFixtures();
+chain.n = head;
+resetLogCache();
+
 console.log('live dashboard checks passed');
+
+function tableRows(selector) {
+  const root = document.querySelector(selector);
+  const grid = root.children[0];
+  if (!grid) return [];
+  return grid.children.slice(1).map((row) => row.children.map((cell) => collectText(cell)));
+}
+
+function cardAt(title) {
+  const root = document.querySelector('#activity-stats');
+  const article = root.children.find((node) => node.children[0]?.textContent === title);
+  assert(article, 'missing card ' + title);
+  return {value: article.children[1].textContent, sub: article.children[2].textContent};
+}
 
 function collectText(node, out = []) {
   if (!node) return out.join(' ');
