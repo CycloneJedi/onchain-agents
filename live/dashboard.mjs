@@ -744,7 +744,7 @@ export function assembleBreakaway(tiles, results) {
 // RefundWithdrawn(address,uint256)
 // Only the current JobBoard and the current DemoAuctionNext address are counted.
 const LIVE_HEADERS = ['Claim', 'Status', 'Leading bid', 'Leader', 'Ends', 'Extensions'];
-const STAT_JOBS = 'OnChain jobs per day';
+const STAT_JOBS = 'OnChain jobs in covered window';
 const STAT_AUCTIONS = 'Breakaway auctions';
 const STAT_BIDS = 'Breakaway bids';
 const STAT_REFUNDS = 'Breakaway refunds';
@@ -1057,7 +1057,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
   let jobsValue = 'Unavailable';
   let jobsSub = '';
   const day = edmontonDay(blockTimestamp);
-  const jobsReady = 'JobPosted events on the current ' + boardName + ' whose block time falls on America/Edmonton day ' + day + ' (the head block day). Older JobBoard versions are not included.';
+  const jobsReady = 'JobPosted events on the current ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. Older JobBoard versions are not included.';
   if (summary.jobs.bad) {
     jobsFailed = true;
     jobsSub = 'A JobPosted log on the current ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
@@ -1095,11 +1095,11 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
   const auctionsValue = summary.auctions.bad ? 'Unavailable' : String(summary.auctions.count);
   const auctionsSub = summary.auctions.bad
     ? 'An AuctionCreated log on the current ' + auctionName + ' could not be decoded.' + NOT_ALL_TIME
-    : countedSub('AuctionCreated events on the current ' + auctionName + '. Raw event count.', from, to);
+    : countedSub('AuctionCreated events on the current ' + auctionName + '. Raw event count. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to);
   const bidsValue = summary.bids.bad ? 'Unavailable' : String(summary.bids.count);
   const bidsSub = summary.bids.bad
     ? 'A BidPlaced log on the current ' + auctionName + ' could not be decoded.' + NOT_ALL_TIME
-    : countedSub('BidPlaced events on the current ' + auctionName + '. Raw event count.', from, to);
+    : countedSub('BidPlaced events on the current ' + auctionName + '. Raw event count. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to);
   let refundsValue = 'Unavailable';
   let refundsSub;
   if (summary.refunds.bad) {
@@ -1107,7 +1107,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
   } else {
     refundsValue = String(summary.refunds.count);
     const withdrawn = summary.withdrawn.bad ? 'Unavailable' : String(summary.withdrawn.count);
-    refundsSub = countedSub('BidRefunded plus RefundEscrowed on the current ' + auctionName + '. RefundWithdrawn is counted separately.', from, to) + ' Withdrawn: ' + withdrawn + '.';
+    refundsSub = countedSub('BidRefunded plus RefundEscrowed on the current ' + auctionName + '. RefundWithdrawn is counted separately. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to) + ' Withdrawn: ' + withdrawn + '.';
   }
   paintActivity([
     [STAT_JOBS, jobsValue, jobsSub],

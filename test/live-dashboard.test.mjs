@@ -282,6 +282,9 @@ assert(!/eth_send/i.test(source), 'dashboard source mentions a send method');
 assert(page.includes('id="live-auctions"'), 'live auctions panel missing');
 assert(page.includes('id="activity-stats"'), 'activity stats missing');
 assert(page.includes('not a full history'), 'covered-window wording missing');
+assert(page.includes('OnChain jobs in covered window counts JobPosted'), 'jobs note still implies a full day');
+assert(page.includes('not a full calendar-day total'), 'jobs note omits the calendar-day limit');
+assert(page.includes('at most 3000 blocks, about 10 minutes on Base Sepolia'), 'jobs note omits the window length');
 assert(page.includes('RefundWithdrawn is counted separately'), 'refund wording missing from the page');
 assert(cfg.addresses.DemoAuction.toLowerCase() === '0x7a2f1b3ba731aba07ae069cc3ef83e03f6b37557', 'DemoAuctionNext address drifted');
 
@@ -718,7 +721,7 @@ resetLogCache();
 setIdCap(100);
 await refreshChecked();
 assert(rpc.counts.eth_getBlockByNumber === 1, 'partial refresh fetched job block times: ' + rpc.counts.eth_getBlockByNumber);
-for (const title of ['OnChain jobs per day', 'Breakaway auctions', 'Breakaway bids', 'Breakaway refunds']) {
+for (const title of ['OnChain jobs in covered window', 'Breakaway auctions', 'Breakaway bids', 'Breakaway refunds']) {
   const card = cardAt(title);
   assert(card.value === 'Unavailable', title + ' was ' + card.value);
   assert(card.value !== '0', title + ' coerced a partial window to zero');
@@ -741,7 +744,8 @@ let liveRows = tableRows('#live-auctions');
 assert(liveRows.length === 1 && liveRows[0][0] === 'None' && liveRows[0][1] === 'No live auctions in the current read', JSON.stringify(liveRows));
 assert(cardAt('Breakaway auctions').value === '0', 'complete empty window hid a real zero');
 assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
-assert(cardAt('OnChain jobs per day').value === '0');
+assert(cardAt('OnChain jobs in covered window').value === '0');
+assertJobsWindow(cardAt('OnChain jobs in covered window'));
 console.log('EMPTY WINDOW', usage.spent, usage.sections);
 
 clearFixtures();
@@ -792,10 +796,11 @@ assert(cardAt('Breakaway bids').value === '3', cardAt('Breakaway bids').value);
 assert(cardAt('Breakaway refunds').value === '0', cardAt('Breakaway refunds').value);
 assert(cardAt('Breakaway refunds').sub.includes('Withdrawn: 0'), cardAt('Breakaway refunds').sub);
 assert(cardAt('Breakaway refunds').sub.includes('RefundWithdrawn is counted separately'), cardAt('Breakaway refunds').sub);
-assert(cardAt('OnChain jobs per day').value === '0', cardAt('OnChain jobs per day').value);
-assert(cardAt('OnChain jobs per day').sub.includes('2026-11-09'), cardAt('OnChain jobs per day').sub);
-assert(cardAt('OnChain jobs per day').sub.includes('JobBoard v32'), cardAt('OnChain jobs per day').sub);
-assert(cardAt('OnChain jobs per day').sub.includes('Older JobBoard versions are not included'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs in covered window').value === '0', cardAt('OnChain jobs in covered window').value);
+assert(cardAt('OnChain jobs in covered window').sub.includes('2026-11-09'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('Older JobBoard versions are not included'), cardAt('OnChain jobs in covered window').sub);
+assertJobsWindow(cardAt('OnChain jobs in covered window'));
 assert(cardAt('Breakaway auctions').sub.includes('DemoAuctionNext'), cardAt('Breakaway auctions').sub);
 assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
 assert(rpc.counts.eth_getBlockByNumber === 1, 'no JobPosted still fetched timestamps ' + rpc.counts.eth_getBlockByNumber);
@@ -864,8 +869,9 @@ rpc.flags.extraLogs = [
 ];
 usage = await fullWindowRefresh();
 assert(view.text('#status') === 'Live snapshot complete', view.text('#error'));
-assert(cardAt('OnChain jobs per day').value === '1', cardAt('OnChain jobs per day').value + ' ' + cardAt('OnChain jobs per day').sub);
-assert(cardAt('OnChain jobs per day').sub.includes('2026-11-09'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs in covered window').value === '1', cardAt('OnChain jobs in covered window').value + ' ' + cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('2026-11-09'), cardAt('OnChain jobs in covered window').sub);
+assertJobsWindow(cardAt('OnChain jobs in covered window'));
 assert(rpc.counts.eth_getBlockByNumber === 3, 'timestamp reads ' + rpc.counts.eth_getBlockByNumber);
 assert(usage.sections.events.spent <= SECTION_RESERVES.events, 'events reserve overrun ' + usage.sections.events.spent);
 console.log('JOB DAY', usage.spent, usage.sections.events);
@@ -885,9 +891,9 @@ for (let index = 0; index < 9; index += 1) {
   }));
 }
 await fullWindowRefresh();
-assert(cardAt('OnChain jobs per day').value === 'Unavailable', cardAt('OnChain jobs per day').value);
-assert(cardAt('OnChain jobs per day').value !== '0', 'stamp cap coerced the day count to zero');
-assert(cardAt('OnChain jobs per day').sub.includes('more than 8'), cardAt('OnChain jobs per day').sub);
+assert(cardAt('OnChain jobs in covered window').value === 'Unavailable', cardAt('OnChain jobs in covered window').value);
+assert(cardAt('OnChain jobs in covered window').value !== '0', 'stamp cap coerced the day count to zero');
+assert(cardAt('OnChain jobs in covered window').sub.includes('more than 8'), cardAt('OnChain jobs in covered window').sub);
 assert(cardAt('Breakaway auctions').value === '0', 'stamp cap hid a complete auction count');
 assert(rpc.counts.eth_getBlockByNumber === 1, 'cap still fetched job blocks ' + rpc.counts.eth_getBlockByNumber);
 assert(view.text('#status') === 'Some readings are incomplete', view.text('#status') + ' ' + view.text('#error'));
@@ -903,9 +909,9 @@ rpc.flags.extraLogs = [{
   topics: badJob.topics,
 }];
 await fullWindowRefresh();
-assert(cardAt('OnChain jobs per day').value === 'Unavailable', cardAt('OnChain jobs per day').value);
-assert(cardAt('OnChain jobs per day').sub.includes('could not be decoded'), cardAt('OnChain jobs per day').sub);
-assert(cardAt('OnChain jobs per day').value !== '0', 'a failed JobPosted decode was counted as zero');
+assert(cardAt('OnChain jobs in covered window').value === 'Unavailable', cardAt('OnChain jobs in covered window').value);
+assert(cardAt('OnChain jobs in covered window').sub.includes('could not be decoded'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').value !== '0', 'a failed JobPosted decode was counted as zero');
 assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
 
 clearFixtures();
@@ -919,6 +925,11 @@ function tableRows(selector) {
   const grid = root.children[0];
   if (!grid) return [];
   return grid.children.slice(1).map((row) => row.children.map((cell) => collectText(cell)));
+}
+
+function assertJobsWindow(card) {
+  assert(card.sub.includes('not a full calendar-day total'), card.sub);
+  assert(card.sub.includes('3000'), card.sub);
 }
 
 function cardAt(title) {
