@@ -147,6 +147,7 @@ function installRpc(box) {
     const decoded = decodeFunctionData({abi, data});
     const fn = abi.find((item) => item.type === 'function' && item.name === decoded.functionName);
     let result = fn.outputs.length === 1 ? zeroFor(fn.outputs[0]) : fn.outputs.map((output) => zeroFor(output));
+    if (flags.failFunctions && flags.failFunctions.has(target.toLowerCase() + ':' + decoded.functionName)) return {fail: true};
     if (decoded.functionName === 'nextJobId' || decoded.functionName === 'nextId') result = currentIdCap() + 1n;
     if (decoded.functionName === 'getAuction') {
       const tile = Number(decoded.args[0]);
@@ -261,6 +262,36 @@ assert(currentBoard && currentBoard.status === 'current', 'JobBoard v32 is not m
 assert(olderBoard && olderBoard.status === 'older', 'JobBoard v31 is not marked older');
 assert(cfg.addresses.JB.toLowerCase() === '0x24e18b482ca215b5e85e0f375380301d13e61dec', 'live reads are not on JobBoard v32');
 assert(cfg.addresses.ESC.toLowerCase() === '0x85c12b6ba25fc8fd2b054aa4ba6df4d788c3bba7', 'live reads are not on the v32 escrow');
+assert(cfg.addresses.JB33 === '0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7', 'JB33 address drifted');
+assert(cfg.addresses.ESC33 === '0xAB1c23EA94324731a89c8AA158555084dc236A88', 'ESC33 address drifted');
+assert(cfg.addresses.JB33_FEE === '0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4', 'v33 fee address drifted');
+assert(cfg.addresses.JB33_RECORDER === '0x10606daa9f9d12670Df50C5c5E717D64ce3269a4', 'v33 recorder address drifted');
+assert(cfg.addresses.JB33_RESOLVER === '0x06272057b0Dfb22a17490576BBf9D1e4cb830adc', 'v33 resolver address drifted');
+assert(cfg.addresses.JB33_REGISTRY === '0xB2932054908BB016291429fbE8591Ae2cCBE9Efd', 'v33 registry address drifted');
+assert(cfg.labels.JB === 'JobBoard v32', 'v32 label changed');
+assert(cfg.labels.JB33 === 'JobBoard v33', cfg.labels.JB33);
+assert(cfg.labels.ESC33 === 'Job escrow (v33)', cfg.labels.ESC33);
+const v33Board = listed(cfg.addresses.JB33);
+const v33Escrow = listed(cfg.addresses.ESC33);
+assert(v33Board && v33Board.status === 'current' && v33Board.abiKey === 'JB33' && v33Board.name === 'JobBoard v33', 'JobBoard v33 is not a current directory row');
+assert(v33Escrow && v33Escrow.status === 'current' && v33Escrow.abiKey === 'ESC33', 'v33 escrow is not current');
+for (const address of [cfg.addresses.JB33_FEE, cfg.addresses.JB33_RECORDER, cfg.addresses.JB33_RESOLVER, cfg.addresses.JB33_REGISTRY]) {
+  assert(listed(address)?.status === 'current', address + ' is not current');
+}
+const onchainNames = directory.filter((item) => item.group === 'Project OnChain').map((item) => item.name);
+const v32At = onchainNames.indexOf('JobBoard v32');
+const v33At = onchainNames.indexOf('JobBoard v33');
+const meterAt = onchainNames.indexOf('Meter v20');
+const v31At = onchainNames.indexOf('JobBoard v31');
+assert(v32At >= 0 && v32At < v33At && v33At < meterAt && meterAt < v31At, onchainNames.join(' | '));
+assert(cfg.abis.JB33.some((item) => item.name === 'OPEN_POST_LIMIT'), 'JB33 ABI is missing the v33 view');
+assert(!cfg.abis.JB.some((item) => item.name === 'OPEN_POST_LIMIT'), 'v32 ABI picked up a v33 view');
+assert(cfg.abis.JB33.some((item) => item.type === 'function' && item.name === 'nextJobId'), 'JB33 nextJobId missing');
+assert(cfg.abis.JB33.some((item) => item.type === 'function' && item.name === 'getJob'), 'JB33 getJob missing');
+assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'totalEscrowed'), 'ESC33 totalEscrowed missing');
+assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'totalClaimable'), 'ESC33 totalClaimable missing');
+assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'getDeal'), 'ESC33 getDeal missing');
+assert(LOG_LOOKBACK === 3000n, 'lookback changed');
 assert(listed('0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b')?.status === 'current', 'RegistryNext is not marked current');
 assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
 assert(cfg.addresses.TileRegistry.toLowerCase() === '0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b', 'live reads are not on RegistryNext');
@@ -276,6 +307,9 @@ assert(bundle.includes('(older)'), 'bundled dashboard omits the older marker');
 assert(bundle.includes('No live auctions in the current read'), 'bundled dashboard omits the live auction panel');
 assert(bundle.includes('RefundWithdrawn is counted separately'), 'bundled dashboard omits the refund definition');
 assert(bundle.includes('Not shown as zero'), 'bundled dashboard omits the unavailable wording');
+assert(bundle.includes('JobBoard v33'), 'bundled dashboard omits JobBoard v33');
+assert(bundle.includes('JB33'), 'bundled dashboard omits JB33');
+assert(bundle.includes('56661016'), 'bundled dashboard omits the v33 deploy block');
 assert(!/blockscout/i.test(source + page), 'dashboard calls Blockscout');
 assert(!source.includes('innerHTML'), 'dashboard source uses innerHTML');
 assert(!/eth_send/i.test(source), 'dashboard source mentions a send method');
@@ -285,6 +319,11 @@ assert(page.includes('not a full history'), 'covered-window wording missing');
 assert(page.includes('OnChain jobs in covered window counts JobPosted'), 'jobs note still implies a full day');
 assert(page.includes('not a full calendar-day total'), 'jobs note omits the calendar-day limit');
 assert(page.includes('at most 3000 blocks, about 10 minutes on Base Sepolia'), 'jobs note omits the window length');
+assert(page.includes('JobBoard v32 and JobBoard v33 are both live'), 'page does not say both boards are live');
+assert(page.includes('JobBoard v33 JobPosted events are not added to this count'), 'jobs note counts v33 into the v32 card');
+assert(page.includes('id="metrics-v33"'), 'v33 metrics strip missing');
+assert(page.includes('56661016'), 'page omits the v33 deploy block');
+assert(page.includes('Covered blocks do not start at that deploy block'), 'page claims history since the v33 deploy block');
 assert(page.includes('RefundWithdrawn is counted separately'), 'refund wording missing from the page');
 assert(cfg.addresses.DemoAuction.toLowerCase() === '0x7a2f1b3ba731aba07ae069cc3ef83e03f6b37557', 'DemoAuctionNext address drifted');
 
@@ -310,6 +349,8 @@ for (const [name, sig] of Object.entries(SNAPSHOT_SIGS)) {
 assert(eventSignature(cfg.abis.DemoAuction, 'BidPlaced').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'tileId,bidder', 'BidPlaced indexed fields drifted');
 assert(eventSignature(cfg.abis.DemoAuction, 'AuctionCreated').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'tileId', 'AuctionCreated indexed fields drifted');
 assert(eventSignature(cfg.abis.JB, 'JobPosted').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'jobId,buyer', 'JobPosted indexed fields drifted');
+assert(eventSignature(cfg.abis.JB33, 'JobPosted').text === SNAPSHOT_SIGS.JobPosted, 'v33 JobPosted signature drifted');
+assert(eventSignature(cfg.abis.JB33, 'JobPosted').item.inputs.filter((input) => input.indexed).map((input) => input.name).join(',') === 'jobId,buyer', 'v33 JobPosted indexed fields drifted');
 
 const view = installDom();
 useConfig(cfg);
@@ -687,6 +728,7 @@ function clearFixtures() {
   rpc.flags.extraLogs = [];
   rpc.flags.auctionByTile = null;
   rpc.flags.failAuctions = null;
+  rpc.flags.failFunctions = null;
   rpc.flags.timestampFor = null;
   rpc.flags.activityAddress = '';
   rpc.flags.calm = true;
@@ -915,6 +957,54 @@ assert(cardAt('OnChain jobs in covered window').value !== '0', 'a failed JobPost
 assert(view.text('#status') === 'Some readings are incomplete', view.text('#status'));
 
 clearFixtures();
+rpc.flags.timestampFor = () => today;
+rpc.flags.extraLogs = [
+  rpcLog({address: cfg.addresses.JB33, blockNumber: 151, logIndex: 0, transactionHash: keccak256(toBytes('job-v33-only')), abi: cfg.abis.JB33, eventName: 'JobPosted', args: jobArgs(9n)}),
+];
+usage = await fullWindowRefresh();
+assert(cardAt('OnChain jobs in covered window').value === '0', cardAt('OnChain jobs in covered window').value);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v33 posts are not added to this count'), cardAt('OnChain jobs in covered window').sub);
+assert(rpc.counts.eth_getBlockByNumber === 1, 'v33 JobPosted fetched day timestamps ' + rpc.counts.eth_getBlockByNumber);
+assert(usage.spent <= REQUEST_BUDGET, 'v33 refresh spent ' + usage.spent);
+assert(usage.sections.onchain.spent <= SECTION_RESERVES.onchain, 'onchain reserve overrun ' + usage.sections.onchain.spent);
+assert(contractLabel(cfg.addresses.JB33) === 'JobBoard v33', contractLabel(cfg.addresses.JB33));
+assert(!contractLabel(cfg.addresses.JB33).includes('(older)'), contractLabel(cfg.addresses.JB33));
+assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32', contractLabel(cfg.addresses.JB));
+let v33Rows = tableRows('#recent').filter((row) => row[2] === 'JobBoard v33');
+assert(v33Rows.length === 1 && v33Rows[0][3] === 'JobPosted', JSON.stringify(tableRows('#recent')));
+assert(!collectText(document.querySelector('#recent')).includes('JobBoard v33 (older)'), 'v33 was marked older');
+const v33Next = cardAt('Next job id', '#metrics-v33');
+assert(v33Next.value === String(currentIdCap() + 1n), v33Next.value);
+assert(v33Next.value !== 'Unavailable' && v33Next.value !== '0', v33Next.value);
+assert(v33Next.sub.includes('JobBoard v33') && v33Next.sub.includes('56661016'), v33Next.sub);
+assert(cardAt('Held in escrow', '#metrics-v33').value === '0 MUSDC', cardAt('Held in escrow', '#metrics-v33').value);
+console.log('V33 QUIET', usage.spent, usage.sections.onchain);
+
+clearFixtures();
+rpc.flags.timestampFor = () => today;
+rpc.flags.extraLogs = [
+  rpcLog({address: cfg.addresses.JB, blockNumber: 150, logIndex: 0, transactionHash: keccak256(toBytes('job-v32-keep')), abi: cfg.abis.JB, eventName: 'JobPosted', args: jobArgs(4n)}),
+  rpcLog({address: cfg.addresses.JB33, blockNumber: 151, logIndex: 0, transactionHash: keccak256(toBytes('job-v33-side')), abi: cfg.abis.JB33, eventName: 'JobPosted', args: jobArgs(8n)}),
+];
+await fullWindowRefresh();
+assert(cardAt('OnChain jobs in covered window').value === '1', cardAt('OnChain jobs in covered window').value + ' ' + cardAt('OnChain jobs in covered window').sub);
+assert(rpc.counts.eth_getBlockByNumber === 2, 'v33 log added a timestamp read ' + rpc.counts.eth_getBlockByNumber);
+v33Rows = tableRows('#recent').filter((row) => row[2] === 'JobBoard v33');
+assert(v33Rows.length === 1 && v33Rows[0][3] === 'JobPosted', JSON.stringify(v33Rows));
+assert(tableRows('#recent').some((row) => row[2] === 'JobBoard v32'), 'v32 activity disappeared');
+
+clearFixtures();
+rpc.flags.failFunctions = new Set([cfg.addresses.JB33.toLowerCase() + ':nextJobId']);
+await fullWindowRefresh();
+const failedV33 = cardAt('Next job id', '#metrics-v33');
+assert(failedV33.value === 'Unavailable', failedV33.value);
+assert(failedV33.value !== '0', 'failed v33 nextJobId rendered as zero');
+assert(cardAt('Held in escrow', '#metrics-v33').value === '0 MUSDC', 'a failed nextJobId blanked a successful escrow read');
+assert(view.text('#status') === 'Some readings are incomplete', view.text('#status') + ' ' + view.text('#error'));
+assert(view.text('#error').includes('JobBoard v33'), view.text('#error'));
+
+clearFixtures();
 chain.n = head;
 resetLogCache();
 
@@ -932,8 +1022,8 @@ function assertJobsWindow(card) {
   assert(card.sub.includes('3000'), card.sub);
 }
 
-function cardAt(title) {
-  const root = document.querySelector('#activity-stats');
+function cardAt(title, rootSel = '#activity-stats') {
+  const root = document.querySelector(rootSel);
   const article = root.children.find((node) => node.children[0]?.textContent === title);
   assert(article, 'missing card ' + title);
   return {value: article.children[1].textContent, sub: article.children[2].textContent};
