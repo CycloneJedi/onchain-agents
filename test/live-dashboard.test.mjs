@@ -258,8 +258,14 @@ function listed(address) {
 }
 const currentBoard = listed('0x24e18B482CA215b5e85E0F375380301D13e61dEc');
 const olderBoard = listed('0x6c53EaD9a3174957032F65D897b70333428AdfF4');
-assert(currentBoard && currentBoard.status === 'current', 'JobBoard v32 is not marked current');
+assert(currentBoard && currentBoard.status === 'older' && currentBoard.abiKey === 'JB', 'JobBoard v32 is not marked older');
 assert(olderBoard && olderBoard.status === 'older', 'JobBoard v31 is not marked older');
+const v32Escrow = listed(cfg.addresses.ESC);
+assert(v32Escrow && v32Escrow.status === 'older' && v32Escrow.name === 'Job escrow, v32 set' && v32Escrow.abiKey === 'ESC', 'v32 escrow row drifted');
+for (const address of ['0x076167Ee9FF648087eA621B4eBEC1095eF2a74d0', '0x219A418F27802F21EA509f8356c7d06c74323Cf0', '0xB2e2C5FEbAc5eBF63b0DbbC6A2CD5c58433594Fc']) {
+  const row = listed(address);
+  assert(row && row.status === 'older' && row.name.startsWith('JobBoard v32'), address + ' is not an older v32 row');
+}
 assert(cfg.addresses.JB.toLowerCase() === '0x24e18b482ca215b5e85e0f375380301d13e61dec', 'live reads are not on JobBoard v32');
 assert(cfg.addresses.ESC.toLowerCase() === '0x85c12b6ba25fc8fd2b054aa4ba6df4d788c3bba7', 'live reads are not on the v32 escrow');
 assert(cfg.addresses.JB33 === '0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7', 'JB33 address drifted');
@@ -269,6 +275,7 @@ assert(cfg.addresses.JB33_RECORDER === '0x10606daa9f9d12670Df50C5c5E717D64ce3269
 assert(cfg.addresses.JB33_RESOLVER === '0x06272057b0Dfb22a17490576BBf9D1e4cb830adc', 'v33 resolver address drifted');
 assert(cfg.addresses.JB33_REGISTRY === '0xB2932054908BB016291429fbE8591Ae2cCBE9Efd', 'v33 registry address drifted');
 assert(cfg.labels.JB === 'JobBoard v32', 'v32 label changed');
+assert(cfg.labels.ESC === 'Job escrow, v32 set', cfg.labels.ESC);
 assert(cfg.labels.JB33 === 'JobBoard v33', cfg.labels.JB33);
 assert(cfg.labels.ESC33 === 'Job escrow (v33)', cfg.labels.ESC33);
 const v33Board = listed(cfg.addresses.JB33);
@@ -319,7 +326,13 @@ assert(page.includes('not a full history'), 'covered-window wording missing');
 assert(page.includes('OnChain jobs in covered window counts JobPosted'), 'jobs note still implies a full day');
 assert(page.includes('not a full calendar-day total'), 'jobs note omits the calendar-day limit');
 assert(page.includes('at most 3000 blocks, about 10 minutes on Base Sepolia'), 'jobs note omits the window length');
-assert(page.includes('JobBoard v32 and JobBoard v33 are both live'), 'page does not say both boards are live');
+assert(page.includes('JobBoard v33 is the current build for new jobs. JobBoard v32 is an older build that is still live on Base Sepolia while its open jobs finish, and the primary metrics below still follow it. JobBoard v31 stays in the older rows.'), 'intro copy drifted');
+assert(page.includes('JobBoard v33 is Current. JobBoard v32 and v31 are Older and still live.'), 'deployed contracts note drifted');
+assert(page.includes('JobPosted on JobBoard v32 (older, still live)'), 'activity note still calls v32 current');
+assert(!page.includes('the current JobBoard v32'), 'activity note still says the current JobBoard v32');
+assert(!page.includes('both are live'), 'page still says both boards are live');
+assert(source.includes('These readings follow JobBoard v32'), 'v32 metrics sentence changed');
+assert(source.includes("(older, still live)"), 'jobs copy dropped the older still live phrase');
 assert(page.includes('JobBoard v33 JobPosted events are not added to this count'), 'jobs note counts v33 into the v32 card');
 assert(page.includes('id="metrics-v33"'), 'v33 metrics strip missing');
 assert(page.includes('56661016'), 'page omits the v33 deploy block');
@@ -671,7 +684,8 @@ await refresh();
 const recent = collectText(document.querySelector('#recent'));
 console.log('OLDER ACTIVITY', recent);
 assert(recent.includes('JobBoard v31 (older)'), recent);
-assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32', contractLabel(cfg.addresses.JB));
+assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32 (older)', contractLabel(cfg.addresses.JB));
+assert(contractLabel(cfg.addresses.ESC) === 'Job escrow, v32 set (older)', contractLabel(cfg.addresses.ESC));
 assert(!recent.includes('JobBoard v32 (older)'), recent);
 rpc.flags.activityAddress = '';
 rpc.flags.calm = false;
@@ -841,7 +855,9 @@ assert(cardAt('Breakaway refunds').sub.includes('RefundWithdrawn is counted sepa
 assert(cardAt('OnChain jobs in covered window').value === '0', cardAt('OnChain jobs in covered window').value);
 assert(cardAt('OnChain jobs in covered window').sub.includes('2026-11-09'), cardAt('OnChain jobs in covered window').sub);
 assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32'), cardAt('OnChain jobs in covered window').sub);
-assert(cardAt('OnChain jobs in covered window').sub.includes('Older JobBoard versions are not included'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32 (older, still live)'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v31 is not included'), cardAt('OnChain jobs in covered window').sub);
+assert(!cardAt('OnChain jobs in covered window').sub.includes('the current '), cardAt('OnChain jobs in covered window').sub);
 assertJobsWindow(cardAt('OnChain jobs in covered window'));
 assert(cardAt('Breakaway auctions').sub.includes('DemoAuctionNext'), cardAt('Breakaway auctions').sub);
 assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
@@ -963,14 +979,15 @@ rpc.flags.extraLogs = [
 ];
 usage = await fullWindowRefresh();
 assert(cardAt('OnChain jobs in covered window').value === '0', cardAt('OnChain jobs in covered window').value);
-assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32'), cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32 (older, still live)'), cardAt('OnChain jobs in covered window').sub);
+assert(!cardAt('OnChain jobs in covered window').sub.includes('the current '), cardAt('OnChain jobs in covered window').sub);
 assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v33 posts are not added to this count'), cardAt('OnChain jobs in covered window').sub);
 assert(rpc.counts.eth_getBlockByNumber === 1, 'v33 JobPosted fetched day timestamps ' + rpc.counts.eth_getBlockByNumber);
 assert(usage.spent <= REQUEST_BUDGET, 'v33 refresh spent ' + usage.spent);
 assert(usage.sections.onchain.spent <= SECTION_RESERVES.onchain, 'onchain reserve overrun ' + usage.sections.onchain.spent);
 assert(contractLabel(cfg.addresses.JB33) === 'JobBoard v33', contractLabel(cfg.addresses.JB33));
 assert(!contractLabel(cfg.addresses.JB33).includes('(older)'), contractLabel(cfg.addresses.JB33));
-assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32', contractLabel(cfg.addresses.JB));
+assert(contractLabel(cfg.addresses.JB) === 'JobBoard v32 (older)', contractLabel(cfg.addresses.JB));
 let v33Rows = tableRows('#recent').filter((row) => row[2] === 'JobBoard v33');
 assert(v33Rows.length === 1 && v33Rows[0][3] === 'JobPosted', JSON.stringify(tableRows('#recent')));
 assert(!collectText(document.querySelector('#recent')).includes('JobBoard v33 (older)'), 'v33 was marked older');
@@ -988,11 +1005,15 @@ rpc.flags.extraLogs = [
   rpcLog({address: cfg.addresses.JB33, blockNumber: 151, logIndex: 0, transactionHash: keccak256(toBytes('job-v33-side')), abi: cfg.abis.JB33, eventName: 'JobPosted', args: jobArgs(8n)}),
 ];
 await fullWindowRefresh();
-assert(cardAt('OnChain jobs in covered window').value === '1', cardAt('OnChain jobs in covered window').value + ' ' + cardAt('OnChain jobs in covered window').sub);
+assert(cardAt('OnChain jobs in covered window').value === '1', 'older directory status dropped the v32 JobPosted count ' + cardAt('OnChain jobs in covered window').value + ' ' + cardAt('OnChain jobs in covered window').sub);
 assert(rpc.counts.eth_getBlockByNumber === 2, 'v33 log added a timestamp read ' + rpc.counts.eth_getBlockByNumber);
 v33Rows = tableRows('#recent').filter((row) => row[2] === 'JobBoard v33');
 assert(v33Rows.length === 1 && v33Rows[0][3] === 'JobPosted', JSON.stringify(v33Rows));
-assert(tableRows('#recent').some((row) => row[2] === 'JobBoard v32'), 'v32 activity disappeared');
+const v32Rows = tableRows('#recent').filter((row) => row[2] === 'JobBoard v32 (older)');
+assert(v32Rows.some((row) => row[3] === 'JobPosted'), 'v32 activity was not decoded from the JB key ' + JSON.stringify(v32Rows));
+const custody = tableRows('#custody');
+assert(custody.some((row) => row[0] === 'Job escrow, v32 set'), 'metrics left the ESC key ' + JSON.stringify(custody.map((row) => row[0])));
+assert(view.text('#scope').includes('These readings follow JobBoard v32'), view.text('#scope'));
 
 clearFixtures();
 rpc.flags.failFunctions = new Set([cfg.addresses.JB33.toLowerCase() + ':nextJobId']);

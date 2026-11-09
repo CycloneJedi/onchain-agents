@@ -607,7 +607,7 @@ function statusCell(status) {
 
 export function contractLabel(address) {
   const key = String(address).toLowerCase();
-  // Match the directory row for this address. v32 and v33 are separate current rows.
+  // Match the directory row for this address. v32 is older. v33 is current.
   const matches = directoryEntries().filter((row) => row.address.toLowerCase() === key);
   const item = matches.find((row) => row.status === 'older') || matches[0];
   if (item) return item.status === 'older' ? item.name + ' (older)' : item.name;
@@ -743,7 +743,8 @@ export function assembleBreakaway(tiles, results) {
 // BidRefunded(uint16,address,uint256)
 // RefundEscrowed(uint16,address,uint256)
 // RefundWithdrawn(address,uint256)
-// The jobs/day card counts JobPosted on JobBoard v32 (addresses.JB) only.
+// The jobs/day card counts JobPosted on addresses.JB (JobBoard v32) only.
+// That directory row is older. The count uses the JB address, not row status.
 // JobBoard v33 logs stay in recent activity and are not added to that count.
 // v33 deployed at block 56661016. LOG_LOOKBACK stays 3000 and does not start at that block.
 // Auction counts use the current DemoAuctionNext address only.
@@ -784,6 +785,7 @@ function decodeCountedLog(log) {
   const topic = String(log.topics?.[0] || '').toLowerCase();
   const spec = activityTopics().get(topic);
   if (!spec) return {kind: 'ignore'};
+  // Address keys, not directory status. JB stays the v32 board after that row is older.
   const current = spec.name === 'JobPosted' ? A.JB : A.DemoAuction;
   if (!sameAddress(log.address, current)) return {kind: 'ignore'};
   try {
@@ -1055,19 +1057,19 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
   const from = logState.from;
   const to = logState.to;
   const summary = summarizeActivity(visibleLogs(logState));
-  const boardName = labelOf('JB');
+  const boardName = labelOf('JB') + ' (older, still live)';
   const auctionName = labelOf('DemoAuction');
   let jobsFailed = false;
   let jobsValue = 'Unavailable';
   let jobsSub = '';
   const day = edmontonDay(blockTimestamp);
-  const jobsReady = 'JobPosted events on the current ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. Older JobBoard versions are not included. JobBoard v33 posts are not added to this count.';
+  const jobsReady = 'JobPosted events on ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. JobBoard v31 is not included. JobBoard v33 posts are not added to this count.';
   if (summary.jobs.bad) {
     jobsFailed = true;
-    jobsSub = 'A JobPosted log on the current ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
+    jobsSub = 'A JobPosted log on ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
   } else if (summary.jobs.byBlock.size > STAMP_CAP) {
     jobsFailed = true;
-    jobsSub = 'JobPosted on the current ' + boardName + ' falls in more than ' + STAMP_CAP + ' blocks in covered blocks ' + from + ' to ' + to + ', so this day count is unavailable.' + NOT_ALL_TIME;
+    jobsSub = 'JobPosted on ' + boardName + ' falls in more than ' + STAMP_CAP + ' blocks in covered blocks ' + from + ' to ' + to + ', so this day count is unavailable.' + NOT_ALL_TIME;
   } else if (summary.jobs.byBlock.size === 0) {
     jobsValue = '0';
     jobsSub = countedSub(jobsReady, from, to);
@@ -1075,7 +1077,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
     const stamps = await readBlockTimestamps([...summary.jobs.byBlock.keys()], budget);
     if (!stamps) {
       jobsFailed = true;
-      jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+      jobsSub = 'Block times for JobPosted on ' + boardName + ' could not be read.' + NOT_ALL_TIME;
     } else {
       let count = 0;
       let missing = false;
@@ -1089,7 +1091,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
       }
       if (missing) {
         jobsFailed = true;
-        jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+        jobsSub = 'Block times for JobPosted on ' + boardName + ' could not be read.' + NOT_ALL_TIME;
       } else {
         jobsValue = String(count);
         jobsSub = countedSub(jobsReady, from, to);
@@ -1353,7 +1355,7 @@ async function loadEvents(blockNumber, blockTimestamp) {
     if (seen.has(log.transactionHash)) continue;
     seen.add(log.transactionHash);
     const listed = directoryEntries().find((row) => row.address.toLowerCase() === log.address.toLowerCase());
-    // abiKey follows the matching directory address, so v33 uses JB33 and is not labeled as v32.
+    // abiKey follows the matching address. v32 stays JB even though that row is older.
     const name = listed?.abiKey || Object.keys(A).find((key) => A[key].toLowerCase() === log.address.toLowerCase());
     let event = 'Contract event';
     if (name && AB[name]) {
