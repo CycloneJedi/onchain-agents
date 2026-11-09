@@ -607,6 +607,7 @@ function statusCell(status) {
 
 export function contractLabel(address) {
   const key = String(address).toLowerCase();
+  // Match the directory row for this address. v32 is older. v33 is current.
   const matches = directoryEntries().filter((row) => row.address.toLowerCase() === key);
   const item = matches.find((row) => row.status === 'older') || matches[0];
   if (item) return item.status === 'older' ? item.name + ' (older)' : item.name;
@@ -742,7 +743,11 @@ export function assembleBreakaway(tiles, results) {
 // BidRefunded(uint16,address,uint256)
 // RefundEscrowed(uint16,address,uint256)
 // RefundWithdrawn(address,uint256)
-// Only the current JobBoard and the current DemoAuctionNext address are counted.
+// The jobs/day card counts JobPosted on addresses.JB (JobBoard v32) only.
+// That directory row is older. The count uses the JB address, not row status.
+// JobBoard v33 logs stay in recent activity and are not added to that count.
+// v33 deployed at block 56661016. LOG_LOOKBACK stays 3000 and does not start at that block.
+// Auction counts use the current DemoAuctionNext address only.
 const LIVE_HEADERS = ['Claim', 'Status', 'Leading bid', 'Leader', 'Ends', 'Extensions'];
 const STAT_JOBS = 'OnChain jobs in covered window';
 const STAT_AUCTIONS = 'Breakaway auctions';
@@ -780,6 +785,7 @@ function decodeCountedLog(log) {
   const topic = String(log.topics?.[0] || '').toLowerCase();
   const spec = activityTopics().get(topic);
   if (!spec) return {kind: 'ignore'};
+  // Address keys, not directory status. JB stays the v32 board after that row is older.
   const current = spec.name === 'JobPosted' ? A.JB : A.DemoAuction;
   if (!sameAddress(log.address, current)) return {kind: 'ignore'};
   try {
@@ -1051,19 +1057,19 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
   const from = logState.from;
   const to = logState.to;
   const summary = summarizeActivity(visibleLogs(logState));
-  const boardName = labelOf('JB');
+  const boardName = labelOf('JB') + ' (older, still live)';
   const auctionName = labelOf('DemoAuction');
   let jobsFailed = false;
   let jobsValue = 'Unavailable';
   let jobsSub = '';
   const day = edmontonDay(blockTimestamp);
-  const jobsReady = 'JobPosted events on the current ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. Older JobBoard versions are not included.';
+  const jobsReady = 'JobPosted events on ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. JobBoard v31 is not included. JobBoard v33 posts are not added to this count.';
   if (summary.jobs.bad) {
     jobsFailed = true;
-    jobsSub = 'A JobPosted log on the current ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
+    jobsSub = 'A JobPosted log on ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
   } else if (summary.jobs.byBlock.size > STAMP_CAP) {
     jobsFailed = true;
-    jobsSub = 'JobPosted on the current ' + boardName + ' falls in more than ' + STAMP_CAP + ' blocks in covered blocks ' + from + ' to ' + to + ', so this day count is unavailable.' + NOT_ALL_TIME;
+    jobsSub = 'JobPosted on ' + boardName + ' falls in more than ' + STAMP_CAP + ' blocks in covered blocks ' + from + ' to ' + to + ', so this day count is unavailable.' + NOT_ALL_TIME;
   } else if (summary.jobs.byBlock.size === 0) {
     jobsValue = '0';
     jobsSub = countedSub(jobsReady, from, to);
@@ -1071,7 +1077,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
     const stamps = await readBlockTimestamps([...summary.jobs.byBlock.keys()], budget);
     if (!stamps) {
       jobsFailed = true;
-      jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+      jobsSub = 'Block times for JobPosted on ' + boardName + ' could not be read.' + NOT_ALL_TIME;
     } else {
       let count = 0;
       let missing = false;
@@ -1085,7 +1091,7 @@ async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) 
       }
       if (missing) {
         jobsFailed = true;
-        jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+        jobsSub = 'Block times for JobPosted on ' + boardName + ' could not be read.' + NOT_ALL_TIME;
       } else {
         jobsValue = String(count);
         jobsSub = countedSub(jobsReady, from, to);
@@ -1134,6 +1140,48 @@ function onchainDetail(report, custodyUnavailable) {
   if (report.serviceUnavailable) bits.push(report.serviceUnavailable + ' service records unavailable');
   if (custodyUnavailable) bits.push('a custody total was unavailable');
   return bits.join('. ') + '.';
+}
+
+// One Multicall3 batch: JB33.nextJobId, ESC33.totalEscrowed, ESC33.totalClaimable.
+// A failed read is Unavailable. It is not rendered as zero.
+const V33_DEPLOY_BLOCK = '56661016';
+const V33_NOTE = 'JobBoard v33. Read-only. Deployed at block ' + V33_DEPLOY_BLOCK + '. VERSION jobboard-v3.3.';
+
+function paintCards(root, cards) {
+  root.replaceChildren();
+  for (const [title, value, sub] of cards) card(root, title, value, sub);
+}
+
+async function loadJobBoardV33(blockNumber) {
+  const root = $('#metrics-v33');
+  if (!root) return {partial: false, detail: ''};
+  const unavailable = [
+    ['Next job id', 'Unavailable', V33_NOTE],
+    ['Held in escrow', 'Unavailable', V33_NOTE],
+    ['Ready to withdraw', 'Unavailable', V33_NOTE],
+  ];
+  let rows;
+  try {
+    rows = await multicall([
+      call('JB33', 'nextJobId'),
+      call('ESC33', 'totalEscrowed'),
+      call('ESC33', 'totalClaimable'),
+    ], blockNumber);
+  } catch {
+    paintCards(root, unavailable);
+    return {partial: true, detail: 'JobBoard v33 readings were unavailable.'};
+  }
+  const next = rows[0];
+  const held = rows[1];
+  const ready = rows[2];
+  const cards = [
+    ['Next job id', next?.status === 'success' ? String(next.result) : 'Unavailable', V33_NOTE + ' nextJobId. This is the next id, not the job count above.'],
+    ['Held in escrow', held?.status === 'success' ? num(held.result) + ' MUSDC' : 'Unavailable', V33_NOTE + ' totalEscrowed on the v33 escrow.'],
+    ['Ready to withdraw', ready?.status === 'success' ? num(ready.result) + ' MUSDC' : 'Unavailable', V33_NOTE + ' totalClaimable on the v33 escrow.'],
+  ];
+  paintCards(root, cards);
+  const partial = cards.some((item) => item[1] === 'Unavailable');
+  return {partial, detail: partial ? 'JobBoard v33 readings were unavailable.' : ''};
 }
 
 async function loadOnchain(blockNumber) {
@@ -1185,13 +1233,17 @@ async function loadOnchain(blockNumber) {
   const metrics = $('#metrics');
   metrics.replaceChildren();
   for (const [title, value, sub] of cards) card(metrics, title, value, sub);
-  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest " + idCap + " IDs per contract, not an unlimited history. These readings use the current contracts, including JobBoard v32.";
-  if (report.partial || custodyUnavailable) scope += ' Unavailable records are counted apart from zero.';
+  const v33 = await loadJobBoardV33(blockNumber);
+  let scope = "State numbers are the contracts' enum values. Job and service counts cover up to the latest " + idCap + " IDs per contract, not an unlimited history. These readings follow JobBoard v32. JobBoard v33 is the separate strip. JobBoard v33 was deployed at block " + V33_DEPLOY_BLOCK + ". That block is not the start of this window.";
+  if (report.partial || custodyUnavailable || v33.partial) scope += ' Unavailable records are counted apart from zero.';
   $('#scope').textContent = scope;
   table($('#custody'), ['Service', 'Held in active work', 'Ready to withdraw'], serviceRows);
   markRead('onchain-block', blockNumber);
-  const partial = report.partial || custodyUnavailable;
-  return {partial, detail: partial ? onchainDetail(report, custodyUnavailable) : ''};
+  const partial = report.partial || custodyUnavailable || v33.partial;
+  let detail = '';
+  if (report.partial || custodyUnavailable) detail = onchainDetail(report, custodyUnavailable);
+  if (v33.partial) detail += (detail ? ' ' : '') + v33.detail;
+  return {partial, detail};
 }
 
 function breakawayText(tileCount, report) {
@@ -1303,6 +1355,7 @@ async function loadEvents(blockNumber, blockTimestamp) {
     if (seen.has(log.transactionHash)) continue;
     seen.add(log.transactionHash);
     const listed = directoryEntries().find((row) => row.address.toLowerCase() === log.address.toLowerCase());
+    // abiKey follows the matching address. v32 stays JB even though that row is older.
     const name = listed?.abiKey || Object.keys(A).find((key) => A[key].toLowerCase() === log.address.toLowerCase());
     let event = 'Contract event';
     if (name && AB[name]) {
