@@ -3,7 +3,7 @@
 // No wallet, no signing, no private keys.
 // Rebuild live/dashboard.js with: npm ci && npm run build:live
 // See live/BUILD.md.
-import {decodeEventLog, decodeFunctionResult, encodeFunctionData, formatUnits} from 'viem';
+import {decodeEventLog, decodeFunctionResult, encodeEventTopics, encodeFunctionData, formatUnits} from 'viem';
 
 const RPC = 'https://sepolia.base.org';
 const CHAIN_ID = 84532;
@@ -18,6 +18,9 @@ export const SECTION_RESERVES = {meta: 4, onchain: 30, breakaway: 5, wallets: 8,
 const LOG_CHUNK = 200n;
 const LOG_LOOKBACK = 3000n;
 const REORG_DEPTH = 32n;
+// Block timestamps are read only after the log window is complete, and only for
+// distinct JobPosted blocks, up to this cap. Above the cap the day count is Unavailable.
+const STAMP_CAP = 8;
 export {LOG_LOOKBACK, REORG_DEPTH};
 const SUPPORTED_ID_CAP = 100n;
 const FILE_TIMEOUT_MS = 8000;
@@ -519,6 +522,8 @@ let AB;
 let busy = false;
 let runnerTask = null;
 let logState = createLogCache();
+let breakawayView = null;
+let topicCache = null;
 
 export function resetLogCache() {
   logState = createLogCache();
@@ -575,6 +580,7 @@ export function useConfig(next) {
   cfg = next;
   A = cfg.addresses;
   AB = cfg.abis;
+  topicCache = null;
 }
 
 function requireDirectory(next) {
@@ -729,6 +735,389 @@ export function assembleBreakaway(tiles, results) {
   };
 }
 
+// Counted events use the configured ABI signatures:
+// JobPosted(uint256,address,uint256,uint16,uint64,uint64,uint64,address,string,uint32,uint64,uint32,uint256)
+// AuctionCreated(uint16,uint256,uint256,bool)
+// BidPlaced(uint16,address,uint256,uint256)
+// BidRefunded(uint16,address,uint256)
+// RefundEscrowed(uint16,address,uint256)
+// RefundWithdrawn(address,uint256)
+// Only the current JobBoard and the current DemoAuctionNext address are counted.
+const LIVE_HEADERS = ['Claim', 'Status', 'Leading bid', 'Leader', 'Ends', 'Extensions'];
+const STAT_JOBS = 'OnChain jobs in covered window';
+const STAT_AUCTIONS = 'Breakaway auctions';
+const STAT_BIDS = 'Breakaway bids';
+const STAT_REFUNDS = 'Breakaway refunds';
+const NOT_ALL_TIME = ' Not shown as zero. Not a full history and not an all-time total.';
+
+export function edmontonDay(seconds) {
+  return new Date(Number(seconds) * 1000).toLocaleDateString('en-CA', {timeZone: 'America/Edmonton'});
+}
+
+function sameAddress(left, right) {
+  return String(left || '').toLowerCase() === String(right || '').toLowerCase();
+}
+
+function activityTopics() {
+  if (topicCache) return topicCache;
+  const entries = [
+    ['JobPosted', AB.JB],
+    ['AuctionCreated', AB.DemoAuction],
+    ['BidPlaced', AB.DemoAuction],
+    ['BidRefunded', AB.DemoAuction],
+    ['RefundEscrowed', AB.DemoAuction],
+    ['RefundWithdrawn', AB.DemoAuction],
+  ];
+  const byTopic = new Map();
+  for (const [name, abi] of entries) {
+    byTopic.set(encodeEventTopics({abi, eventName: name})[0].toLowerCase(), {name, abi});
+  }
+  topicCache = byTopic;
+  return topicCache;
+}
+
+function decodeCountedLog(log) {
+  const topic = String(log.topics?.[0] || '').toLowerCase();
+  const spec = activityTopics().get(topic);
+  if (!spec) return {kind: 'ignore'};
+  const current = spec.name === 'JobPosted' ? A.JB : A.DemoAuction;
+  if (!sameAddress(log.address, current)) return {kind: 'ignore'};
+  try {
+    const decoded = decodeEventLog({
+      abi: spec.abi,
+      eventName: spec.name,
+      data: log.data,
+      topics: log.topics,
+    });
+    return {
+      kind: 'ok',
+      name: spec.name,
+      args: decoded.args || {},
+      blockNumber: log.blockNumber,
+      logIndex: log.logIndex ?? 0n,
+    };
+  } catch {
+    return {kind: 'bad', name: spec.name};
+  }
+}
+
+function tileIdOf(args) {
+  const tile = Number(args?.tileId);
+  return Number.isInteger(tile) ? tile : null;
+}
+
+function bigOf(value) {
+  if (value == null) return null;
+  try {
+    return BigInt(value);
+  } catch {
+    return null;
+  }
+}
+
+export function summarizeActivity(logs) {
+  const summary = {
+    jobs: {bad: false, byBlock: new Map()},
+    auctions: {count: 0, bad: false},
+    bids: {count: 0, bad: false},
+    refunds: {count: 0, bad: false},
+    withdrawn: {count: 0, bad: false},
+    auctionEvents: [],
+    extensionsBad: false,
+  };
+  const mark = (name) => {
+    if (name === 'JobPosted') summary.jobs.bad = true;
+    else if (name === 'AuctionCreated') summary.auctions.bad = true;
+    else if (name === 'BidPlaced') summary.bids.bad = true;
+    else if (name === 'BidRefunded' || name === 'RefundEscrowed') summary.refunds.bad = true;
+    else if (name === 'RefundWithdrawn') summary.withdrawn.bad = true;
+    if (name === 'AuctionCreated' || name === 'BidPlaced') summary.extensionsBad = true;
+  };
+  for (const log of logs) {
+    const decoded = decodeCountedLog(log);
+    if (decoded.kind === 'ignore') continue;
+    if (decoded.kind === 'bad') {
+      mark(decoded.name);
+      continue;
+    }
+    const args = decoded.args;
+    if (decoded.name === 'JobPosted') {
+      const seen = summary.jobs.byBlock.get(decoded.blockNumber) || 0;
+      summary.jobs.byBlock.set(decoded.blockNumber, seen + 1);
+      continue;
+    }
+    if (decoded.name === 'AuctionCreated') {
+      const tile = tileIdOf(args);
+      const endTime = bigOf(args.endTime);
+      if (tile == null || endTime == null) {
+        mark(decoded.name);
+        continue;
+      }
+      summary.auctions.count += 1;
+      summary.auctionEvents.push({
+        name: 'AuctionCreated',
+        tile,
+        endTime,
+        blockNumber: decoded.blockNumber,
+        logIndex: decoded.logIndex,
+      });
+      continue;
+    }
+    if (decoded.name === 'BidPlaced') {
+      const tile = tileIdOf(args);
+      const newEndTime = bigOf(args.newEndTime);
+      if (tile == null || newEndTime == null) {
+        mark(decoded.name);
+        continue;
+      }
+      summary.bids.count += 1;
+      summary.auctionEvents.push({
+        name: 'BidPlaced',
+        tile,
+        newEndTime,
+        blockNumber: decoded.blockNumber,
+        logIndex: decoded.logIndex,
+      });
+      continue;
+    }
+    if (decoded.name === 'BidRefunded' || decoded.name === 'RefundEscrowed') {
+      summary.refunds.count += 1;
+      continue;
+    }
+    if (decoded.name === 'RefundWithdrawn') summary.withdrawn.count += 1;
+  }
+  summary.auctionEvents.sort((left, right) => {
+    if (left.blockNumber !== right.blockNumber) return left.blockNumber < right.blockNumber ? -1 : 1;
+    if (left.logIndex !== right.logIndex) return left.logIndex < right.logIndex ? -1 : 1;
+    return 0;
+  });
+  return summary;
+}
+
+export function extensionsByTile(events) {
+  const state = new Map();
+  for (const ev of events) {
+    let row = state.get(ev.tile);
+    if (!row) {
+      row = {created: false, prior: null, count: 0};
+      state.set(ev.tile, row);
+    }
+    if (ev.name === 'AuctionCreated') {
+      row.created = true;
+      row.prior = ev.endTime;
+    } else if (ev.name === 'BidPlaced' && row.created && row.prior != null && ev.newEndTime > row.prior) {
+      row.count += 1;
+      row.prior = ev.newEndTime;
+    }
+  }
+  const out = new Map();
+  for (const [tile, row] of state) out.set(tile, row.created ? row.count : null);
+  return out;
+}
+
+export function liveAuctionRecords(rows, blockTimestamp) {
+  const records = [];
+  for (const row of rows) {
+    const data = row.data;
+    if (!data) {
+      records.push({
+        tile: row.tile,
+        status: 'Unavailable',
+        bid: 'Unavailable',
+        leaderAddress: null,
+        ends: 'Unavailable',
+        endTime: null,
+      });
+      continue;
+    }
+    const endTime = BigInt(data[0] || 0);
+    if (endTime === 0n) continue;
+    const bidder = data[1];
+    const noBids = isZero(bidder);
+    let status = 'Unavailable';
+    if (blockTimestamp != null) {
+      if (endTime > BigInt(blockTimestamp)) status = 'Live';
+      else if (!noBids) status = 'Ended, settle pending';
+      else status = 'Ended, no bids';
+    }
+    records.push({
+      tile: row.tile,
+      status,
+      bid: num(data[2], 18) + ' test ETH',
+      leaderAddress: noBids ? null : bidder,
+      ends: mt(endTime),
+      endTime,
+    });
+  }
+  const rank = (status) => status === 'Live' ? 0 : String(status).startsWith('Ended') ? 1 : 2;
+  records.sort((left, right) => {
+    const diff = rank(left.status) - rank(right.status);
+    if (diff) return diff;
+    if (left.endTime != null && right.endTime != null && left.endTime !== right.endTime) {
+      return left.endTime < right.endTime ? -1 : 1;
+    }
+    return Number(left.tile) - Number(right.tile);
+  });
+  return records;
+}
+
+function leaderNode(record) {
+  if (record.status === 'Unavailable') return 'Unavailable';
+  if (record.leaderAddress == null) return 'No bids';
+  return link('address', record.leaderAddress, small(record.leaderAddress));
+}
+
+function extensionCell(record, counts) {
+  if (record.status === 'Unavailable') return 'Unavailable';
+  if (record.status !== 'Live') return 'Not counted';
+  if (!counts) return 'Unavailable';
+  const value = counts.get(Number(record.tile));
+  if (value == null) return 'Unavailable';
+  return String(value);
+}
+
+function renderLiveAuctions(coverageReady) {
+  if (!breakawayView) return;
+  const records = liveAuctionRecords(breakawayView.rows, breakawayView.timestamp);
+  let counts = null;
+  if (coverageReady && logState.from != null && logState.to != null) {
+    const summary = summarizeActivity(visibleLogs(logState));
+    if (!summary.extensionsBad) counts = extensionsByTile(summary.auctionEvents);
+  }
+  const rows = records.length
+    ? records.map((record) => [
+      record.tile,
+      record.status,
+      record.bid,
+      leaderNode(record),
+      record.ends,
+      extensionCell(record, counts),
+    ])
+    : [['None', 'No live auctions in the current read', '', '', '', '']];
+  table($('#live-auctions'), LIVE_HEADERS, rows);
+}
+
+function renderLiveUnavailable() {
+  breakawayView = null;
+  table($('#live-auctions'), LIVE_HEADERS, [['Unavailable', 'Unavailable', 'Unavailable', 'Unavailable', 'Unavailable', 'Unavailable']]);
+}
+
+function paintActivity(cards) {
+  const root = $('#activity-stats');
+  if (!root) return;
+  root.replaceChildren();
+  for (const [title, value, sub] of cards) card(root, title, value, sub);
+}
+
+function unavailableActivity(sub) {
+  paintActivity([
+    [STAT_JOBS, 'Unavailable', sub],
+    [STAT_AUCTIONS, 'Unavailable', sub],
+    [STAT_BIDS, 'Unavailable', sub],
+    [STAT_REFUNDS, 'Unavailable', sub],
+  ]);
+}
+
+function incompleteActivity(from, to, lookback, head) {
+  const covered = from == null || to == null
+    ? 'No covered blocks on this refresh.'
+    : 'Covered blocks ' + from + ' to ' + to + ' of target ' + lookback + ' to ' + head + '.';
+  unavailableActivity(covered + ' The window is incomplete, so this count is unavailable.' + NOT_ALL_TIME);
+}
+
+function countedSub(sentence, from, to) {
+  return sentence + ' Covered blocks ' + from + ' to ' + to + '. Not a full history and not an all-time total.';
+}
+
+async function readBlockTimestamps(blocks, budget) {
+  const stamps = new Map();
+  for (const block of blocks) {
+    try {
+      const raw = await spaced(async () => rpc('eth_getBlockByNumber', [toHex(block), false], budget));
+      if (typeof raw?.timestamp !== 'string' || !/^0x[0-9a-fA-F]+$/.test(raw.timestamp)) return null;
+      stamps.set(block, BigInt(raw.timestamp));
+    } catch {
+      return null;
+    }
+  }
+  return stamps;
+}
+
+async function fillActivity(logPartial, lookback, head, blockTimestamp, budget) {
+  if (logPartial || logState.from == null || logState.to == null || blockTimestamp == null) {
+    incompleteActivity(logState.from, logState.to, lookback, head);
+    return false;
+  }
+  const from = logState.from;
+  const to = logState.to;
+  const summary = summarizeActivity(visibleLogs(logState));
+  const boardName = labelOf('JB');
+  const auctionName = labelOf('DemoAuction');
+  let jobsFailed = false;
+  let jobsValue = 'Unavailable';
+  let jobsSub = '';
+  const day = edmontonDay(blockTimestamp);
+  const jobsReady = 'JobPosted events on the current ' + boardName + ' inside this covered window whose block time falls on America/Edmonton day ' + day + ' (the head block day). This is not a full calendar-day total; only the covered blocks (at most 3000, about 10 minutes on Base Sepolia) are searched. Older JobBoard versions are not included.';
+  if (summary.jobs.bad) {
+    jobsFailed = true;
+    jobsSub = 'A JobPosted log on the current ' + boardName + ' could not be decoded.' + NOT_ALL_TIME;
+  } else if (summary.jobs.byBlock.size > STAMP_CAP) {
+    jobsFailed = true;
+    jobsSub = 'JobPosted on the current ' + boardName + ' falls in more than ' + STAMP_CAP + ' blocks in covered blocks ' + from + ' to ' + to + ', so this day count is unavailable.' + NOT_ALL_TIME;
+  } else if (summary.jobs.byBlock.size === 0) {
+    jobsValue = '0';
+    jobsSub = countedSub(jobsReady, from, to);
+  } else {
+    const stamps = await readBlockTimestamps([...summary.jobs.byBlock.keys()], budget);
+    if (!stamps) {
+      jobsFailed = true;
+      jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+    } else {
+      let count = 0;
+      let missing = false;
+      for (const [block, n] of summary.jobs.byBlock) {
+        const ts = stamps.get(block);
+        if (ts == null) {
+          missing = true;
+          break;
+        }
+        if (edmontonDay(ts) === day) count += n;
+      }
+      if (missing) {
+        jobsFailed = true;
+        jobsSub = 'Block times for JobPosted on the current ' + boardName + ' could not be read.' + NOT_ALL_TIME;
+      } else {
+        jobsValue = String(count);
+        jobsSub = countedSub(jobsReady, from, to);
+      }
+    }
+  }
+  const auctionsValue = summary.auctions.bad ? 'Unavailable' : String(summary.auctions.count);
+  const auctionsSub = summary.auctions.bad
+    ? 'An AuctionCreated log on the current ' + auctionName + ' could not be decoded.' + NOT_ALL_TIME
+    : countedSub('AuctionCreated events on the current ' + auctionName + '. Raw event count. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to);
+  const bidsValue = summary.bids.bad ? 'Unavailable' : String(summary.bids.count);
+  const bidsSub = summary.bids.bad
+    ? 'A BidPlaced log on the current ' + auctionName + ' could not be decoded.' + NOT_ALL_TIME
+    : countedSub('BidPlaced events on the current ' + auctionName + '. Raw event count. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to);
+  let refundsValue = 'Unavailable';
+  let refundsSub;
+  if (summary.refunds.bad) {
+    refundsSub = 'A BidRefunded or RefundEscrowed log on the current ' + auctionName + ' could not be decoded.' + NOT_ALL_TIME;
+  } else {
+    refundsValue = String(summary.refunds.count);
+    const withdrawn = summary.withdrawn.bad ? 'Unavailable' : String(summary.withdrawn.count);
+    refundsSub = countedSub('BidRefunded plus RefundEscrowed on the current ' + auctionName + '. RefundWithdrawn is counted separately. The covered window is at most 3000 blocks, about 10 minutes on Base Sepolia.', from, to) + ' Withdrawn: ' + withdrawn + '.';
+  }
+  paintActivity([
+    [STAT_JOBS, jobsValue, jobsSub],
+    [STAT_AUCTIONS, auctionsValue, auctionsSub],
+    [STAT_BIDS, bidsValue, bidsSub],
+    [STAT_REFUNDS, refundsValue, refundsSub],
+  ]);
+  return jobsFailed || summary.auctions.bad || summary.bids.bad || summary.refunds.bad || summary.withdrawn.bad || summary.extensionsBad;
+}
+
 export function countWalletGaps(balances, practice) {
   let unavailable = 0;
   for (let index = 0; index < balances.length; index += 1) {
@@ -815,13 +1204,15 @@ function breakawayText(tileCount, report) {
   return text;
 }
 
-async function loadBreakaway(blockNumber) {
+async function loadBreakaway(blockNumber, blockTimestamp) {
   const calls = cfg.tiles.flatMap((tile) => [
     call('TileRegistry', 'getTileState', [tile]),
     call('DemoAuction', 'getAuction', [tile]),
   ]);
   const results = await multicall(calls, blockNumber);
   const report = assembleBreakaway(cfg.tiles, results);
+  breakawayView = {rows: report.rows, timestamp: blockTimestamp};
+  renderLiveAuctions(false);
   const rows = report.rows.map((row) => {
     const data = row.data;
     const close = !data ? 'Unavailable' : data[0] === 0n ? 'Not opened' : mt(data[0]);
@@ -872,7 +1263,7 @@ async function loadWallets(blockNumber) {
   };
 }
 
-async function loadEvents(blockNumber) {
+async function loadEvents(blockNumber, blockTimestamp) {
   const budget = active;
   const addresses = eventTargets();
   const originalTo = logState.to;
@@ -900,9 +1291,11 @@ async function loadEvents(blockNumber) {
     logState = pruneLookback(committed.state, blockNumber);
   }
   if (logState.from == null || logState.to == null) {
+    incompleteActivity(null, null, plan.lookback, blockNumber);
+    renderLiveAuctions(false);
     return {partial: true, detail: 'Recent events have not covered a block yet.'};
   }
-  const partial = stoppedEarly || logState.from > plan.lookback || logState.to < blockNumber;
+  const logPartial = stoppedEarly || logState.from > plan.lookback || logState.to < blockNumber;
   const rows = [];
   const seen = new Set();
   const ordered = visibleLogs(logState).slice().sort((left, right) => Number(right.blockNumber - left.blockNumber) || Number(right.logIndex - left.logIndex));
@@ -936,10 +1329,13 @@ async function loadEvents(blockNumber) {
   }
   scope += ' Missing blocks are filled from the covered edge. A short overlap is read again in case of a reorg. This is not a complete transaction history.';
   $('#eventscope').textContent = scope;
-  return {
-    partial,
-    detail: partial ? 'Event backfill covers blocks ' + logState.from + ' to ' + logState.to + '.' : '',
-  };
+  const activityPartial = await fillActivity(logPartial, plan.lookback, blockNumber, blockTimestamp, budget);
+  renderLiveAuctions(!logPartial);
+  const partial = logPartial || activityPartial;
+  let detail = '';
+  if (logPartial) detail = 'Event backfill covers blocks ' + logState.from + ' to ' + logState.to + '.';
+  else if (activityPartial) detail = 'Activity counts are incomplete for covered blocks ' + logState.from + ' to ' + logState.to + '.';
+  return {partial, detail};
 }
 
 async function loadRunner() {
@@ -1014,9 +1410,9 @@ export async function refresh() {
     $('#network').textContent = 'Base Sepolia · chain 84532 · head block ' + blockNumber;
     const sections = [
       ['Project OnChain', 'onchain', () => loadOnchain(blockNumber)],
-      ['Breakaway', 'breakaway', () => loadBreakaway(blockNumber)],
+      ['Breakaway', 'breakaway', () => loadBreakaway(blockNumber, block.timestamp)],
       ['Wallets', 'wallets', () => loadWallets(blockNumber)],
-      ['Recent activity', 'events', () => loadEvents(blockNumber)],
+      ['Recent activity', 'events', () => loadEvents(blockNumber, block.timestamp)],
     ];
     let allOk = true;
     for (const [name, section, run] of sections) {
@@ -1030,9 +1426,12 @@ export async function refresh() {
       } catch (error) {
         allOk = false;
         problems.push(name + ': ' + explain(error) + '.');
+        if (name === 'Breakaway') renderLiveUnavailable();
         if (name === 'Recent activity') {
           const scope = $('#eventscope');
           if (scope) scope.textContent = 'Recent events could not be read: ' + explain(error) + '. Earlier events stay in place.';
+          incompleteActivity(logState.from, logState.to, lookbackFloor(blockNumber), blockNumber);
+          renderLiveAuctions(false);
         }
       }
     }
@@ -1048,6 +1447,8 @@ export async function refresh() {
     console.error('Dashboard RPC read failed', errorText(error));
     $('#error').textContent = 'Refresh incomplete: ' + explain(error) + '. Previously displayed values may be stale.';
     $('#status').textContent = 'RPC read issue';
+    renderLiveUnavailable();
+    unavailableActivity('This refresh did not finish a chain read, so this count is unavailable.' + NOT_ALL_TIME);
   } finally {
     busy = false;
     $('#refresh').disabled = false;

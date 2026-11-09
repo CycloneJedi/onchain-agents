@@ -54,10 +54,16 @@ footer{margin-top:50px;border-top:1px solid #203047;padding-top:24px}
 <p class="subtle" id="breakaway-block"></p>
 <p>Bounded registry demonstration. Practice claims only, no real value or legal title. The claim table reads the current registry and auction. Auction activity follows the deployed contracts and their live timing.</p>
 <p id="bkstats"></p>
+<h3>Live auctions</h3>
+<p class="subtle" id="live-auctions-note">Reads the current DemoAuctionNext only. Older auction contracts are excluded. Status, leading bid, leader, and end time come from getAuction at this refresh. Extensions count BidPlaced logs in the covered blocks whose new end time is later than the prior end from AuctionCreated or an earlier bid in that window. If AuctionCreated is outside those blocks, or the window is incomplete, Extensions is Unavailable. Practice claims, no real value. This is not a full history.</p>
+<div class="scroll" id="live-auctions"></div>
 <div class="scroll" id="claims"></div>
 <h2>Agent wallets</h2>
 <p class="subtle" id="wallets-block"></p>
 <div class="scroll" id="wallets"></div>
+<h2>Activity (covered window)</h2>
+<p class="subtle" id="activity-note">OnChain jobs in covered window counts JobPosted on the current JobBoard v32 inside the blocks this page has covered whose block time falls on the head block's America/Edmonton day. That is not a full calendar-day total (the window is at most 3000 blocks, about 10 minutes on Base Sepolia). Breakaway auctions, bids, and refunds count AuctionCreated, BidPlaced, and BidRefunded plus RefundEscrowed on the current DemoAuctionNext in those same blocks. RefundWithdrawn is counted separately. Older JobBoard jobs, registry eligibility, and anything outside the covered blocks are not included. The window rolls forward, up to 3000 blocks behind the head, and is not a full history, so these counts can be lower than an all-time snapshot. A missing or partial read shows Unavailable.</p>
+<div class="grid" id="activity-stats"></div>
 <h2>Recent on-chain activity</h2>
 <p class="subtle" id="events-block"></p>
 <p class="subtle" id="eventscope"></p>
