@@ -277,11 +277,11 @@ assert(cfg.addresses.JB33_REGISTRY === '0xB2932054908BB016291429fbE8591Ae2cCBE9E
 assert(cfg.labels.JB === 'JobBoard v32', 'v32 label changed');
 assert(cfg.labels.ESC === 'Job escrow, v32 set', cfg.labels.ESC);
 assert(cfg.labels.JB33 === 'JobBoard v33', cfg.labels.JB33);
-assert(cfg.labels.ESC33 === 'Job escrow (v33)', cfg.labels.ESC33);
+assert(cfg.labels.ESC33 === 'Job escrow, v33 set', cfg.labels.ESC33);
 const v33Board = listed(cfg.addresses.JB33);
 const v33Escrow = listed(cfg.addresses.ESC33);
 assert(v33Board && v33Board.status === 'current' && v33Board.abiKey === 'JB33' && v33Board.name === 'JobBoard v33', 'JobBoard v33 is not a current directory row');
-assert(v33Escrow && v33Escrow.status === 'current' && v33Escrow.abiKey === 'ESC33', 'v33 escrow is not current');
+assert(v33Escrow && v33Escrow.status === 'current' && v33Escrow.abiKey === 'ESC33' && v33Escrow.name === 'Job escrow, v33 set', 'v33 escrow is not current');
 for (const address of [cfg.addresses.JB33_FEE, cfg.addresses.JB33_RECORDER, cfg.addresses.JB33_RESOLVER, cfg.addresses.JB33_REGISTRY]) {
   assert(listed(address)?.status === 'current', address + ' is not current');
 }
@@ -305,7 +305,7 @@ assert(cfg.addresses.TileRegistry.toLowerCase() === '0x199eeb5a5cc8ad4afb204350d
 assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');
 const page = readFileSync(new URL('../live/index.html', import.meta.url), 'utf8');
 const bundle = readFileSync(new URL('../live/dashboard.js', import.meta.url), 'utf8');
-const wording = 'The counts, claim table and wallet panel read the current contracts. Recent activity also includes older contracts, marked (older). Older contracts remain on Base Sepolia.';
+const wording = 'The OnChain counts and custody table follow JobBoard v32 (older, still live) and the current Meter, Split and Stream. The claim table and wallet panel read the current contracts. Recent activity also includes older contracts, marked (older). Older contracts remain on Base Sepolia.';
 assert(page.includes(wording), 'contract list wording missing');
 assert(page.includes('DemoTreasury, SanctionsOracle, DemoGeometry, and DemoNoCharters are shared by both Breakaway sets.'), 'shared contract sentence missing');
 assert(!page.includes('Current rows are what the panels above read'), 'old contract list wording remains');
