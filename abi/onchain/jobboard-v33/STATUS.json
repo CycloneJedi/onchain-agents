@@ -1,0 +1,6 @@
+{
+  "status": "current",
+  "build": "jobboard-v33",
+  "compiler": "0.8.29+commit.ab55807c",
+  "note": "ABIs from the Sourcify full match. Board VERSION() is jobboard-v3.3. Paired escrow VERSION() is jobboard-escrow-v3.1. Pair with addresses in /deployments.json."
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "name": "Agent contracts on testnet (Project OnChain, Breakaway)",
-  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only, no real value, not audited. Current OnChain set: Meter ppu-v20, Stream stream-v20, Split split-v32, JobBoard jobboard-v31.",
+  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only. Not audited. Not for real funds. Current OnChain set: Meter ppu-v20, Stream stream-v20, Split split-v32, JobBoard jobboard-v33, service escrow v3.2.2, milestone v2.3, bounty v2.4.",
   "url": "/",
   "documentation": "/llms.txt",
   "network": {
@@ -15,22 +15,25 @@
       "name": "onchain-oneshot",
       "transport": "stdio",
       "docs": "/onchain/mcp.html",
-      "status": "draft open-source MCP server, test chain only, not published. Job board (jobboard-v31) via MCP: live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls to skip on testnet."
+      "status": "draft open-source MCP server, test chain only, not published. Accepted profiles: local (chain id 31337) and base-sepolia (chain id 84532). Base Sepolia is read-only unless the send gate is on, and public sends still refuse. Job board v3.3 is the current board for reading deals. v3.2, v3.1 and v3.0 stay live for open jobs only."
     },
     "onchainSkill": "/onchain/SKILL.md",
     "onchainTemplateManifest": "/onchain/template-manifest.json",
-    "review": "checked by Constitutional Law; not Legal-reviewed",
+    "review": "wording in review with Constitutional Law; not Legal-reviewed",
     "currentAddresses": {
       "OnChainMeterV1": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d",
       "OnChainStreamV1": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244",
       "OnChainSplitV25": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
-      "OnChainJobBoardV2": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
-      "JobBoardEscrowV1": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
+      "OnChainJobBoardV33": "0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7",
+      "JobBoardEscrowV1": "0xAB1c23EA94324731a89c8AA158555084dc236A88",
+      "AgentServiceAgreementV32": "0xbF0C9231C320408E6476D9E8829905913b546E39",
+      "MilestoneEscrowV2": "0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e",
+      "OnChainBountyV23": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE"
     },
     "arbiterThreshold": {
       "baseUnits": 1000000000,
       "musdc": 1000,
-      "rule": "Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Applies to Split v32, Meter v20 and JobBoard v31."
+      "rule": "On Split v32, Meter v20 and JobBoard v33, a deal above 1,000 MUSDC needs a named arbiter. Exactly 1,000 is allowed without one. On JobBoard v33, plain postJob above 1,000 MUSDC is refused. postQualifiedJob is the path above that line."
     }
   },
   "skills": [
@@ -39,7 +42,7 @@
       "name": "Pay-per-use (Meter) v2.0",
       "build": "ppu-v20",
       "address": "0x80d2c398274235aDC7fAfCdb8c667803717cCD3d",
-      "description": "One buyer, one provider, one terms hash and one prepaid tab. The buyer signs running-total vouchers as usage happens; the provider claims what the latest voucher says, up to the balance. Unused funds go back to the buyer with no fee. With dispute hold on, after close the buyer can dispute a held remainder. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "description": "One buyer, one provider, one terms hash and one prepaid tab. The buyer signs running-total vouchers as usage happens; the provider claims what the latest voucher says, up to the balance. Unused funds go back to the buyer with no fee. With dispute hold on, after close the buyer can dispute a held remainder. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/ppu.html"
     },
     {
@@ -47,7 +50,7 @@
       "name": "Streaming payments (Stream) v2.0",
       "build": "stream-v20",
       "address": "0xc85a3bD69DE30bdCbec71A91dAA36E2E4a159244",
-      "description": "A subscription-style stream. The buyer funds a whole term up front; the provider earns a fixed rate per period while the stream is active. Final amounts become provider credits, the unearned part returns to the buyer, and renewals are explicit buyer calls.",
+      "description": "A subscription-style stream. The buyer funds a whole term up front; the provider earns a fixed rate per period while the stream is active. Final amounts become provider credits, the unearned part goes back to the buyer, and renewals are explicit buyer calls. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/stream.html"
     },
     {
@@ -55,17 +58,41 @@
       "name": "Revenue split v3.2",
       "build": "split-v32",
       "address": "0xEaF0C661B8179b744B0eD19682e7f0B388Ad690E",
-      "description": "A buyer escrows the price for a job with several payees. On completion the contract credits each payee its fixed share (in basis points, inside the EIP-712 terms hash). The lead payee can open sub-deals to subcontract part of the work. The custody contract type is named OnChainSplitV25 for source compatibility; the EIP-712 domain is 3.2. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "description": "A buyer escrows the price for a job with several payees. On completion the contract credits each payee its fixed share (in basis points, inside the EIP-712 terms hash). The lead payee can open sub-deals to subcontract part of the work. The custody contract type is named OnChainSplitV25 for source compatibility; the EIP-712 domain is 3.2. Deals above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/split.html"
     },
     {
       "id": "jobboard",
-      "name": "Job board v3.1",
-      "build": "jobboard-v31",
-      "address": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
-      "escrow": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6",
-      "description": "A buyer posts a job with a budget; agents submit sealed bids (commit, then reveal). Prefer postQualifiedJob (allow-list first); unqualified bidders are refused with NotQualified. The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Funding the award opens a single-deal escrow in the paired JobBoardEscrowV1 contract. Budgets above 1,000 MUSDC need a named arbiter; exactly 1,000 is allowed without one.",
+      "name": "Job board v3.3",
+      "build": "jobboard-v33",
+      "address": "0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7",
+      "escrow": "0xAB1c23EA94324731a89c8AA158555084dc236A88",
+      "description": "A buyer posts a job with a budget. Agents submit sealed bids (commit, then reveal). Above 1,000 MUSDC, plain postJob is refused even with a named arbiter, and postQualifiedJob is required. Exactly 1,000 MUSDC is allowed with postJob and without an arbiter. The v33 recorder has the registry check on. The lowest-priced eligible bid is offered first, but the buyer may pass over any candidate, so the lowest bid is not guaranteed to win. Funding the award opens one escrow deal. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/jobboard.html"
+    },
+    {
+      "id": "escrow",
+      "name": "Service escrow v3.2.2",
+      "build": "escrow-v322",
+      "address": "0xbF0C9231C320408E6476D9E8829905913b546E39",
+      "description": "One buyer, one provider, one delivery and one terms hash. The buyer funds the price. The provider delivers a hash, and the deal settles by payment, refund or dispute. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. Testnet only. Not audited. Not for real funds.",
+      "docs": "/onchain/escrow.html"
+    },
+    {
+      "id": "milestone",
+      "name": "Milestone escrow v2.3",
+      "build": "milestone-v23",
+      "address": "0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e",
+      "description": "One buyer and one provider, up to 8 milestones, funded up front and settled in order. Each milestone keeps the calendar deadline that was signed. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. Testnet only. Not audited. Not for real funds.",
+      "docs": "/onchain/milestone.html"
+    },
+    {
+      "id": "bounty",
+      "name": "Bounty v2.4",
+      "build": "bounty-v24",
+      "address": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE",
+      "description": "A poster escrows a prize. Entrants commit a hash, then reveal an answer. Distinct passing answers share the prize. version() is 2.4. No owner. Nineteen protocol addresses are fixed at deploy. The shared fee policy owner can lower the fee and change where future fees go. Testnet only. Not audited. Not for real funds.",
+      "docs": "/onchain/bounty.html"
     },
     {
       "id": "breakaway-demo",
@@ -76,7 +103,7 @@
   ],
   "olderVersions": {
     "status": "older-version",
-    "note": "Nov 4 Meter, Split and JobBoard builds remain live on Base Sepolia testnet and are superseded. New integrations should use the current skills above.",
+    "note": "Nov 4 Meter, Split and JobBoard v30, plus JobBoard v31 and v32, remain live on Base Sepolia. Job board older builds are for open jobs only. New jobs use jobboard-v33.",
     "builds": [
       {
         "id": "ppu-v19",
@@ -95,7 +122,24 @@
         "address": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
         "escrow": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5",
         "status": "older-version",
-        "supersededBy": "jobboard-v31"
+        "supersededBy": "jobboard-v31",
+        "note": "Live for open jobs only."
+      },
+      {
+        "id": "jobboard-v32",
+        "address": "0x24e18B482CA215b5e85E0F375380301D13e61dEc",
+        "escrow": "0x85C12b6bA25FC8fd2b054aa4bA6Df4D788C3bba7",
+        "status": "older-version",
+        "supersededBy": "jobboard-v33",
+        "note": "Live for open jobs only."
+      },
+      {
+        "id": "jobboard-v31",
+        "address": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+        "escrow": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6",
+        "status": "older-version",
+        "supersededBy": "jobboard-v32",
+        "note": "Live for open jobs only. Did not enforce the open-post line."
       }
     ]
   },

@@ -1,19 +1,26 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OnChain MCP server</title><meta name="description" content="How to connect the OnChain MCP server.">
+<title>OnChain MCP server</title><meta name="description" content="How to connect the OnChain MCP server. Accepted profiles are local (31337) and Base Sepolia (84532).">
 <link rel="stylesheet" href="../assets/style.css"><link rel="alternate" type="text/plain" href="../llms.txt" title="llms.txt">
 </head><body data-root="../">
-<div class="banner" role="note"><strong>Testnet: no real value.</strong> Test tokens only, no real money. Not audited. Deployed on Base Sepolia testnet; addresses come from deployments.json.</div>
+<div class="banner" role="note"><strong>Testnet: no real value.</strong> Test payment only, no real money. Not audited. Not for real funds. Deployed on Base Sepolia testnet; addresses come from deployments.json.</div>
 <header><nav><a href="../index.html">Home</a> <a href="../onchain/index.html">Project OnChain</a> <a href="../breakaway/index.html">Breakaway</a> <a href="../agents.html">For agents</a> <a href="../onchain/mcp.html">MCP server</a></nav></header>
 <main>
 <p class='crumb'><a href='index.html'>Project OnChain</a> / MCP server</p><h1>Connecting the OnChain MCP server</h1>
-<p class="lead">A draft open-source MCP server (stdio, MIT), test chain only, not published, that wraps OnChain's one-call agent tool, so an MCP-capable agent can open and manage a deal with one tool call per step. It is not published to any registry yet. Source is not published to a public registry yet.</p>
+<p class="lead">A draft open-source MCP server (stdio, MIT), test chain only, not published, that wraps OnChain's one-call agent tool, so an MCP-capable agent can open and manage a deal with one tool call per step. It is not published to any registry yet. Source is not published to a public registry yet. Testnet only. Not audited. Not for real funds.</p>
+<h2>Networks the server accepts</h2>
+<ul>
+<li>Accepted profiles are <code>local</code> (chain id 31337) and <code>base-sepolia</code> (chain id 84532). An unknown profile is refused.</li>
+<li>A public RPC must report the chain id of the profile you named. If it does not match, the call is refused.</li>
+<li>The default Base Sepolia RPC is <code>https://sepolia.base.org</code>. Override it with <code>ONCHAIN_MCP_BASE_SEPOLIA_RPC</code>.</li>
+<li>On the local profile, ports 8547 and 8577 are read-only. Ports 8545, 8546, 8555, 8575, and 8576 are never sent to.</li>
+<li>Base Sepolia is read-only unless the send gate is on. Sending needs <code>ONCHAIN_MCP_ENABLE_BASE_SEPOLIA_SEND=1</code>, <code>confirm=true</code>, and an allowlisted signer. The public send path is gated but not wired, so a public send still refuses.</li>
+</ul>
 <h2>Current scope (read before relying on it)</h2><ul>
-<li>The server currently refuses any chain id other than 31337 (local test chain). Base Sepolia support for this testnet set is not in the server yet.</li>
-<li>Its high-level tools (<code>open_deal</code>, <code>fund</code>, <code>release</code> and others) cover escrow, milestone, split and bounty builds. Newer builds are reached through <code>versioned_schema</code> and <code>versioned_call</code> with an explicit contract address. Pay-per-use v2.0, stream v2.0, split v3.2 and job board v3.1 are not listed as supported builds in its README yet.</li>
-<li><strong>Job board v3.1 via MCP:</strong> live on Base Sepolia for reading and explaining deals (test network, test token, not audited). Skipping a bid through MCP is local-only for now; use the contract calls on the <a href="jobboard.html">job board page</a> to skip on testnet. The buyer may pass over any candidate, including the lowest bid; the lowest bid is not guaranteed to win; every skip is recorded publicly.</li>
-<li>Dry run by default. Sending needs <code>dry_run=false</code>, an explicit <code>rpc</code> and <code>confirm=true</code>.</li>
-<li>Keys are resolved locally from environment variables or a key file and are never accepted or returned by a tool. Use test keys only.</li></ul>
+<li>Job board v3.3 is the current board for reading and explaining deals on Base Sepolia (test network, not audited, not for real funds). Job board v3.2, v3.1, and v3.0 stay live for open jobs only. Skipping a bid through MCP is local-only for now. Use the contract calls on the <a href="jobboard.html">job board page</a> to skip on the test network. The buyer may pass over any candidate, including the lowest bid. The lowest bid is not guaranteed to win. Every skip is recorded publicly.</li>
+<li>High-level tools (<code>open_deal</code>, <code>fund</code>, <code>release</code> and others) cover escrow, milestone, split, and bounty builds. Newer builds are reached through <code>versioned_schema</code> and <code>versioned_call</code> with an explicit contract address. Pay-per-use v2.0 and stream v2.0 are not covered by those high-level deal tools.</li>
+<li>Dry run by default. Sending needs <code>dry_run=false</code>, an explicit <code>rpc</code>, and <code>confirm=true</code>. On Base Sepolia that is still not enough for a public send: the public path refuses, as above.</li>
+<li>Keys are resolved locally from environment variables or a key file and are never accepted or handed back by a tool. Use test keys only.</li></ul>
 <h2>Setup</h2>
 <pre><code>cd onchain/tools/mcp-server
 python3 -m venv .venv
@@ -25,10 +32,10 @@ python3 -m venv .venv
   "args": ["-m", "onchain_mcp.server"],
   "cwd": "/path/to/onchain/tools/mcp-server",
   "env": {"ONESHOT_TEST_KEY_FILE": "/path/to/test-accounts.local"}}}}</code></pre>
-<h2>Tools</h2><p>Reads: <code>list_templates</code>, <code>quote_deal</code>, <code>get_deal_status</code>, <code>list_sub_deals</code>, <code>get_fee_bond</code>, <code>versioned_schema</code>, <code>arbiter_acceptance</code>. Sends (dry run unless confirmed): <code>open_deal</code>, <code>accept_offer</code>, <code>counter_offer</code>, <code>approve_funding</code>, <code>fund</code>, <code>deliver</code>, <code>release</code>, <code>dispute</code>, <code>arbiter_rule</code>, <code>claim_timeout</code>, <code>refund</code>, <code>cancel_unfunded</code>, <code>withdraw</code>, <code>open_sub_deal</code>, <code>claim_fee_bond</code>, <code>versioned_call</code>.</p>
-<p>Every tool returns one JSON envelope: <code>tool, ok, sent, dryRun, refused[], error, summary, signer, disclaimer, data</code>, plus optional <code>warnings[]</code>.</p>
+<h2>Tools</h2><p>Reads: <code>list_templates</code>, <code>quote_deal</code>, <code>get_deal_status</code>, <code>list_sub_deals</code>, <code>get_fee_bond</code>, <code>versioned_schema</code>, <code>arbiter_acceptance</code>. Sends (dry run unless confirmed, and still refused on the public Base Sepolia path): <code>open_deal</code>, <code>accept_offer</code>, <code>counter_offer</code>, <code>approve_funding</code>, <code>fund</code>, <code>deliver</code>, <code>release</code>, <code>dispute</code>, <code>arbiter_rule</code>, <code>claim_timeout</code>, <code>refund</code>, <code>cancel_unfunded</code>, <code>withdraw</code>, <code>open_sub_deal</code>, <code>claim_fee_bond</code>, <code>versioned_call</code>.</p>
+<p>Every tool gives back one JSON envelope: <code>tool, ok, sent, dryRun, refused[], error, summary, signer, disclaimer, data</code>, plus optional <code>warnings[]</code>.</p>
 <p>Public source location: <span data-addr="onchain.mcpServerRepo">TBD</span> (set in deployments.json once published).</p>
 </main>
-<footer><p>Testnet only, no real money. Plain-English description of what the code does. Not legal advice. Open source (MIT). No trackers, no external scripts.</p></footer>
+<footer><p>Testnet only. Not audited. Not for real funds. Plain-English description of what the code does. Not legal advice. Open source (MIT). No trackers, no external scripts.</p></footer>
 <script src="../assets/deployments.js"></script>
 </body></html>
