@@ -1,5 +1,5 @@
 {
-  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, JobBoard v31 (Nov 5). Stream v20 and MockUSDC unchanged from Nov 4. Nov 4 Meter, Split and JobBoard stay live under previousVersions. Breakaway is a live bounded demo on Base Sepolia (testnet only, no real value, no legal title); its addresses are under breakaway.",
+  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, Stream v20, JobBoard v33 (primary for new jobs), service escrow v3.2.2, milestone v2.3, and bounty v2.4. JobBoard v32, v31 and v30 stay live for open jobs only under previousVersions. The payment asset and Stream are unchanged from Nov 4. SplitUsabilityLens stays TBD_AFTER_DEPLOY. Breakaway is a live bounded demo on Base Sepolia (testnet only, no real value, no legal title); its addresses are under breakaway.",
   "network": {
     "name": "Base Sepolia",
     "chainId": 84532,
@@ -7,7 +7,7 @@
   },
   "onchain": {
     "paymentToken": {
-      "name": "payment token (testnet test token, 6 decimals, no value)",
+      "name": "payment asset (testnet, 6 decimals, no value)",
       "address": "0xb16660860D6fB4a871722aFd2CC52E461A77eC65"
     },
     "ppu": {
@@ -21,8 +21,20 @@
       "SplitUsabilityLens": "TBD_AFTER_DEPLOY"
     },
     "jobboard": {
-      "OnChainJobBoardV2": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
-      "JobBoardEscrowV1": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6"
+      "OnChainJobBoardV33": "0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7",
+      "JobBoardEscrowV1": "0xAB1c23EA94324731a89c8AA158555084dc236A88"
+    },
+    "escrow": {
+      "AgentServiceAgreementV32": "0xbF0C9231C320408E6476D9E8829905913b546E39"
+    },
+    "milestone": {
+      "MilestoneEscrowV2": "0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e"
+    },
+    "bounty": {
+      "OnChainBountyV23": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE"
+    },
+    "registry": {
+      "ProtocolAddressRegistry": "0xB2932054908BB016291429fbE8591Ae2cCBE9Efd"
     },
     "mcpServerRepo": "TBD_AFTER_PUBLISH",
     "supporting": {
@@ -32,33 +44,38 @@
       "METER_V20_FEE_POLICY": "0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad",
       "METER_V20_RECORDER": "0x82320Ed4a19B7866743a86320de2e03b3c485159",
       "METER_V20_RESOLVER": "0x0968B099A58CD0c0Bb089b6333c271257a483b42",
-      "JOBBOARD_V31_FEE_POLICY": "0x2De548B4B06062BA825f906a3edd169dec6C736a",
-      "JOBBOARD_V31_RECORDER": "0x33e9219a6fBc3f95F8c941c1B4AE398b349D25b3",
-      "JOBBOARD_V31_RESOLVER": "0x61d6E5dFdb001630806b9166178501a65e463f90",
       "SPLIT_V32_LIB": "0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497",
       "SPLIT_V32_FEE_POLICY": "0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392",
       "SPLIT_V32_RECORDER": "0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8",
-      "SPLIT_V32_RESOLVER": "0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa"
+      "SPLIT_V32_RESOLVER": "0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa",
+      "JOBBOARD_V33_FEE_POLICY": "0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4",
+      "JOBBOARD_V33_FEE_RECIPIENT": "0x68ce334aC945dFd07DF9437886389150a5A41493",
+      "JOBBOARD_V33_RECORDER": "0x10606daa9f9d12670Df50C5c5E717D64ce3269a4",
+      "JOBBOARD_V33_RESOLVER": "0x06272057b0Dfb22a17490576BBf9D1e4cb830adc",
+      "PROTOCOL_REGISTRY": "0xB2932054908BB016291429fbE8591Ae2cCBE9Efd"
     },
     "deployer": "0x68ce334aC945dFd07DF9437886389150a5A41493",
-    "deployedAt": "Stream and payment token: 2026-11-04, blocks 54524543 to 54524682. Meter v20, JobBoard v31, Split v32: 2026-11-05, blocks 54890349 to 54890449",
+    "deployedAt": "Stream and payment asset: 2026-11-04, blocks 54524543 to 54524682. Meter v20, JobBoard v31, Split v32: 2026-11-05, blocks 54890349 to 54890449. JobBoard v33: block 56661016. Service escrow v3.2.2, milestone v2.3 and bounty v2.4 use the same v33 fee policy.",
     "versions": {
       "ppu": "ppu-v20 (VERSION per contract)",
       "stream": "stream-v20 (unchanged, live Nov 4 deploy)",
       "split": "split-v32 (split-v3.2)",
-      "jobboard": "jobboard-v31 (escrow jobboard-escrow-v3.1)"
+      "jobboard": "jobboard-v33 (VERSION jobboard-v3.3, paired escrow VERSION jobboard-escrow-v3.1)",
+      "escrow": "escrow-v322 (EIP-712 domain version 3.2.2, contract AgentServiceAgreementV32)",
+      "milestone": "milestone-v23 (EIP-712 domain version 2.3, contract MilestoneEscrowV2)",
+      "bounty": "bounty-v24 (version() 2.4, contract OnChainBountyV23)"
     },
     "arbiterThreshold": {
       "baseUnits": 1000000000,
       "musdc": 1000,
-      "appliesTo": "Split v32, Meter v20, JobBoard v31 (Stream v20 unchanged)",
-      "rule": "price above threshold needs a named arbiter; equality allowed without one"
+      "appliesTo": "Split v32, Meter v20, JobBoard v33 (Stream v20 unchanged). Service escrow v3.2.2, milestone v2.3 and bounty v2.4 do not use this job-board line.",
+      "rule": "A job-board budget above the line needs a named arbiter. Exactly 1,000 MUSDC is allowed without one. On the v33 deploy, OPEN_POST_LIMIT is the same 1,000 MUSDC, and plain postJob above that line is refused."
     },
-    "jobboardPostingDefault": "postQualifiedJob: with an allow-list it enables allow-list mode; without one, minCompletedValue defaults to the budget (fresh boards are allow-list-first)",
+    "jobboardPostingDefault": "v33 enforces the open-post line. postJob reverts when the budget is above OPEN_POST_LIMIT (1,000 MUSDC, 1000000000 base units on this deploy), even with a named arbiter. postQualifiedJob is the only posting path above that line. A supplied allow-list turns allow-list mode on. With no allow-list, a zero minCompletedValue defaults to the budget. A budget above ARBITER_THRESHOLD still needs a named arbiter. On this deploy both lines are 1,000 MUSDC, so exactly 1,000 is allowed with postJob and without an arbiter.",
     "previousVersions": {
       "status": "older-version",
-      "note": "Nov 4 set, still live on Base Sepolia testnet, superseded. New integrations should use the current addresses above.",
-      "supersededBy": "current onchain.ppu / onchain.split / onchain.jobboard and supporting METER_V20_*, JOBBOARD_V31_*, SPLIT_V32_*",
+      "note": "Older builds still live on Base Sepolia. JobBoard v32, v31 and v30 are for open jobs only. New jobs use jobboard-v33. New integrations should use the current addresses above.",
+      "supersededBy": "current onchain.ppu / onchain.split / onchain.jobboard and supporting METER_V20_*, JOBBOARD_V33_*, SPLIT_V32_*",
       "contracts": {
         "OnChainMeterV1 (ppu-v19)": {
           "address": "0x716E4b09ec864cE29bE13206554189a31eB3A224",
@@ -114,8 +131,72 @@
           "address": "0x37dC7268b328C820292D5FA6A0AFE42672Ac5A9e",
           "status": "older-version",
           "supersededBy": "0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8"
+        },
+        "OnChainJobBoardV2 (jobboard-v31)": {
+          "address": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+          "status": "older-version",
+          "supersededBy": "0x24e18B482CA215b5e85E0F375380301D13e61dEc",
+          "note": "Live for open jobs only. Not for new jobs. v31 did not enforce the open-post line."
+        },
+        "JobBoardEscrowV1 (jobboard-v31)": {
+          "address": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6",
+          "status": "older-version",
+          "supersededBy": "0x85C12b6bA25FC8fd2b054aa4bA6Df4D788C3bba7",
+          "note": "Live for open jobs only."
+        },
+        "JOBBOARD_V31_FEE_POLICY": {
+          "address": "0x2De548B4B06062BA825f906a3edd169dec6C736a",
+          "status": "older-version",
+          "supersededBy": "0x076167Ee9FF648087eA621B4eBEC1095eF2a74d0"
+        },
+        "JOBBOARD_V31_RECORDER": {
+          "address": "0x33e9219a6fBc3f95F8c941c1B4AE398b349D25b3",
+          "status": "older-version",
+          "supersededBy": "0x219A418F27802F21EA509f8356c7d06c74323Cf0"
+        },
+        "JOBBOARD_V31_RESOLVER": {
+          "address": "0x61d6E5dFdb001630806b9166178501a65e463f90",
+          "status": "older-version",
+          "supersededBy": "0xB2e2C5FEbAc5eBF63b0DbbC6A2CD5c58433594Fc"
+        },
+        "OnChainJobBoardV2 (jobboard-v32)": {
+          "address": "0x24e18B482CA215b5e85E0F375380301D13e61dEc",
+          "status": "older-version",
+          "supersededBy": "0x28Eb3B4684931cA32e3E6cBf7F4664B661d564A7",
+          "note": "Live for open jobs only. Not for new jobs. VERSION() is jobboard-v3.2."
+        },
+        "JobBoardEscrowV1 (jobboard-v32)": {
+          "address": "0x85C12b6bA25FC8fd2b054aa4bA6Df4D788C3bba7",
+          "status": "older-version",
+          "supersededBy": "0xAB1c23EA94324731a89c8AA158555084dc236A88",
+          "note": "Live for open jobs only."
+        },
+        "JOBBOARD_V32_FEE_POLICY": {
+          "address": "0x076167Ee9FF648087eA621B4eBEC1095eF2a74d0",
+          "status": "older-version",
+          "supersededBy": "0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4"
+        },
+        "JOBBOARD_V32_RECORDER": {
+          "address": "0x219A418F27802F21EA509f8356c7d06c74323Cf0",
+          "status": "older-version",
+          "supersededBy": "0x10606daa9f9d12670Df50C5c5E717D64ce3269a4",
+          "note": "Registry check is off: REGISTRY() is the zero address."
+        },
+        "JOBBOARD_V32_RESOLVER": {
+          "address": "0xB2e2C5FEbAc5eBF63b0DbbC6A2CD5c58433594Fc",
+          "status": "older-version",
+          "supersededBy": "0x06272057b0Dfb22a17490576BBf9D1e4cb830adc"
         }
-      }
+      },
+      "jobboardV32": "0x24e18B482CA215b5e85E0F375380301D13e61dEc",
+      "jobboardV32Escrow": "0x85C12b6bA25FC8fd2b054aa4bA6Df4D788C3bba7",
+      "jobboardV32FeePolicy": "0x076167Ee9FF648087eA621B4eBEC1095eF2a74d0",
+      "jobboardV32Recorder": "0x219A418F27802F21EA509f8356c7d06c74323Cf0",
+      "jobboardV32Resolver": "0xB2e2C5FEbAc5eBF63b0DbbC6A2CD5c58433594Fc",
+      "jobboardV31": "0x6c53EaD9a3174957032F65D897b70333428AdfF4",
+      "jobboardV31Escrow": "0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6",
+      "jobboardV30": "0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec",
+      "jobboardV30Escrow": "0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5"
     }
   },
   "breakaway": {

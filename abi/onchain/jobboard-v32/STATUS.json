@@ -1,0 +1,5 @@
+{
+  "status": "older-version",
+  "build": "jobboard-v32",
+  "note": "Older job board, live for open jobs only. Board VERSION() is jobboard-v3.2. Paired escrow VERSION() is jobboard-escrow-v3.1. Not for new jobs. Pair with previousVersions in /deployments.json."
+}

@@ -1,0 +1,2165 @@
+[
+ {
+  "type": "constructor",
+  "inputs": [
+   {
+    "name": "token_",
+    "type": "address",
+    "internalType": "contract IERC20"
+   },
+   {
+    "name": "policy_",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   },
+   {
+    "name": "marsDelay_",
+    "type": "uint32",
+    "internalType": "uint32"
+   },
+   {
+    "name": "maxTotalFeeBps_",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "protocol_",
+    "type": "address[]",
+    "internalType": "address[]"
+   },
+   {
+    "name": "refPredicates_",
+    "type": "address[]",
+    "internalType": "address[]"
+   },
+   {
+    "name": "refGates_",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "AlreadyClaimed",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "AlreadyCommitted",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadGate",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "gate",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadPredicate",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "predicate",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadReference",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "ref",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadState",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "uint8"
+   },
+   {
+    "name": "expected",
+    "type": "uint8",
+    "internalType": "uint8"
+   }
+  ]
+ },
+ {
+  "name": "BountyNotPoster",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "caller",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "CommitPhaseNotOpen",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "opensAt",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "closesAt",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "CommitPhaseStarted",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "commitStart",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "DepositTooHigh",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "deposit",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "maxDeposit",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "DurationOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "field",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "ExactMatchRequired",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "FeeModelUnsupported",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "GateCodeChanged",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "GuardOutOfRange",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "InsufficientGasForCheck",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "needed",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "MarsDelayOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "NoCheck",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotAWinner",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "NotBuyer",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotCommitted",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "NotEligible",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "entrant",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "NothingToWithdraw",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "PosterCannotSolve",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "PredicateCodeChanged",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "PredicateGasOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "PriceTooLarge",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "ReentrancyGuardReentrantCall",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "RelayPreimageMismatch",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "RevealNotOpen",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "opensAfter",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "RevealPhaseNotOver",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "RevealWindowClosed",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "SafeERC20FailedOperation",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "token",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "TotalFeeTooHigh",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "feeBps",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "maxBps",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "TransferAmountMismatch",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "expected",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "received",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "TwoChecks",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "UnknownAgreement",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "WrongToken",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "expected",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "ZeroAddress",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ZeroHash",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ZeroPrice",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BountyPosted",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "prize",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "deposit",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "commitStart",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "commitEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "entrantGate",
+    "type": "address",
+    "indexed": false,
+    "internalType": "address"
+   },
+   {
+    "name": "termsURI",
+    "type": "string",
+    "indexed": false,
+    "internalType": "string"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Committed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "commitment",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Finalized",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "outcome",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IOnChainBountyV21.State"
+   },
+   {
+    "name": "distinctAnswers",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "winnerEntries",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "perAnswer",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "forfeits",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "paidAnswers",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "paidOut",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "OutcomeRecorded",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "outcome",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IOnChainBountyV21.State"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "prize",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "PassedUnpaid",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "PrizeClaimed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "gross",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Revealed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "valid",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   },
+   {
+    "name": "passed",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   },
+   {
+    "name": "answerHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Withdrawal",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "token",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "BOUNTY_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "CHECK_OVERHEAD_GAS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "COMMIT_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "FEE_GUARD_CEILING_BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "FEE_POLICY",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "FEE_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "GATE_GAS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MARS_DELAY",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_COMMIT_LEAD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_COMMIT_PHASE",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_DEPOSIT_BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_PREDICATE_GAS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_PRICE",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_REVEAL_WINDOW",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_TOTAL_FEE_BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MIN_PREDICATE_GAS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "OWNER_POWERS_HASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TERMS_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TIME_FLOOR",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TOKEN",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IERC20"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "answerCount",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "answerRank",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "cancel",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "checkCache",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "uint8"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "claimMany",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solvers",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "claimPrize",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "claimable",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "a",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "commit",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "commitment",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "commitmentOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "answer",
+    "type": "bytes",
+    "internalType": "bytes"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "custodyOk",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "entryOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "status",
+      "type": "uint8",
+      "internalType": "enum IOnChainBountyV21.EntryStatus"
+     },
+     {
+      "name": "passed",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "claimed",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "commitment",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "answerHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "rank",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Entry"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "finalize",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "finalizeAndClaimMany",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solvers",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "getBounty",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "prize",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "deposit",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "targetHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "predicate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "predicateGas",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "entrantGate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "commitStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Terms"
+   },
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.FeeTerms"
+   },
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "poster",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "state",
+      "type": "uint8",
+      "internalType": "enum IOnChainBountyV21.State"
+     },
+     {
+      "name": "postedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "commitCount",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "validCount",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "distinctPassing",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "passingEntries",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "perAnswer",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "predicateCodeHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "gateCodeHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Progress"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "hashBounty",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "t",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "prize",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "deposit",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "targetHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "predicate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "predicateGas",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "entrantGate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "commitStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Terms"
+   },
+   {
+    "name": "f",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.FeeTerms"
+   },
+   {
+    "name": "poster",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "predicateCodeHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "gateCodeHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "pure"
+ },
+ {
+  "name": "isProtocolAddress",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "a",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "maxDepositFor",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "prize",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "pure"
+ },
+ {
+  "name": "nextId",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "outcomeOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "outcome",
+      "type": "uint8",
+      "internalType": "enum IOnChainBountyV21.State"
+     },
+     {
+      "name": "poster",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "distinctAnswers",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "winnerEntries",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "paidAnswers",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "paidEntries",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "unpaidEntries",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "prize",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "paidOut",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "feeCharged",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "at",
+      "type": "uint64",
+      "internalType": "uint64"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Outcome"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "post",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "t",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "token",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "prize",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "deposit",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "targetHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "predicate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "predicateGas",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "entrantGate",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "commitStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.Terms"
+   },
+   {
+    "name": "termsURI",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "protocolAddresses",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "quoteFeeTerms",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "prize",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "f",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "feePolicy",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "skimBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     }
+    ],
+    "internalType": "struct IOnChainBountyV21.FeeTerms"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "referenceAddresses",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "referenceKind",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "uint8"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "resultOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "enum IOnChainBountyV21.EntryResult"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "reveal",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "answer",
+    "type": "bytes",
+    "internalType": "bytes"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "revealFor",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "answer",
+    "type": "bytes",
+    "internalType": "bytes"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "shareOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "gross",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "solverStatus",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "solver",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "state",
+    "type": "uint8",
+    "internalType": "enum IOnChainBountyV21.State"
+   },
+   {
+    "name": "entry",
+    "type": "uint8",
+    "internalType": "enum IOnChainBountyV21.EntryStatus"
+   },
+   {
+    "name": "commitEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "needsReveal",
+    "type": "bool",
+    "internalType": "bool"
+   },
+   {
+    "name": "needsClaim",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "stateOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint8",
+    "internalType": "enum IOnChainBountyV21.State"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "termsHashOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "id",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "totalClaimable",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "totalEscrowed",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "version",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "stateMutability": "pure"
+ },
+ {
+  "name": "withdraw",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ }
+]

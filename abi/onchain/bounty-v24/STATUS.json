@@ -1,0 +1,6 @@
+{
+  "status": "current",
+  "build": "bounty-v24",
+  "compiler": "0.8.29+commit.ab55807c",
+  "note": "ABI from the Sourcify full match of bounty v2.4. version() returns 2.4. The contract type is OnChainBountyV23. Pair with addresses in /deployments.json."
+}

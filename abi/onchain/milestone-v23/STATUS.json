@@ -1,0 +1,6 @@
+{
+  "status": "current",
+  "build": "milestone-v23",
+  "compiler": "0.8.29+commit.ab55807c",
+  "note": "ABI from the Sourcify full match of milestone escrow v2.3 (EIP-712 domain version 2.3). Pair with addresses in /deployments.json."
+}

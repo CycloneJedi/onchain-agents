@@ -1,0 +1,1294 @@
+[
+ {
+  "type": "constructor",
+  "inputs": [
+   {
+    "name": "token_",
+    "type": "address",
+    "internalType": "contract IERC20"
+   },
+   {
+    "name": "board_",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "recorder_",
+    "type": "address",
+    "internalType": "contract IJobOutcomeRecorder"
+   },
+   {
+    "name": "marsDelay_",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "BadArbiter",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "arbiter",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadDealState",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   },
+   {
+    "name": "expected",
+    "type": "uint8",
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   }
+  ]
+ },
+ {
+  "name": "BadDealStateRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   },
+   {
+    "name": "min",
+    "type": "uint8",
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   },
+   {
+    "name": "max",
+    "type": "uint8",
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   }
+  ]
+ },
+ {
+  "name": "BadPrice",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BadRecorder",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "recorder",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "DeadlineNotPassed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "DeadlinePassed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "DealExists",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "DisputeTimedOut",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "DisputeTimeoutNotReached",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "at",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "DurationOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "field",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "value",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "EmptyDeliverable",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "GrossBelowPaid",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "alreadyPaid",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "InsufficientGasForHook",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "needed",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "InvalidDisputeAmount",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "MarsDelayOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "NotArbiter",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotBoard",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotBuyer",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotParty",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotProvider",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotRequested",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NothingToWithdraw",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ReentrancyGuardReentrantCall",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ReviewWindowClosed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ReviewWindowOpen",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "endsAt",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "SafeERC20FailedOperation",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "token",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "SplitTooLarge",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "TransferAmountMismatch",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "expected",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "received",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "ZeroAddress",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "Credited",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "DealOpened",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "buyer",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "provider",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "arbiterWindow",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "longestHold",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "lateReviewExtension",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "deliveryDeadline",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "latestRelease",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Delivered",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "deliverableHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "DisputeAmountDeclared",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "disputedAmount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "DisputeResolved",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "buyerRefund",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "rulingHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "DisputeTimedOutResolved",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Disputed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "by",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "reasonHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "MutualCancelRequested",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "by",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "cancelNonce",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "MutualCancelRevoked",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "by",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Paid",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerNet",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "automatic",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Receipt",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "outcome",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IJobBoardEscrowV1.DealState"
+   },
+   {
+    "name": "toProvider",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "toBuyer",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fee",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "TrustRecordFailed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Withdrawn",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "account",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "BOARD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MARS_DELAY",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "RECORDER",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IJobOutcomeRecorder"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TOKEN",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IERC20"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TRUST_HOOK_GAS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "VERSION",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "claimAfterReview",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "claimable",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "a",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "deliver",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deliverableHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "disputeEnd",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "getDeal",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "state",
+      "type": "uint8",
+      "internalType": "enum IJobBoardEscrowV1.DealState"
+     },
+     {
+      "name": "everDisputed",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "feeBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "cancelNonce",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "buyerCancelTag",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "providerCancelTag",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "fundedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deliveredAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "disputedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "provider",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "paid",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "fee",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "buyerCancelGross",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "providerCancelGross",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "deliverableHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "disputedAmount",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "arbiterWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IJobBoardEscrowV1.Deal"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "longestHoldOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "open",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "p",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "provider",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "feeBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "deadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "termsHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "arbiterWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IJobBoardEscrowV1.OpenParams"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "openDispute",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "disputedAmount",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "reasonHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "openDispute",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "reasonHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "refundAfterDeadline",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "release",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "requestMutualCancel",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "resolutionEnd",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "resolveByTimeout",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "resolveDispute",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "providerGross",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "rulingHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "reviewEnd",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "revokeMutualCancel",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "dealId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "totalClaimable",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "totalEscrowed",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "withdraw",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ }
+]
