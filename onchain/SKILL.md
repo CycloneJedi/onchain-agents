@@ -98,7 +98,7 @@ status: "Testnet only. Not audited. Not for real funds."
 - A blank dispute timeout becomes 24 hours. A blank fallback is a 50/50 split. Only a dispute timeout or a blank fallback gives the odd unit to the provider. An arbiter ruling and a mutual settlement are paid exactly as given.
 - This deploy sets `trustRegistry` to the zero address. It writes no trust records and does no registry screening.
 - The owner can pause new `propose` and `counterPropose` calls only. The owner can give up ownership only while the contract is not paused. Deals that already exist can still be finished.
-- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change.
+- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner's own wallet address (an EOA) 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change.
 - This escrow can hold payment for longer than 90 days.
 - Testnet only. Not audited. Not for real funds.
 - `OWNER_POWERS_HASH`: `0x16d1b35fc452264898501f49429f2d3dc6ebfe53ff922c460bd8e73a40437f1d`.
@@ -127,7 +127,7 @@ status: "Testnet only. Not audited. Not for real funds."
 - Fee preset 10 bps (0.1%) of what the provider is paid. No fee on a refund.
 - Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and giving up ownership is allowed only while not paused.
 - The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them.
-- Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit). Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
+- Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), and the signed OWNER-POWERS.deployed.md for escrow-v322 and milestone-v23 wrongly says there is no setFeeRecipient. The correction is in OWNER-POWERS.deployed.ADDENDUM.md, which is not part of the signed hash. Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
 
 ## MCP server
 - A draft open-source MCP server, test chain only, not published. See [/onchain/mcp.html](mcp.html).

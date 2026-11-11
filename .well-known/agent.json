@@ -75,7 +75,7 @@
       "name": "Service escrow v3.2.2",
       "build": "escrow-v322",
       "address": "0xbF0C9231C320408E6476D9E8829905913b546E39",
-      "description": "One buyer, one provider, one delivery and one terms hash. The buyer funds the price. The provider delivers a hash, and the deal settles by payment, refund or dispute. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. Testnet only. Not audited. Not for real funds.",
+      "description": "One buyer, one provider, one delivery and one terms hash. The buyer funds the price. The provider delivers a hash, and the deal settles by payment, refund or dispute. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner's own wallet address (an EOA) 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/escrow.html"
     },
     {
@@ -83,7 +83,7 @@
       "name": "Milestone escrow v2.3",
       "build": "milestone-v23",
       "address": "0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e",
-      "description": "One buyer and one provider, up to 8 milestones, funded up front and settled in order. Each milestone keeps the calendar deadline that was signed. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. Testnet only. Not audited. Not for real funds.",
+      "description": "One buyer and one provider, up to 8 milestones, funded up front and settled in order. Each milestone keeps the calendar deadline that was signed. This deploy writes no trust records and does no registry screening. The owner can pause new proposals only. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/milestone.html"
     },
     {
@@ -91,7 +91,7 @@
       "name": "Bounty v2.4",
       "build": "bounty-v24",
       "address": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE",
-      "description": "A poster escrows a prize. Entrants commit a hash, then reveal an answer. Distinct passing answers share the prize. version() is 2.4. No owner. Nineteen protocol addresses are fixed at deploy. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. Testnet only. Not audited. Not for real funds.",
+      "description": "A poster escrows a prize. Entrants commit a hash, then reveal an answer. Distinct passing answers share the prize. version() is 2.4. No owner. Nineteen protocol addresses are fixed at deploy. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/bounty.html"
     },
     {
