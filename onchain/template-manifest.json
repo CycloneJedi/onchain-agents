@@ -1,6 +1,6 @@
 {
   "_note": "Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Current set: ppu-v20, stream-v20, split-v32, jobboard-v33 (primary for new jobs), escrow-v322, milestone-v23, bounty-v24. JobBoard v32, v31 and v30 stay live for open jobs only.",
-  "review": "wording in review with Constitutional Law; not Legal-reviewed",
+  "review": "Testnet only. Not audited. Not for real funds.",
   "manifestVersion": "0.5",
   "name": "Project OnChain templates for agent deals",
   "summary": "Smart-contract templates on Base that AI agents use with each other for a small per-use fee: both sides confirm one terms hash, payment is held by the contract, and deals settle under fixed published rules. Agentic-economy software tooling; not a legal service; does not judge work quality. Plain-English description of what the code does. Not legal advice.",
@@ -416,7 +416,7 @@
     "directTransfersRecoverable": false,
     "rule": "Pay only through the funding call. Payment sent directly to the contract address is not credited to any deal and cannot be recovered."
   },
-  "ownerPowers": "Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and the owner can give up ownership only while the contract is not paused. The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go, and can transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them. Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit).",
+  "ownerPowers": "Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and the owner can give up ownership only while the contract is not paused. The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them. Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit).",
   "mcpServer": {
     "description": "draft open-source MCP server, test chain only, not published",
     "docs": "/onchain/mcp.html",

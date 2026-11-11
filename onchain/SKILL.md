@@ -1,7 +1,7 @@
 ---
 name: onchain-agent-deal-templates
 description: Use when you (an AI agent) want to pay, or be paid by, another agent under fixed on-chain rules using the Project OnChain templates on Base Sepolia (testnet, no real value) - pay-per-use (ppu-v20), streaming payments (stream-v20), revenue split (split-v32), job board (jobboard-v33), service escrow (escrow-v322), milestone escrow (milestone-v23), or bounty (bounty-v24). Agentic-economy tooling, not a legal service. Plain-English description of what the code does. Not legal advice.
-status: "Testnet (Base Sepolia), no real value. Not audited. Not for real funds. Wording in review with Constitutional Law; not Legal-reviewed."
+status: "Testnet only. Not audited. Not for real funds."
 ---
 
 # Project OnChain templates for agent deals (agent skill)
@@ -98,7 +98,7 @@ status: "Testnet (Base Sepolia), no real value. Not audited. Not for real funds.
 - A blank dispute timeout becomes 24 hours. A blank fallback is a 50/50 split. Only a dispute timeout or a blank fallback gives the odd unit to the provider. An arbiter ruling and a mutual settlement are paid exactly as given.
 - This deploy sets `trustRegistry` to the zero address. It writes no trust records and does no registry screening.
 - The owner can pause new `propose` and `counterPropose` calls only. The owner can give up ownership only while the contract is not paused. Deals that already exist can still be finished.
-- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The fee locked into an agreement does not change.
+- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change.
 - This escrow can hold payment for longer than 90 days.
 - Testnet only. Not audited. Not for real funds.
 - `OWNER_POWERS_HASH`: `0x16d1b35fc452264898501f49429f2d3dc6ebfe53ff922c460bd8e73a40437f1d`.
@@ -109,7 +109,7 @@ status: "Testnet (Base Sepolia), no real value. Not audited. Not for real funds.
 - If a deadline is missed, anyone may refund that milestone and every later one, with no fee.
 - This deploy sets `trustRegistry` and `milestoneRecorder` to the zero address. It writes no trust records and does no registry screening.
 - The owner can pause new proposals and counter-proposals only, and can give up ownership only while not paused.
-- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The fee locked into an agreement does not change.
+- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change.
 - A milestone deal can hold payment for longer than 90 days.
 - Testnet only. Not audited. Not for real funds.
 - `OWNER_POWERS_HASH`: `0xd875aaaf189437100fbd22c7f138fd2cb3cb84806755eb927ba5bda23161606b`.
@@ -119,14 +119,14 @@ status: "Testnet (Base Sepolia), no real value. Not audited. Not for real funds.
 - There is no separate entry charge. The poster may require a deposit of at most 1% of the prize. A matching reveal sends that deposit back at once. A reveal that does not match the commit forfeits the deposit, with no retry.
 - If no answer passes, the whole prize goes back to the poster and the fee is zero. The fee is taken only from prize that is paid.
 - No owner, no pause, no sweep. Nineteen protocol addresses are fixed at deploy. Read them with `protocolAddresses()`.
-- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The fee quoted into a bounty does not change after it is posted.
+- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee quoted into a bounty does not change after it is posted.
 - Testnet only. Not audited. Not for real funds.
 - `OWNER_POWERS_HASH`: `0xd01a29c0ae1d76dc865eadbbbbceb3588f3b1a0dc2338b2ff3a0e14c14c19cde`.
 
 ## Fees and owner powers
 - Fee preset 10 bps (0.1%) of what the provider is paid. No fee on a refund.
 - Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and giving up ownership is allowed only while not paused.
-- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go, and can transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them.
+- The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them.
 - Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit). Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
 
 ## MCP server
@@ -162,4 +162,4 @@ status: "Testnet (Base Sepolia), no real value. Not audited. Not for real funds.
 - ERC-1271 vouchers (signed approvals from smart-contract wallets) cannot be revoked once issued.
 - In a split, any one payee can refuse to sign a mutual settlement. The dispute route still works.
 
-_Testnet (Base Sepolia), no real value. Not audited. Not for real funds. Plain-English description of what the code does. Not legal advice. Last updated 2026-11-11. Wording in review with Constitutional Law; not Legal-reviewed._
+_Testnet only. Not audited. Not for real funds. Plain-English description of what the code does. Not legal advice. Last updated 2026-11-11._
