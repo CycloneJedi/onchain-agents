@@ -250,27 +250,27 @@
   "name": "bid",
   "inputs": [
    {
-    "name": "tile",
+    "name": "tileId",
     "type": "uint16",
     "internalType": "uint16"
    },
    {
-    "name": "amount",
+    "name": "bidAmount",
     "type": "uint256",
     "internalType": "uint256"
    },
    {
-    "name": "charter",
+    "name": "charterElected",
     "type": "bool",
     "internalType": "bool"
    },
    {
-    "name": "name",
+    "name": "charterNameHash",
     "type": "bytes32",
     "internalType": "bytes32"
    },
    {
-    "name": "signature",
+    "name": "assentSig",
     "type": "bytes",
     "internalType": "bytes"
    }
@@ -496,6 +496,25 @@
    }
   ],
   "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "minRaise",
+  "inputs": [
+   {
+    "name": "leading",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "pure"
  },
  {
   "type": "function",
@@ -781,6 +800,19 @@
   "type": "function",
   "name": "withdrawRefund",
   "inputs": [],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "withdrawRefund",
+  "inputs": [
+   {
+    "name": "to",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
   "outputs": [],
   "stateMutability": "nonpayable"
  },
@@ -1155,6 +1187,17 @@
   "type": "error",
   "name": "InvalidShortString",
   "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "MergedNotAuctionable",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ]
  },
  {
   "type": "error",

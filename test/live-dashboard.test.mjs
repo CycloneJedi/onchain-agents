@@ -299,7 +299,7 @@ assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === '
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'totalClaimable'), 'ESC33 totalClaimable missing');
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'getDeal'), 'ESC33 getDeal missing');
 assert(LOG_LOOKBACK === 3000n, 'lookback changed');
-assert(listed(cfg.addresses.TileRegistry)?.status === 'current', 'RegistryNext is not marked current');
+assert(listed('0x38a27bda10fa4ffd61406642f558818f91333d12')?.status === 'current', 'RegistryNext is not marked current');
 assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
 assert(cfg.addresses.TileRegistry.toLowerCase() === '0x38a27bda10fa4ffd61406642f558818f91333d12', 'live reads are not on RegistryNext');
 assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');

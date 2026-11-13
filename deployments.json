@@ -125,13 +125,12 @@
     "TileRegistry": "0x38a27bda10FA4ffd61406642F558818F91333D12",
     "DemoClaim": "0x08Bc09020bb7cca1ACdB22F74F7EB21f6eb5a44e",
     "DemoVault": "0xE62Be8378830D2Fe9F4b4005f44B6348C06a0b22",
-    "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb",
     "DemoAuction": "0xF2dEC91b7C2290a837554C688C9d621dd23D18aa",
     "DemoRegistration": "0xDCD13dE3De8F2d3a551261FE905abdD2C10a4aE6",
     "DemoScheduler": "0xd074ed43d400dd861BF15367195AC0d8b2E2E665",
     "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5",
     "previousVersions": {
-      "status": "older",
+      "status": "historical snapshot; shared addresses remain current",
       "addresses": {
         "DemoTreasury": "0x030b3834397867b9ff8d550c9d5a4f11fe0260b4",
         "SanctionsOracle": "0xe8fc9c4275e08754ad5f95217f977ab3d9319bc3",
@@ -148,6 +147,17 @@
     },
     "CharterRegistry": "0x891Ad9C7c552fb41CEC0579FDfB9F1e91fe7A932",
     "GovernanceRouter": "0x0632a92d2a4071F8Fd0739a69C4c64a720Ec81aF",
-    "logOriginBlock": 57514697
+    "intermediateVersion": {
+      "status": "older",
+      "addresses": {
+        "TileRegistry": "0x199eeB5a5Cc8aD4AFb204350d2f7521eEaE1f86B",
+        "DemoClaim": "0xa751b188785555d663AaEcf5b73f19B89a8A9090",
+        "DemoVault": "0xc799927eA03D9C0b552DDebC54f3DFA153Ee4843",
+        "DemoAuction": "0x7a2f1B3Ba731ABa07Ae069CC3ef83E03F6B37557",
+        "DemoRegistration": "0x11A60731B5a6015488eAE4De428D9b35264F33F0",
+        "DemoScheduler": "0x158B9800E80eE87561fC67bC186891a6a84257f1",
+        "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb"
+      }
+    }
   }
 }
