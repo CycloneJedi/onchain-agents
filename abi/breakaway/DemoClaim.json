@@ -124,6 +124,30 @@
  },
  {
   "type": "function",
+  "name": "burnForMerge",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "expectedOwner",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "formerOwner",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
   "name": "deleteDefaultRoyalty",
   "inputs": [],
   "outputs": [],
@@ -181,6 +205,19 @@
     "name": "",
     "type": "bool",
     "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "mergeRegistry",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IMergeLookup"
    }
   ],
   "stateMutability": "view"
@@ -284,6 +321,32 @@
   "type": "function",
   "name": "renounceOwnership",
   "inputs": [],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "resetLoyaltyOnTerritoryExit",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "resetLoyaltyOnTerritoryTransfer",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
   "outputs": [],
   "stateMutability": "nonpayable"
  },
@@ -475,6 +538,19 @@
     "name": "uri",
     "type": "string",
     "internalType": "string"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "setMergeRegistry",
+  "inputs": [
+   {
+    "name": "registry_",
+    "type": "address",
+    "internalType": "address"
    }
   ],
   "outputs": [],
@@ -751,6 +827,32 @@
  },
  {
   "type": "event",
+  "name": "LoyaltyResetFailed",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "indexed": true,
+    "internalType": "uint16"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "MergeRegistrySet",
+  "inputs": [
+   {
+    "name": "mergeRegistry",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
   "name": "MinterSet",
   "inputs": [
    {
@@ -972,6 +1074,43 @@
  },
  {
   "type": "error",
+  "name": "InsufficientGasForReset",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "InvalidTileId",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "LiveTileToken",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ]
+ },
+ {
+  "type": "error",
+  "name": "MergeRegistryAlreadySet",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "MergeRegistryHasNoCode",
+  "inputs": []
+ },
+ {
+  "type": "error",
   "name": "MintERC2309QuantityExceedsLimit",
   "inputs": []
  },
@@ -998,6 +1137,11 @@
  {
   "type": "error",
   "name": "NotCompatibleWithSpotMints",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "NotMergeRegistry",
   "inputs": []
  },
  {
@@ -1047,6 +1191,11 @@
     "internalType": "uint16"
    }
   ]
+ },
+ {
+  "type": "error",
+  "name": "RouterHasNoCode",
+  "inputs": []
  },
  {
   "type": "error",

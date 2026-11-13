@@ -101,13 +101,32 @@
  },
  {
   "type": "function",
+  "name": "bountyWaived",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
   "name": "charterRegistry",
   "inputs": [],
   "outputs": [
    {
     "name": "",
     "type": "address",
-    "internalType": "contract ICharterRegistryLike"
+    "internalType": "contract ICharterClock"
    }
   ],
   "stateMutability": "view"
@@ -143,13 +162,13 @@
   "name": "dissolve",
   "inputs": [
    {
-    "name": "",
+    "name": "tileId",
     "type": "uint16",
     "internalType": "uint16"
    }
   ],
   "outputs": [],
-  "stateMutability": "pure"
+  "stateMutability": "nonpayable"
  },
  {
   "type": "function",
@@ -272,6 +291,19 @@
  },
  {
   "type": "function",
+  "name": "mergedPayoutEnabled",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
   "name": "nft",
   "inputs": [],
   "outputs": [
@@ -295,6 +327,53 @@
    }
   ],
   "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "parkEscheat",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "formerOwner",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "arrears",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "bounty",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "pay",
+  "inputs": [
+   {
+    "name": "to",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "amount",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
  },
  {
   "type": "function",
@@ -332,6 +411,35 @@
  },
  {
   "type": "function",
+  "name": "reclaimToEscheatWaived",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "formerOwner",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "arrears",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "escheatId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
   "name": "registry",
   "inputs": [],
   "outputs": [
@@ -342,6 +450,30 @@
    }
   ],
   "stateMutability": "view"
+ },
+ {
+  "type": "function",
+  "name": "releaseMergedSeed",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "to",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "payout",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
  },
  {
   "type": "function",
@@ -498,6 +630,25 @@
   "name": "sweepTreasury",
   "inputs": [],
   "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "takeMergedNet",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "net",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
   "stateMutability": "nonpayable"
  },
  {
@@ -847,13 +998,19 @@
  },
  {
   "type": "error",
-  "name": "DemoOutOfScope",
+  "name": "FeeOutOfBounds",
   "inputs": []
  },
  {
   "type": "error",
-  "name": "FeeOutOfBounds",
-  "inputs": []
+  "name": "InvalidTileId",
+  "inputs": [
+   {
+    "name": "tileId",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ]
  },
  {
   "type": "error",
