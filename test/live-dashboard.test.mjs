@@ -299,15 +299,15 @@ assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === '
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'totalClaimable'), 'ESC33 totalClaimable missing');
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'getDeal'), 'ESC33 getDeal missing');
 assert(LOG_LOOKBACK === 3000n, 'lookback changed');
-assert(listed('0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b')?.status === 'current', 'RegistryNext is not marked current');
+assert(listed(cfg.addresses.TileRegistry)?.status === 'current', 'RegistryNext is not marked current');
 assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
-assert(cfg.addresses.TileRegistry.toLowerCase() === '0x199eeb5a5cc8ad4afb204350d2f7521eeae1f86b', 'live reads are not on RegistryNext');
+assert(cfg.addresses.TileRegistry.toLowerCase() === '0x38a27bda10fa4ffd61406642f558818f91333d12', 'live reads are not on RegistryNext');
 assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');
 const page = readFileSync(new URL('../live/index.html', import.meta.url), 'utf8');
 const bundle = readFileSync(new URL('../live/dashboard.js', import.meta.url), 'utf8');
 const wording = 'The OnChain counts and custody table follow JobBoard v32 (older, still live) and the current Meter, Split and Stream. The claim table and wallet panel read the current contracts. Recent activity also includes older contracts, marked (older). Older contracts remain on Base Sepolia.';
 assert(page.includes(wording), 'contract list wording missing');
-assert(page.includes('DemoTreasury, SanctionsOracle, DemoGeometry, and DemoNoCharters are shared by both Breakaway sets.'), 'shared contract sentence missing');
+assert(page.includes('DemoTreasury, SanctionsOracle, and DemoGeometry are shared with the older Breakaway sets. CharterRegistry and GovernanceRouter belong to the current redeploy.'), 'shared contract sentence missing');
 assert(!page.includes('Current rows are what the panels above read'), 'old contract list wording remains');
 assert(source.includes("item.name + ' (older)'"), 'recent activity omits the older marker');
 assert(bundle.includes('(older)'), 'bundled dashboard omits the older marker');
@@ -338,7 +338,7 @@ assert(page.includes('id="metrics-v33"'), 'v33 metrics strip missing');
 assert(page.includes('56661016'), 'page omits the v33 deploy block');
 assert(page.includes('Covered blocks do not start at that deploy block'), 'page claims history since the v33 deploy block');
 assert(page.includes('RefundWithdrawn is counted separately'), 'refund wording missing from the page');
-assert(cfg.addresses.DemoAuction.toLowerCase() === '0x7a2f1b3ba731aba07ae069cc3ef83e03f6b37557', 'DemoAuctionNext address drifted');
+assert(cfg.addresses.DemoAuction.toLowerCase() === '0xf2dec91b7c2290a837554c688c9d621dd23d18aa', 'DemoAuctionNext address drifted');
 
 const SNAPSHOT_SIGS = {
   JobPosted: 'JobPosted(uint256,address,uint256,uint16,uint64,uint64,uint64,address,string,uint32,uint64,uint32,uint256)',
@@ -859,7 +859,7 @@ assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v32 (olde
 assert(cardAt('OnChain jobs in covered window').sub.includes('JobBoard v31 is not included'), cardAt('OnChain jobs in covered window').sub);
 assert(!cardAt('OnChain jobs in covered window').sub.includes('the current '), cardAt('OnChain jobs in covered window').sub);
 assertJobsWindow(cardAt('OnChain jobs in covered window'));
-assert(cardAt('Breakaway auctions').sub.includes('DemoAuctionNext'), cardAt('Breakaway auctions').sub);
+assert(cardAt('Breakaway auctions').sub.includes('DemoCharterAuctionNext'), cardAt('Breakaway auctions').sub);
 assert(cardAt('Breakaway auctions').sub.includes('Covered blocks 0 to 199'), cardAt('Breakaway auctions').sub);
 assert(rpc.counts.eth_getBlockByNumber === 1, 'no JobPosted still fetched timestamps ' + rpc.counts.eth_getBlockByNumber);
 console.log('SNAPSHOT FIXTURE', usage.spent, JSON.stringify(usage.sections));

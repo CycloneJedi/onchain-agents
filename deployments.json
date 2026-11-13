@@ -122,13 +122,32 @@
     "DemoTreasury": "0x030b3834397867b9ff8d550c9d5a4f11fe0260b4",
     "SanctionsOracle": "0xe8fc9c4275e08754ad5f95217f977ab3d9319bc3",
     "DemoGeometry": "0x2c2d240108fb0b10308ae23e57e49faaf08f61aa",
-    "TileRegistry": "0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9",
-    "DemoClaim": "0xc28d0818d3e83a677ef5336c70756a7e685a9f1a",
-    "DemoVault": "0xd3739ee76ac5d27e18f35e923e7e86a155cecb80",
+    "TileRegistry": "0x38a27bda10FA4ffd61406642F558818F91333D12",
+    "DemoClaim": "0x08Bc09020bb7cca1ACdB22F74F7EB21f6eb5a44e",
+    "DemoVault": "0xE62Be8378830D2Fe9F4b4005f44B6348C06a0b22",
     "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb",
-    "DemoAuction": "0x6b70115e110f45ccd0f076b5147c5a10ad576c17",
-    "DemoRegistration": "0x6425c8df0bf745b46bce97318a6631e9f423c61f",
-    "DemoScheduler": "0xe623e0f767f47ee38026576de82ba0f7cc4656cc",
-    "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5"
+    "DemoAuction": "0xF2dEC91b7C2290a837554C688C9d621dd23D18aa",
+    "DemoRegistration": "0xDCD13dE3De8F2d3a551261FE905abdD2C10a4aE6",
+    "DemoScheduler": "0xd074ed43d400dd861BF15367195AC0d8b2E2E665",
+    "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5",
+    "previousVersions": {
+      "status": "older",
+      "addresses": {
+        "DemoTreasury": "0x030b3834397867b9ff8d550c9d5a4f11fe0260b4",
+        "SanctionsOracle": "0xe8fc9c4275e08754ad5f95217f977ab3d9319bc3",
+        "DemoGeometry": "0x2c2d240108fb0b10308ae23e57e49faaf08f61aa",
+        "TileRegistry": "0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9",
+        "DemoClaim": "0xc28d0818d3e83a677ef5336c70756a7e685a9f1a",
+        "DemoVault": "0xd3739ee76ac5d27e18f35e923e7e86a155cecb80",
+        "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb",
+        "DemoAuction": "0x6b70115e110f45ccd0f076b5147c5a10ad576c17",
+        "DemoRegistration": "0x6425c8df0bf745b46bce97318a6631e9f423c61f",
+        "DemoScheduler": "0xe623e0f767f47ee38026576de82ba0f7cc4656cc",
+        "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5"
+      }
+    },
+    "CharterRegistry": "0x891Ad9C7c552fb41CEC0579FDfB9F1e91fe7A932",
+    "GovernanceRouter": "0x0632a92d2a4071F8Fd0739a69C4c64a720Ec81aF",
+    "logOriginBlock": 57514697
   }
 }
