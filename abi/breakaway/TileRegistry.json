@@ -197,6 +197,19 @@
  },
  {
   "type": "function",
+  "name": "mergeRegistry",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "type": "function",
   "name": "operators",
   "inputs": [
    {
@@ -249,6 +262,19 @@
     "name": "tileIds",
     "type": "uint16[]",
     "internalType": "uint16[]"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "type": "function",
+  "name": "setMergeRegistry",
+  "inputs": [
+   {
+    "name": "registry_",
+    "type": "address",
+    "internalType": "address"
    }
   ],
   "outputs": [],
@@ -376,6 +402,19 @@
     "type": "uint16",
     "indexed": false,
     "internalType": "uint16"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "type": "event",
+  "name": "MergeRegistrySet",
+  "inputs": [
+   {
+    "name": "mergeRegistry",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
    }
   ],
   "anonymous": false
@@ -516,6 +555,16 @@
     "internalType": "enum TileState"
    }
   ]
+ },
+ {
+  "type": "error",
+  "name": "MergeExitDenied",
+  "inputs": []
+ },
+ {
+  "type": "error",
+  "name": "MergeRegistryAlreadySet",
+  "inputs": []
  },
  {
   "type": "error",
