@@ -920,6 +920,7 @@
      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/breakaway/DemoVault.json",
      "addressKey": "breakaway.DemoVault",
      "participantActions": [
+      "dissolve(uint16)",
       "claimEscheat(uint256)",
       "sweepEscheat(uint256)",
       "sweepTreasury()",
@@ -936,7 +937,6 @@
       ]
      },
      "disabledActions": [
-      "dissolve(uint16)",
       "renounceOwnership()",
       "setAuthorized(address,bool)",
       "setContracts(address,address,address)",
@@ -952,6 +952,7 @@
       "MAX_FEE_BPS()",
       "MIN_FEE_BPS()",
       "authorized(address)",
+      "bountyWaived(uint256)",
       "charterRegistry()",
       "dissolutionFeeBps()",
       "escheatCount()",
@@ -972,7 +973,7 @@
      "project": "breakaway",
      "contract": "DemoNoCharters",
      "abi": "https://cyclonejedi.github.io/onchain-agents/abi/breakaway/DemoNoCharters.json",
-     "addressKey": "breakaway.DemoNoCharters",
+     "addressKey": "breakaway.intermediateVersion.addresses.DemoNoCharters",
      "participantActions": [],
      "restrictedActions": {},
      "disabledActions": [
@@ -981,7 +982,8 @@
      "reads": [
       "activeCharterCount(uint16)",
       "lastWindDownAt(uint16)"
-     ]
+     ],
+     "status": "older"
     },
     {
      "project": "breakaway",
@@ -992,7 +994,8 @@
       "bid(uint16,uint256,bool,bytes32,bytes)",
       "settle(uint16)",
       "sweepTreasury()",
-      "withdrawRefund()"
+      "withdrawRefund()",
+      "withdrawRefund(address)"
      ],
      "restrictedActions": {
       "createAuction(uint16)": [
@@ -1034,6 +1037,7 @@
       "getAuction(uint16)",
       "isAuctionActive(uint16)",
       "minIncrement()",
+      "minRaise(uint256)",
       "nft()",
       "nonces(address)",
       "owner()",
@@ -1107,6 +1111,107 @@
       "allowed(uint16)",
       "auction()",
       "tiles(uint256)"
+     ]
+    },
+    {
+     "project": "breakaway",
+     "contract": "CharterRegistry",
+     "abi": "https://cyclonejedi.github.io/onchain-agents/abi/breakaway/CharterRegistry.json",
+     "addressKey": "breakaway.CharterRegistry",
+     "participantActions": [
+      "registerCharter(uint16,bytes32,bytes32)",
+      "renewCharter(uint256)",
+      "windDownCharter(uint256)",
+      "amendName(uint256,bytes32)",
+      "expireCharter(uint256)"
+     ],
+     "restrictedActions": {
+      "registerGenesisCharter(uint16,address,bytes32)": [
+       "authorized callers"
+      ],
+      "forceWindDownAll(uint16)": [
+       "authorized callers"
+      ]
+     },
+     "disabledActions": [
+      "recordGenesisCongress(uint16,bytes32)",
+      "suspendCharter(uint256)",
+      "enableInstruments()",
+      "recordInstrument(uint16,bytes32)",
+      "setTreasury(address)",
+      "setAuthorized(address,bool)",
+      "setMergeRegistry(address)",
+      "renounceOwnership()",
+      "transferOwnership(address)"
+     ],
+     "reads": [
+      "REG_FEE()",
+      "RENEWAL_PERIOD()",
+      "RENEW_FEE()",
+      "activeCharterCount(uint16)",
+      "authorized(address)",
+      "charterCount()",
+      "charterEpoch(uint256)",
+      "charters(uint256)",
+      "foundingCharterTemplateHash()",
+      "genesisRecorded()",
+      "getCharters(uint16)",
+      "hasLiveCharter(uint16)",
+      "instrumentsEnabled()",
+      "lastWindDownAt(uint16)",
+      "mergeLookup()",
+      "nameTaken(bytes32)",
+      "nft()",
+      "owner()",
+      "recordedInstrument(uint16)",
+      "tileEpoch(uint16)",
+      "treasury()"
+     ]
+    },
+    {
+     "project": "breakaway",
+     "contract": "GovernanceRouter",
+     "abi": "https://cyclonejedi.github.io/onchain-agents/abi/breakaway/GovernanceRouter.json",
+     "addressKey": "breakaway.GovernanceRouter",
+     "participantActions": [
+      "alignTile(uint16,uint16)"
+     ],
+     "restrictedActions": {
+      "grantLoyalty(uint16,uint256)": [
+       "authorized callers"
+      ],
+      "transferLoyalty(uint16,address,address)": [
+       "authorized callers"
+      ],
+      "resetLoyalty(uint16)": [
+       "authorized callers"
+      ]
+     },
+     "disabledActions": [
+      "setAuthorized(address,bool)",
+      "setNft(address)",
+      "setMergeRegistry(address)",
+      "renounceOwnership()",
+      "transferOwnership(address)"
+     ],
+     "reads": [
+      "ALIGN_COOLDOWN()",
+      "FACTION_FLOOR()",
+      "LOYALTY_MAX()",
+      "PHI()",
+      "RADIUS()",
+      "WAD()",
+      "authorized(address)",
+      "geometry()",
+      "getAlignment(uint16)",
+      "getCongressWeight(uint16)",
+      "getFactionWeight(uint16,uint16)",
+      "getLoyaltyMultiplier(uint16)",
+      "mergeLookup()",
+      "nft()",
+      "owner()",
+      "territoryCongressWeight(uint256)",
+      "territoryFactionWeight(uint256,uint16)"
      ]
     }
    ]
