@@ -299,9 +299,19 @@ assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === '
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'totalClaimable'), 'ESC33 totalClaimable missing');
 assert(cfg.abis.ESC33.some((item) => item.type === 'function' && item.name === 'getDeal'), 'ESC33 getDeal missing');
 assert(LOG_LOOKBACK === 3000n, 'lookback changed');
-assert(listed('0x38a27bda10fa4ffd61406642f558818f91333d12')?.status === 'current', 'RegistryNext is not marked current');
+assert(listed('0xe72019d2fdfef899c11601b52ce26873ae665de1')?.status === 'current', 'RegistryNext is not marked current');
+assert(listed('0x38a27bda10fa4ffd61406642f558818f91333d12')?.status === 'older', 'Nov 11 RegistryNext is not marked older');
 assert(listed('0xbded2d8bf0e5a8ecb276e463c4004fbd5f78c3f9')?.status === 'older', 'older TileRegistry is missing');
-assert(cfg.addresses.TileRegistry.toLowerCase() === '0x38a27bda10fa4ffd61406642f558818f91333d12', 'live reads are not on RegistryNext');
+assert(cfg.addresses.TileRegistry.toLowerCase() === '0xe72019d2fdfef899c11601b52ce26873ae665de1', 'live reads are not on RegistryNext');
+assert(cfg.addresses.DemoClaim.toLowerCase() === '0xcf61dc36eca2b1cada16a0f567bd71dd3573f86f', 'DemoClaim address drifted');
+assert(cfg.addresses.DemoVault.toLowerCase() === '0xac687bd62af6181408e07fdacc04b69a88ba14d6', 'DemoCharterVault address drifted');
+assert(cfg.addresses.DemoRegistration.toLowerCase() === '0x74b9c8e3fac7810d4d8073a7caa676a4bb239b23', 'DemoRegistration address drifted');
+assert(cfg.addresses.DemoScheduler.toLowerCase() === '0xb03ca1567807c9f505b7a254259dff616625331a', 'DemoScheduler address drifted');
+assert(cfg.addresses.CharterRegistry.toLowerCase() === '0x4a5acd024344db2f02d6c33961ff1e75d0bcadfa', 'CharterRegistry address drifted');
+assert(cfg.addresses.GovernanceRouter.toLowerCase() === '0x741adf1e2288c3f2c8910b39b7fdcdc24bd9169f', 'GovernanceRouter address drifted');
+assert(listed('0x1632f908cbbd169d6e4fcc58779dfb73e0eb7a05')?.status === 'current' && listed('0x1632f908cbbd169d6e4fcc58779dfb73e0eb7a05')?.name === 'OnChainBountyV26', 'bounty v2.6 is not a current directory row');
+assert(listed('0x803536ec41ca151a4be38a398bf0864ceaab1ec6')?.name === 'BountyV26Actions', 'BountyV26Actions row missing');
+assert(listed('0x38f9c6224f791ef0c39226d07c04d1bc4f559df2')?.name === 'GuardianRole', 'GuardianRole row missing');
 assert(!JSON.stringify(directory).includes('\u2014'), 'directory contains an em dash');
 const page = readFileSync(new URL('../live/index.html', import.meta.url), 'utf8');
 const bundle = readFileSync(new URL('../live/dashboard.js', import.meta.url), 'utf8');
@@ -338,7 +348,9 @@ assert(page.includes('id="metrics-v33"'), 'v33 metrics strip missing');
 assert(page.includes('56661016'), 'page omits the v33 deploy block');
 assert(page.includes('Covered blocks do not start at that deploy block'), 'page claims history since the v33 deploy block');
 assert(page.includes('RefundWithdrawn is counted separately'), 'refund wording missing from the page');
-assert(cfg.addresses.DemoAuction.toLowerCase() === '0xf2dec91b7c2290a837554c688c9d621dd23d18aa', 'DemoAuctionNext address drifted');
+assert(cfg.addresses.DemoAuction.toLowerCase() === '0x69edff8768481c3cc1a37fe109900d5d63f9ad98', 'DemoCharterAuctionNext address drifted');
+assert(!page.includes('DemoAuctionNext'), 'live page still says DemoAuctionNext');
+assert(page.includes('current DemoCharterAuctionNext'), 'live page does not name DemoCharterAuctionNext');
 
 const SNAPSHOT_SIGS = {
   JobPosted: 'JobPosted(uint256,address,uint256,uint16,uint64,uint64,uint64,address,string,uint32,uint64,uint32,uint256)',

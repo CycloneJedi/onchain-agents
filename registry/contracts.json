@@ -7,7 +7,7 @@
   "realValue": false
  },
  "addressesFrom": "https://cyclonejedi.github.io/onchain-agents/deployments.json",
- "generatedFrom": "Sourcify full matches for JobBoard v33, service escrow v3.2.2, milestone v2.3 and bounty v2.4 on Base Sepolia; earlier Meter, Split, Stream and JobBoard ABIs kept. JobBoard v32 ABI matches the deployed bytecode, including OPEN_POST_LIMIT.",
+ "generatedFrom": "Sourcify full matches for JobBoard v33, service escrow v3.2.2, milestone v2.3 and bounty v2.4 on Base Sepolia; earlier Meter, Split, Stream and JobBoard ABIs kept. JobBoard v32 ABI matches the deployed bytecode, including OPEN_POST_LIMIT. Bounty v2.6 addresses were checked with eth_getCode and eth_call on Base Sepolia. Its ABI JSON is not in this repo.",
  "projects": [
   {
    "id": "onchain",
@@ -438,6 +438,49 @@
       "version()",
       "withdraw()"
      ]
+    },
+
+    {
+     "project": "onchain",
+     "template": "bounty",
+     "build": "bounty-v26",
+     "status": "current",
+     "contract": "OnChainBountyV26",
+     "addressKey": "onchain.bountyV26.OnChainBountyV26",
+     "page": "https://cyclonejedi.github.io/onchain-agents/onchain/bounty-v26.html",
+     "notes": "Live on Base Sepolia from CycloneJedi/onchain commit 61b1605e. version() is 2.6. ABI JSON is not in this repo. Optional judge panel and mutual close are provisional, testnet only, pending founder review. Judged entries are capped at 500. MAX_PASSING is 128. Guardian is the deployer EOA. Max deal 1,000 MUSDC and max TVL 10,000 MUSDC are testnet stand-ins, open founder decisions for mainnet. Testnet with no real money. Mainnet is blocked.",
+     "functions": [
+      "version()",
+      "OWNER_POWERS_HASH()",
+      "MAX_PASSING()",
+      "MAX_JUDGED_ENTRIES()",
+      "guardian()",
+      "MAX_DEAL_AMOUNT()",
+      "MAX_TVL()",
+      "FEE_POLICY()",
+      "TOKEN()",
+      "paused()"
+     ]
+    },
+    {
+     "project": "onchain",
+     "template": "bounty",
+     "build": "bounty-v26",
+     "status": "current",
+     "contract": "BountyV26Actions",
+     "addressKey": "onchain.bountyV26.BountyV26Actions",
+     "page": "https://cyclonejedi.github.io/onchain-agents/onchain/bounty-v26.html",
+     "notes": "Linked actions contract for OnChainBountyV26. Code is present on Base Sepolia. ABI JSON is not in this repo."
+    },
+    {
+     "project": "onchain",
+     "template": "bounty",
+     "build": "bounty-v26",
+     "status": "current",
+     "contract": "GuardianRole",
+     "addressKey": "onchain.bountyV26.GuardianRole",
+     "page": "https://cyclonejedi.github.io/onchain-agents/onchain/bounty-v26.html",
+     "notes": "Guardian role contract. The guardian() read on OnChainBountyV26 is the deployer EOA, which is separate from this contract. Code is present on Base Sepolia. ABI JSON is not in this repo."
     },
     {
      "project": "onchain",

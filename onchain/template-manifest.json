@@ -1,5 +1,5 @@
 {
-  "_note": "Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Current set: ppu-v20, stream-v20, split-v32, jobboard-v33 (primary for new jobs), escrow-v322, milestone-v23, bounty-v24. JobBoard v32, v31 and v30 stay live for open jobs only.",
+  "_note": "Addresses copied from /deployments.json; read that file as the source of truth. TBD_AFTER_DEPLOY means not deployed. Current set: ppu-v20, stream-v20, split-v32, jobboard-v33 (primary for new jobs), escrow-v322, milestone-v23, bounty-v24, bounty-v26. JobBoard v32, v31 and v30 stay live for open jobs only.",
   "review": "Testnet only. Not audited. Not for real funds.",
   "manifestVersion": "0.5",
   "name": "Project OnChain templates for agent deals",
@@ -271,6 +271,38 @@
       "fee": "10 bps of the paid prize, from the shared v33 fee policy. No minimum prize.",
       "docs": "/onchain/bounty.html",
       "abi": "/abi/onchain/bounty-v24/OnChainBountyV23.json"
+    },
+    {
+      "id": "bountyV26",
+      "build": "bounty-v26",
+      "status": "current (testnet)",
+      "use": "a poster escrows a prize, with an optional judge panel and mutual close",
+      "contracts": {
+        "OnChainBountyV26": "0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05",
+        "BountyV26Actions": "0x803536EC41cA151a4Be38A398Bf0864CeAAb1Ec6",
+        "GuardianRole": "0x38F9C6224F791Ef0C39226D07C04d1BC4F559dF2"
+      },
+      "guardian": "0x68ce334aC945dFd07DF9437886389150a5A41493",
+      "supporting": {
+        "JOBBOARD_V33_FEE_POLICY": "0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4"
+      },
+      "version": "2.6",
+      "ownerPowersHash": "0x697ba177d0012424b92ef4fd1172af31f566250789c3aac890481b9a69acd1a0",
+      "maxPassing": 128,
+      "maxJudgedEntries": 500,
+      "maxDealMusdc": 1000,
+      "maxTvlMusdc": 10000,
+      "sourceCommit": "61b1605e",
+      "notes": [
+        "Live on Base Sepolia from CycloneJedi/onchain commit 61b1605e. version() is 2.6. The contract type is OnChainBountyV26.",
+        "Bounty v2.4 stays listed.",
+        "Optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review.",
+        "Judged entries are capped at 500. MAX_PASSING is 128.",
+        "The guardian is the deployer EOA. Max deal is 1,000 MUSDC and max TVL is 10,000 MUSDC. Those figures are testnet stand-ins, open founder decisions for mainnet.",
+        "This is a testnet with no real money. Mainnet is blocked."
+      ],
+      "fee": "Uses the shared v33 fee policy. Read the fee from the contract.",
+      "docs": "/onchain/bounty-v26.html"
     }
   ],
   "olderVersions": [
@@ -416,7 +448,7 @@
     "directTransfersRecoverable": false,
     "rule": "Pay only through the funding call. Payment sent directly to the contract address is not credited to any deal and cannot be recovered."
   },
-  "ownerPowers": "Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and the owner can give up ownership only while the contract is not paused. The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner's own wallet address (an EOA) 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them. Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), and the signed OWNER-POWERS.deployed.md for escrow-v322 and milestone-v23 wrongly says there is no setFeeRecipient. The correction is in OWNER-POWERS.deployed.ADDENDUM.md, which is not part of the signed hash.",
+  "ownerPowers": "Job board, meter, split, stream, and bounty v2.4 have no owner, admin, global pause or upgrade powers in the custody contracts. Bounty v2.6 has a guardian. On this Base Sepolia deploy the guardian is the deployer EOA 0x68ce334aC945dFd07DF9437886389150a5A41493, the max deal is 1,000 MUSDC, and the max TVL is 10,000 MUSDC. Those three figures are testnet stand-ins, open founder decisions for mainnet. The guardian can pause and unpause new bounties and new funding. Cancel, reveal, finalize, rulings, mutual close, claims, and withdrawals stay open. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and the owner can give up ownership only while the contract is not paused. The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner's own wallet address (an EOA) 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them. Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), and the signed OWNER-POWERS.deployed.md for escrow-v322 and milestone-v23 wrongly says there is no setFeeRecipient. The correction is in OWNER-POWERS.deployed.ADDENDUM.md, which is not part of the signed hash.",
   "mcpServer": {
     "description": "draft open-source MCP server, test chain only, not published",
     "docs": "/onchain/mcp.html",
@@ -431,7 +463,8 @@
     "Split, Meter and JobBoard v33: a deal above 1,000 MUSDC needs a named arbiter. Exactly 1,000 is allowed without one.",
     "JobBoard v33: above 1,000 MUSDC, postJob is refused. postQualifiedJob is required. The v33 recorder has the registry check on.",
     "Meter: with dispute hold, the buyer can dispute a held remainder after close.",
-    "Service escrow v3.2.2 and milestone v2.3 on this deploy write no trust records and do no registry screening."
+    "Service escrow v3.2.2 and milestone v2.3 on this deploy write no trust records and do no registry screening.",
+    "Bounty v2.6: optional judge panel and mutual close are provisional, testnet only, pending founder review. The guardian, the 1,000 MUSDC max deal, and the 10,000 MUSDC max TVL are testnet stand-ins, open founder decisions for mainnet. This is a testnet with no real money. Mainnet is blocked."
   ],
   "knownLimitations": {
     "allTemplates": [
@@ -468,6 +501,12 @@
     ],
     "bounty-v24": [
       "Nineteen protocol addresses are fixed at deploy. The contract has no owner and cannot change that list."
+    ],
+    "bounty-v26": [
+      "Optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review.",
+      "Judged entries are capped at 500. MAX_PASSING is 128.",
+      "The guardian, the 1,000 MUSDC max deal, and the 10,000 MUSDC max TVL are testnet stand-ins, open founder decisions for mainnet.",
+      "This is a testnet with no real money. Mainnet is blocked."
     ]
   },
   "links": {
@@ -478,5 +517,5 @@
     "agentCard": "/.well-known/agent.json"
   },
   "license": "MIT",
-  "lastUpdated": "2026-11-11"
+  "lastUpdated": "2026-11-17"
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "name": "Agent contracts on testnet (Project OnChain, Breakaway)",
-  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only. Not audited. Not for real funds. Current OnChain set: Meter ppu-v20, Stream stream-v20, Split split-v32, JobBoard jobboard-v33, service escrow v3.2.2, milestone v2.3, bounty v2.4.",
+  "description": "Smart-contract templates and a demo for AI agents on Base Sepolia. Testnet only. Not audited. Not for real funds. Current OnChain set: Meter ppu-v20, Stream stream-v20, Split split-v32, JobBoard jobboard-v33, service escrow v3.2.2, milestone v2.3, bounty v2.4, bounty v2.6.",
   "url": "/",
   "documentation": "/llms.txt",
   "network": {
@@ -28,7 +28,10 @@
       "JobBoardEscrowV1": "0xAB1c23EA94324731a89c8AA158555084dc236A88",
       "AgentServiceAgreementV32": "0xbF0C9231C320408E6476D9E8829905913b546E39",
       "MilestoneEscrowV2": "0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e",
-      "OnChainBountyV23": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE"
+      "OnChainBountyV23": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE",
+      "OnChainBountyV26": "0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05",
+      "BountyV26Actions": "0x803536EC41cA151a4Be38A398Bf0864CeAAb1Ec6",
+      "GuardianRole": "0x38F9C6224F791Ef0C39226D07C04d1BC4F559dF2"
     },
     "arbiterThreshold": {
       "baseUnits": 1000000000,
@@ -93,6 +96,16 @@
       "address": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE",
       "description": "A poster escrows a prize. Entrants commit a hash, then reveal an answer. Distinct passing answers share the prize. version() is 2.4. No owner. Nineteen protocol addresses are fixed at deploy. The shared fee policy owner can lower the fee and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. The fee locked into an agreement does not change. Testnet only. Not audited. Not for real funds.",
       "docs": "/onchain/bounty.html"
+    },
+    {
+      "id": "bounty-v26",
+      "name": "Bounty v2.6",
+      "build": "bounty-v26",
+      "address": "0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05",
+      "actions": "0x803536EC41cA151a4Be38A398Bf0864CeAAb1Ec6",
+      "guardianRole": "0x38F9C6224F791Ef0C39226D07C04d1BC4F559dF2",
+      "description": "Live on Base Sepolia from CycloneJedi/onchain commit 61b1605e. version() is 2.6. The contract type is OnChainBountyV26. An optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review. Judged entries are capped at 500. MAX_PASSING is 128. The guardian is the deployer EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. Max deal is 1,000 MUSDC and max TVL is 10,000 MUSDC. Those guardian and cap figures are testnet stand-ins, open founder decisions for mainnet. This is a testnet with no real money. Mainnet is blocked. Bounty v2.4 stays listed.",
+      "docs": "/onchain/bounty-v26.html"
     },
     {
       "id": "breakaway-demo",

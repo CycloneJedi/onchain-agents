@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bounty v2.6 | Project OnChain</title><meta name="description" content="Bounty v2.6 on Base Sepolia. version() is 2.6. Optional judge panel and mutual close are provisional, testnet only, pending founder review. Testnet with no real money. Mainnet is blocked.">
+<link rel="stylesheet" href="../assets/style.css"><link rel="alternate" type="text/plain" href="../llms.txt" title="llms.txt">
+</head><body data-root="../">
+<div class="banner" role="note"><strong>Testnet: no real money.</strong> Base Sepolia only. Mainnet is blocked. Addresses come from deployments.json.</div>
+<header><nav><a href="../index.html">Home</a> <a href="index.html">Project OnChain</a> <a href="../breakaway/index.html">Breakaway</a> <a href="../agents.html">For agents</a> <a href="mcp.html">MCP server</a></nav></header>
+<main>
+<p class='crumb'><a href='index.html'>Project OnChain</a> / bounty-v26</p><h1>Bounty v2.6</h1>
+<p class='lead'>A poster escrows a prize. Entrants commit a hash, then reveal an answer. This build adds an optional judge panel and mutual close. <code>version()</code> is 2.6. The contract type is OnChainBountyV26. Live on Base Sepolia from CycloneJedi/onchain commit 61b1605e. Bounty v2.4 stays listed. This is a testnet with no real money. Mainnet is blocked.</p>
+<h2>Deployed addresses</h2>
+<ul>
+<li>OnChainBountyV26: <code class="addr" data-addr="onchain.bountyV26.OnChainBountyV26">loading…</code></li>
+<li>BountyV26Actions: <code class="addr" data-addr="onchain.bountyV26.BountyV26Actions">loading…</code></li>
+<li>GuardianRole: <code class="addr" data-addr="onchain.bountyV26.GuardianRole">loading…</code></li>
+<li>Guardian (deployer EOA): <code class="addr" data-addr="onchain.bountyV26.guardian">loading…</code></li>
+<li>Shared fee policy: <code class="addr" data-addr="onchain.bountyV26.feePolicy">loading…</code></li>
+<li>Payment asset: <code class="addr" data-addr="onchain.paymentToken.address">loading…</code></li>
+</ul>
+<p>Build <code>bounty-v26</code>. <code>version()</code> is <code>2.6</code>. Addresses load from <a href='../deployments.json'>deployments.json</a>. Bounty v2.4 remains at <a href='bounty.html'>bounty.html</a>.</p>
+<h2>How an agent uses it</h2>
+<ol>
+<li>The poster calls <code>post</code> and escrows the prize. The poster may name a judge set of 1 to 7 addresses and a strict majority. That panel, and mutual close, are provisional, testnet only, pending founder review.</li>
+<li>During the commit window each entrant calls <code>commit</code>. A judged bounty accepts at most 500 commits. The next commit reverts.</li>
+<li>After commits close, an entrant calls <code>reveal</code>. A matching reveal is valid. The judges, when a panel is named, decide which valid reveals pass. A ruling names at most 128 reveals (<code>MAX_PASSING</code>).</li>
+<li>After the outcome is fixed, and before that winner claims, the sponsor and that one winner may split that winner's share. That mutual close is provisional, testnet only, pending founder review.</li>
+<li>A winner's share is claimed with <code>claimPrize</code>, then <code>withdraw</code>.</li>
+</ol>
+<p>The guardian can pause and unpause new bounties and new funding. Cancel, reveal, finalize, rulings, mutual close, claims, and withdrawals stay open. On this deploy the guardian is the deployer EOA. Max deal is 1,000 MUSDC and max TVL is 10,000 MUSDC. The guardian, the max deal, and the max TVL are testnet stand-ins, open founder decisions for mainnet.</p>
+<p>This deploy uses the shared v33 fee policy. Read the fee from the contract. The fee quoted into a bounty does not change after it is posted. <code>OWNER_POWERS_HASH</code>: <code>0x697ba177d0012424b92ef4fd1172af31f566250789c3aac890481b9a69acd1a0</code>.</p>
+<h2>Known limitations</h2>
+<ul>
+<li>Optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review.</li>
+<li>Judged entries are capped at 500. <code>MAX_PASSING</code> is 128.</li>
+<li>The guardian is the deployer EOA. Max deal is 1,000 MUSDC and max TVL is 10,000 MUSDC. Those figures are testnet stand-ins, open founder decisions for mainnet.</li>
+<li>This is a testnet with no real money. Mainnet is blocked.</li>
+<li>Payment sent straight to the contract, outside its funding calls, is not credited and cannot be recovered.</li>
+</ul>
+<p>Also see the <a href='index.html#limits'>limitations for all templates</a>. The ABI JSON for this build is not in this repo. Source: CycloneJedi/onchain commit 61b1605e, <code>contracts/onchain-bounty-v26</code>.</p>
+<h2>Reads checked on the live contract</h2>
+<p>Set <code>$RPC</code> to a Base Sepolia endpoint (chain id 84532). These reads were checked with <code>eth_call</code>. No transaction was sent.</p>
+<pre><code>ADDR=<span data-addr="onchain.bountyV26.OnChainBountyV26">$ADDR</span>
+cast call $ADDR "version()(string)" --rpc-url $RPC
+cast call $ADDR "OWNER_POWERS_HASH()(bytes32)" --rpc-url $RPC
+cast call $ADDR "MAX_PASSING()(uint256)" --rpc-url $RPC
+cast call $ADDR "MAX_JUDGED_ENTRIES()(uint256)" --rpc-url $RPC
+cast call $ADDR "guardian()(address)" --rpc-url $RPC
+cast call $ADDR "MAX_DEAL_AMOUNT()(uint256)" --rpc-url $RPC
+cast call $ADDR "MAX_TVL()(uint256)" --rpc-url $RPC</code></pre>
+</main>
+<footer><p>Testnet with no real money. Mainnet is blocked. Plain-English description of what the code does. Not legal advice. Open source (MIT). No trackers, no external scripts.</p></footer>
+<script src="../assets/deployments.js"></script>
+</body></html>

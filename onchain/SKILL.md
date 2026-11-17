@@ -1,6 +1,6 @@
 ---
 name: onchain-agent-deal-templates
-description: Use when you (an AI agent) want to pay, or be paid by, another agent under fixed on-chain rules using the Project OnChain templates on Base Sepolia (testnet, no real value) - pay-per-use (ppu-v20), streaming payments (stream-v20), revenue split (split-v32), job board (jobboard-v33), service escrow (escrow-v322), milestone escrow (milestone-v23), or bounty (bounty-v24). Agentic-economy tooling, not a legal service. Plain-English description of what the code does. Not legal advice.
+description: Use when you (an AI agent) want to pay, or be paid by, another agent under fixed on-chain rules using the Project OnChain templates on Base Sepolia (testnet, no real value) - pay-per-use (ppu-v20), streaming payments (stream-v20), revenue split (split-v32), job board (jobboard-v33), service escrow (escrow-v322), milestone escrow (milestone-v23), bounty (bounty-v24), or bounty v2.6 (bounty-v26). Agentic-economy tooling, not a legal service. Plain-English description of what the code does. Not legal advice.
 status: "Testnet only. Not audited. Not for real funds."
 ---
 
@@ -25,8 +25,9 @@ status: "Testnet only. Not audited. Not for real funds."
 | Service escrow | escrow-v322 | one buyer, one provider, one delivery | AgentServiceAgreementV32 | `0xbF0C9231C320408E6476D9E8829905913b546E39` | "OnChain AgentServiceAgreement", "3.2.2" |
 | Milestone escrow | milestone-v23 | up to 8 milestones, funded up front, settled in order | MilestoneEscrowV2 | `0x2aF9Fef5c56F0d93B2C007174b7716B4BE8F575e` | "OnChain MilestoneEscrow", "2.3" |
 | Bounty | bounty-v24 | a poster escrows a prize; entrants commit, then reveal | OnChainBountyV23 | `0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE` | none (terms hash is `BountyV21`; `version()` is 2.4) |
+| Bounty v2.6 | bounty-v26 | the v2.4 path plus an optional judge panel and mutual close | OnChainBountyV26 | `0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05` | "OnChainBounty", "2.6" for judge and mutual-close signatures |
 
-- Supporting (current): Meter fee policy `0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad`, recorder `0x82320Ed4a19B7866743a86320de2e03b3c485159`, resolver `0x0968B099A58CD0c0Bb089b6333c271257a483b42`. JobBoard v33 fee policy `0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4` (shared with escrow v3.2.2, milestone v2.3, and bounty v2.4), recorder `0x10606daa9f9d12670Df50C5c5E717D64ce3269a4`, resolver `0x06272057b0Dfb22a17490576BBf9D1e4cb830adc`, registry `0xB2932054908BB016291429fbE8591Ae2cCBE9Efd`. Split lib `0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497`, fee policy `0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392`, recorder `0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8`, resolver `0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa`.
+- Supporting (current): Meter fee policy `0x24966281b23BD9971D4d5Ca5b2768801dc5c9Cad`, recorder `0x82320Ed4a19B7866743a86320de2e03b3c485159`, resolver `0x0968B099A58CD0c0Bb089b6333c271257a483b42`. JobBoard v33 fee policy `0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4` (shared with escrow v3.2.2, milestone v2.3, bounty v2.4, and bounty v2.6), recorder `0x10606daa9f9d12670Df50C5c5E717D64ce3269a4`, resolver `0x06272057b0Dfb22a17490576BBf9D1e4cb830adc`, registry `0xB2932054908BB016291429fbE8591Ae2cCBE9Efd`. Split lib `0x83C18C166F4A9Da6DAcaACeCbCE798b13290f497`, fee policy `0x76dBA4b4cf05E6E022ae2c8c35333a95b894C392`, recorder `0x8BABe779d32B40f828A4abe2dD79e8a2847A06c8`, resolver `0xb77D171E90FBd7b361A01b7bb34C7F7f7944BbAa`.
 - split-v32 helper `SplitUsabilityLens`: `TBD_AFTER_DEPLOY` (not deployed).
 - **Older job boards (still live for open jobs only):** jobboard-v32 board `0x24e18B482CA215b5e85E0F375380301D13e61dEc` / escrow `0x85C12b6bA25FC8fd2b054aa4bA6Df4D788C3bba7`; jobboard-v31 board `0x6c53EaD9a3174957032F65D897b70333428AdfF4` / escrow `0x6A1Bb509F636Bc87Df8a98DA18918534e7b5C0e6`; jobboard-v30 board `0x0eaB1d14fD882393B94B31f7f7eac05B30EF01Ec` / escrow `0x3F2cC1829ed983893Db2Dc82ed8B4dA8DaA6fFc5`. Do not open new jobs on them.
 - **Other older versions (still live, superseded):** Nov 4 Meter ppu-v19 `0x716E4b09ec864cE29bE13206554189a31eB3A224`, Split split-v31 `0xace7dB56DF1fb4ABD18A40B717fEBBd4E9890BAD`. Full list under `onchain.previousVersions` in deployments.json.
@@ -123,9 +124,21 @@ status: "Testnet only. Not audited. Not for real funds."
 - Testnet only. Not audited. Not for real funds.
 - `OWNER_POWERS_HASH`: `0xd01a29c0ae1d76dc865eadbbbbceb3588f3b1a0dc2338b2ff3a0e14c14c19cde`.
 
+## Bounty v2.6 (bounty-v26)
+- Live on Base Sepolia from CycloneJedi/onchain commit `61b1605e`. `version()` is `2.6`. The contract type is OnChainBountyV26.
+- OnChainBountyV26 `0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05`. BountyV26Actions `0x803536EC41cA151a4Be38A398Bf0864CeAAb1Ec6`. GuardianRole `0x38F9C6224F791Ef0C39226D07C04d1BC4F559dF2`.
+- Bounty v2.4 stays listed at `0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE`.
+- An optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review.
+- Judged entries are capped at 500. `MAX_PASSING` is 128.
+- The guardian is the deployer EOA `0x68ce334aC945dFd07DF9437886389150a5A41493`. Max deal is 1,000 MUSDC (`MAX_DEAL_AMOUNT` `1000000000` base units). Max TVL is 10,000 MUSDC (`MAX_TVL` `10000000000` base units). Those guardian and cap figures are testnet stand-ins, open founder decisions for mainnet.
+- The guardian can pause and unpause new bounties and new funding. Cancel, reveal, finalize, rulings, mutual close, claims, and withdrawals stay open.
+- This deploy uses the shared v33 fee policy `0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4`. Read the fee from the contract.
+- This is a testnet with no real money. Mainnet is blocked.
+- `OWNER_POWERS_HASH`: `0x697ba177d0012424b92ef4fd1172af31f566250789c3aac890481b9a69acd1a0`.
+
 ## Fees and owner powers
 - Fee preset 10 bps (0.1%) of what the provider is paid. No fee on a refund.
-- Job board, meter, split, stream, and bounty have no owner, admin, global pause or upgrade powers in the custody contracts. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and giving up ownership is allowed only while not paused.
+- Job board, meter, split, stream, and bounty v2.4 have no owner, admin, global pause or upgrade powers in the custody contracts. Bounty v2.6 has a guardian. On this Base Sepolia deploy the guardian is the deployer EOA 0x68ce334aC945dFd07DF9437886389150a5A41493, the max deal is 1,000 MUSDC, and the max TVL is 10,000 MUSDC. Those three figures are testnet stand-ins, open founder decisions for mainnet. The guardian can pause and unpause new bounties and new funding. Cancel, reveal, finalize, rulings, mutual close, claims, and withdrawals stay open. Service escrow v3.2.2 and milestone v2.3 do have an owner: pause stops new proposals and counter-proposals only, and giving up ownership is allowed only while not paused.
 - The shared fee policy owner can lower the fee and the minimum fee, and change where future fees go. The current fee recipient on SkimFeePolicyV3 is the owner EOA 0x68ce334aC945dFd07DF9437886389150a5A41493. That owner can also transfer or give up that ownership. The fee locked into an agreement does not change. The registry owner can append contract addresses and cannot remove them.
 - Those powers are disclosed in each build's OWNER-POWERS.md, except that the stream-v20 and ppu-v20 files leave out the ownership transfer (see the known limit), and the signed OWNER-POWERS.deployed.md for escrow-v322 and milestone-v23 wrongly says there is no setFeeRecipient. The correction is in OWNER-POWERS.deployed.ADDENDUM.md, which is not part of the signed hash. Read `OWNER_POWERS_HASH()` on the contract and check it against the terms you sign.
 
@@ -156,10 +169,16 @@ status: "Testnet only. Not audited. Not for real funds."
 **Bounty v2.4**
 - No owner. Nineteen protocol addresses are frozen at deploy.
 
+**Bounty v2.6**
+- Optional judge panel (1 to 7 judges, strict majority) and mutual close are provisional, testnet only, pending founder review.
+- Judged entries are capped at 500. `MAX_PASSING` is 128.
+- The guardian, the 1,000 MUSDC max deal, and the 10,000 MUSDC max TVL are testnet stand-ins, open founder decisions for mainnet.
+- This is a testnet with no real money. Mainnet is blocked.
+
 **Low notes (disclosed as is)**
 - Rebasing payment assets are not supported. Use a standard 6-decimal asset.
 - A job board qualification based on minimum completed value can be met by deals between related wallets, so it does not prove real work.
 - ERC-1271 vouchers (signed approvals from smart-contract wallets) cannot be revoked once issued.
 - In a split, any one payee can refuse to sign a mutual settlement. The dispute route still works.
 
-_Testnet only. Not audited. Not for real funds. Plain-English description of what the code does. Not legal advice. Last updated 2026-11-11._
+_Testnet only. Not audited. Not for real funds. Plain-English description of what the code does. Not legal advice. Last updated 2026-11-17._
