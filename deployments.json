@@ -1,5 +1,5 @@
 {
-  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, Stream v20, JobBoard v33 (primary for new jobs), service escrow v3.2.2, milestone v2.3, and bounty v2.4. JobBoard v32, v31 and v30 stay live for open jobs only under previousVersions. The payment asset and Stream are unchanged from Nov 4. SplitUsabilityLens stays TBD_AFTER_DEPLOY. Breakaway is a live bounded demo on Base Sepolia (testnet only, no real value, no legal title); its addresses are under breakaway.",
+  "_note": "Pages and the registry read addresses from this file. 0x0 placeholders and TBD_AFTER_DEPLOY mean not deployed. Current OnChain set: Meter (ppu) v20, Split v32, Stream v20, JobBoard v33 (primary for new jobs), service escrow v3.2.2, milestone v2.3, bounty v2.4, and bounty v2.6. JobBoard v32, v31 and v30 stay live for open jobs only under previousVersions. The payment asset and Stream are unchanged from Nov 4. SplitUsabilityLens stays TBD_AFTER_DEPLOY. Breakaway is a live bounded demo on Base Sepolia (testnet only, no real value, no legal title). Its current addresses are the Nov 17, 2026 DeployDemoCharter redeploy under breakaway.",
   "network": {
     "name": "Base Sepolia",
     "chainId": 84532,
@@ -33,6 +33,19 @@
     "bounty": {
       "OnChainBountyV23": "0xC3157Fb11E90a8832bc5f82f0D5e4298017EE9fE"
     },
+    "bountyV26": {
+      "OnChainBountyV26": "0x1632f908cBbd169D6e4FCc58779dFB73E0EB7a05",
+      "BountyV26Actions": "0x803536EC41cA151a4Be38A398Bf0864CeAAb1Ec6",
+      "GuardianRole": "0x38F9C6224F791Ef0C39226D07C04d1BC4F559dF2",
+      "guardian": "0x68ce334aC945dFd07DF9437886389150a5A41493",
+      "OWNER_POWERS_HASH": "0x697ba177d0012424b92ef4fd1172af31f566250789c3aac890481b9a69acd1a0",
+      "feePolicy": "0x2f358Cc9E8601FD6eA7e2ab8d49744965a70ccA4",
+      "source": "CycloneJedi/onchain 61b1605e",
+      "maxPassing": 128,
+      "maxJudgedEntries": 500,
+      "maxDealAmount": "1000000000",
+      "maxTvl": "10000000000"
+    },
     "registry": {
       "ProtocolAddressRegistry": "0xB2932054908BB016291429fbE8591Ae2cCBE9Efd"
     },
@@ -55,7 +68,7 @@
       "PROTOCOL_REGISTRY": "0xB2932054908BB016291429fbE8591Ae2cCBE9Efd"
     },
     "deployer": "0x68ce334aC945dFd07DF9437886389150a5A41493",
-    "deployedAt": "Stream and payment asset: 2026-11-04, blocks 54524543 to 54524682. Meter v20, JobBoard v31, Split v32: 2026-11-05, blocks 54890349 to 54890449. JobBoard v33: block 56661016. Service escrow v3.2.2, milestone v2.3 and bounty v2.4 use the same v33 fee policy.",
+    "deployedAt": "Stream and payment asset: 2026-11-04, blocks 54524543 to 54524682. Meter v20, JobBoard v31, Split v32: 2026-11-05, blocks 54890349 to 54890449. JobBoard v33: block 56661016. Service escrow v3.2.2, milestone v2.3, bounty v2.4, and bounty v2.6 use the same v33 fee policy. Bounty v2.6 is live on Base Sepolia from CycloneJedi/onchain commit 61b1605e.",
     "versions": {
       "ppu": "ppu-v20 (VERSION per contract)",
       "stream": "stream-v20 (unchanged, live Nov 4 deploy)",
@@ -63,12 +76,13 @@
       "jobboard": "jobboard-v33 (VERSION jobboard-v3.3, paired escrow VERSION jobboard-escrow-v3.1)",
       "escrow": "escrow-v322 (EIP-712 domain version 3.2.2, contract AgentServiceAgreementV32)",
       "milestone": "milestone-v23 (EIP-712 domain version 2.3, contract MilestoneEscrowV2)",
-      "bounty": "bounty-v24 (version() 2.4, contract OnChainBountyV23)"
+      "bounty": "bounty-v24 (version() 2.4, contract OnChainBountyV23)",
+      "bountyV26": "bounty-v26 (version() 2.6, contract OnChainBountyV26)"
     },
     "arbiterThreshold": {
       "baseUnits": 1000000000,
       "musdc": 1000,
-      "appliesTo": "Split v32, Meter v20, JobBoard v33 (Stream v20 unchanged). Service escrow v3.2.2, milestone v2.3 and bounty v2.4 do not use this job-board line.",
+      "appliesTo": "Split v32, Meter v20, JobBoard v33 (Stream v20 unchanged). Service escrow v3.2.2, milestone v2.3, bounty v2.4, and bounty v2.6 do not use this job-board line.",
       "rule": "A job-board budget above the line needs a named arbiter. Exactly 1,000 MUSDC is allowed without one. On the v33 deploy, OPEN_POST_LIMIT is the same 1,000 MUSDC, and plain postJob above that line is refused."
     },
     "jobboardPostingDefault": "v33 enforces the open-post line. postJob reverts when the budget is above OPEN_POST_LIMIT (1,000 MUSDC, 1000000000 base units on this deploy), even with a named arbiter. postQualifiedJob is the only posting path above that line. A supplied allow-list turns allow-list mode on. With no allow-list, a zero minCompletedValue defaults to the budget. A budget above ARBITER_THRESHOLD still needs a named arbiter. On this deploy both lines are 1,000 MUSDC, so exactly 1,000 is allowed with postJob and without an arbiter.",
@@ -203,12 +217,12 @@
     "DemoTreasury": "0x030b3834397867b9ff8d550c9d5a4f11fe0260b4",
     "SanctionsOracle": "0xe8fc9c4275e08754ad5f95217f977ab3d9319bc3",
     "DemoGeometry": "0x2c2d240108fb0b10308ae23e57e49faaf08f61aa",
-    "TileRegistry": "0x38a27bda10FA4ffd61406642F558818F91333D12",
-    "DemoClaim": "0x08Bc09020bb7cca1ACdB22F74F7EB21f6eb5a44e",
-    "DemoVault": "0xE62Be8378830D2Fe9F4b4005f44B6348C06a0b22",
-    "DemoAuction": "0xF2dEC91b7C2290a837554C688C9d621dd23D18aa",
-    "DemoRegistration": "0xDCD13dE3De8F2d3a551261FE905abdD2C10a4aE6",
-    "DemoScheduler": "0xd074ed43d400dd861BF15367195AC0d8b2E2E665",
+    "TileRegistry": "0xe72019d2FDfef899C11601B52Ce26873ae665de1",
+    "DemoClaim": "0xcf61DC36Eca2b1CaDa16A0F567bD71dD3573f86f",
+    "DemoVault": "0xac687bd62aF6181408e07FDaCC04b69a88ba14D6",
+    "DemoAuction": "0x69edff8768481C3Cc1a37fe109900D5D63f9ad98",
+    "DemoRegistration": "0x74B9C8e3Fac7810D4d8073a7CAa676A4bB239B23",
+    "DemoScheduler": "0xB03CA1567807c9f505B7a254259dFF616625331a",
     "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5",
     "previousVersions": {
       "status": "historical snapshot; shared addresses remain current",
@@ -226,8 +240,8 @@
         "workAttestor": "0x48f43a5D14520912a7511a6d35ADaC44069Ab7D5"
       }
     },
-    "CharterRegistry": "0x891Ad9C7c552fb41CEC0579FDfB9F1e91fe7A932",
-    "GovernanceRouter": "0x0632a92d2a4071F8Fd0739a69C4c64a720Ec81aF",
+    "CharterRegistry": "0x4A5acd024344Db2f02d6C33961Ff1e75d0bcaDfa",
+    "GovernanceRouter": "0x741adF1e2288C3f2C8910B39B7FDCdc24BD9169f",
     "intermediateVersion": {
       "status": "older",
       "addresses": {
@@ -239,6 +253,29 @@
         "DemoScheduler": "0x158B9800E80eE87561fC67bC186891a6a84257f1",
         "DemoNoCharters": "0x6251c9644c59589066d42b0a00854cf17e8874eb"
       }
+    },
+    "nov11Redeploy": {
+      "status": "older",
+      "note": "Nov 11, 2026 DeployDemoCharter redeploy. Superseded by the Nov 17, 2026 redeploy. Shared treasury, sanctions, geometry, and work attestor addresses were not redeployed.",
+      "addresses": {
+        "TileRegistry": "0x38a27bda10FA4ffd61406642F558818F91333D12",
+        "DemoClaim": "0x08Bc09020bb7cca1ACdB22F74F7EB21f6eb5a44e",
+        "DemoVault": "0xE62Be8378830D2Fe9F4b4005f44B6348C06a0b22",
+        "DemoAuction": "0xF2dEC91b7C2290a837554C688C9d621dd23D18aa",
+        "DemoRegistration": "0xDCD13dE3De8F2d3a551261FE905abdD2C10a4aE6",
+        "DemoScheduler": "0xd074ed43d400dd861BF15367195AC0d8b2E2E665",
+        "CharterRegistry": "0x891Ad9C7c552fb41CEC0579FDfB9F1e91fe7A932",
+        "GovernanceRouter": "0x0632a92d2a4071F8Fd0739a69C4c64a720Ec81aF"
+      }
+    },
+    "redeploy": {
+      "script": "DeployDemoCharter",
+      "source": "CycloneJedi/mars2033",
+      "commit": "5f2f3fea3007ef2935fb2f673b0060933b43148c",
+      "deployer": "0x68ce334aC945dFd07DF9437886389150a5A41493",
+      "nonces": "404 to 437",
+      "blocks": "60118252 to 60118262",
+      "at": "2026-11-17 about 2:00 PM MT"
     }
   }
 }

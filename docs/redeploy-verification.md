@@ -2,6 +2,29 @@
 
 Scope: read-only Base Sepolia displays, chain 84532.
 
+## Nov 17, 2026 DeployDemoCharter redeploy
+
+Current Breakaway addresses are the DeployDemoCharter redeploy from
+CycloneJedi/mars2033 commit `5f2f3fea3007ef2935fb2f673b0060933b43148c`,
+about 2:00 PM MT on Tue Nov 17, 2026. Deployer
+`0x68ce334aC945dFd07DF9437886389150a5A41493`, nonces 404 to 437, blocks
+60118252 to 60118262.
+
+`eth_getCode` on `https://sepolia.base.org` returned code at each new address.
+No transaction was sent. Reused addresses (geometry, sanctions, fee receiver)
+also still have code. The work attestor remains an EOA with no code.
+
+`eth_call` on the new auction returned `DEMO_RESERVE` of 50000000000000000 wei
+(0.05 test ETH). `registry()`, `vault()`, and `charterRegistry()` returned the
+new registry, vault, and CharterRegistry. The scheduler's `auction()` returned
+the new auction. `getAuction(uint16)` and `getTileState(uint16)` still return
+the shapes the live dashboard already decodes.
+
+The Nov 11 record below is the prior redeploy. Its addresses are kept there as
+that broadcast's record. They are not the current addresses.
+
+## Prior Nov 11 record
+
 The deployment-manifest.json confirms six current addresses: registry, claim,
 auction, CharterRegistry, GovernanceRouter and scheduler. Vault and registration
 are intentionally absent from that manifest. Their provenance is the Nov 11
