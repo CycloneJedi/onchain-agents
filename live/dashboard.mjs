@@ -747,7 +747,7 @@ export function assembleBreakaway(tiles, results) {
 // That directory row is older. The count uses the JB address, not row status.
 // JobBoard v33 logs stay in recent activity and are not added to that count.
 // v33 deployed at block 56661016. LOG_LOOKBACK stays 3000 and does not start at that block.
-// Auction counts use the current DemoAuctionNext address only.
+// Auction counts use the current DemoCharterAuctionNext address only.
 const LIVE_HEADERS = ['Claim', 'Status', 'Leading bid', 'Leader', 'Ends', 'Extensions'];
 const STAT_JOBS = 'OnChain jobs in covered window';
 const STAT_AUCTIONS = 'Breakaway auctions';
