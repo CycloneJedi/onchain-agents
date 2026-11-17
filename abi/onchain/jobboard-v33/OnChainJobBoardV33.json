@@ -1,0 +1,3023 @@
+[
+ {
+  "type": "constructor",
+  "inputs": [
+   {
+    "name": "token_",
+    "type": "address",
+    "internalType": "contract IERC20"
+   },
+   {
+    "name": "policy_",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   },
+   {
+    "name": "recorder_",
+    "type": "address",
+    "internalType": "contract IJobOutcomeRecorder"
+   },
+   {
+    "name": "escrow_",
+    "type": "address",
+    "internalType": "contract IJobBoardEscrowV1"
+   },
+   {
+    "name": "marsDelay_",
+    "type": "uint32",
+    "internalType": "uint32"
+   },
+   {
+    "name": "maxTotalFeeBps_",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "relayOperator_",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "relayAffiliates_",
+    "type": "address[]",
+    "internalType": "address[]"
+   },
+   {
+    "name": "arbiterThreshold_",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "ArbiterNotAccepted",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "arbiter",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "ArbiterRequired",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "budget",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "threshold",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "ArbiterThresholdAboveOpenPostLimit",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "threshold",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "openPostLimit",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "AwardStillOpen",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BadArbiter",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "arbiter",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadEscrow",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "escrow",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadHint",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "hint",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "BadJobState",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IOnChainJobBoardV2.JobState"
+   },
+   {
+    "name": "expected",
+    "type": "uint8",
+    "internalType": "enum IOnChainJobBoardV2.JobState"
+   }
+  ]
+ },
+ {
+  "name": "BadParty",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "who",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BadPhase",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "current",
+    "type": "uint8",
+    "internalType": "enum IOnChainJobBoardV2.Phase"
+   },
+   {
+    "name": "expected",
+    "type": "uint8",
+    "internalType": "enum IOnChainJobBoardV2.Phase"
+   }
+  ]
+ },
+ {
+  "name": "BadPrice",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BadSetup",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BadSignature",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "signer",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "BidWithdrawnAlready",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "BondsNotOffered",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "bond",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "CancelClosed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "CommitClosed",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "commitEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "CommitMismatch",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "committed",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "revealed",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ]
+ },
+ {
+  "name": "DeliveryTooShort",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "minDeadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "DurationOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "field",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "value",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "FeeAboveCap",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "FeeAboveJobCeiling",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "bidBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   },
+   {
+    "name": "ceilingBps",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ]
+ },
+ {
+  "name": "FeeModelUnsupported",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "FundedPostingNotOffered",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "FundingHoldTooLong",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "latestRelease",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "hardEnd",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "FundingWindowExpired",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "nextActionSyncJob",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "HoldTooLong",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "hold",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "limit",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "InvalidShortString",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "JobBoardAlreadyCommitted",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "JobBoardAlreadyRevealed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "JobBoardNotCommitted",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "MarsDelayOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "given",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "min",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "max",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "NoArbiter",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NoPickToSkip",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotArbiter",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotBuyer",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "NotQualified",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "bidder",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "NotRevealed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "OfferExpired",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "OfferExpiryOutOfRange",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "expiry",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "min",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "max",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "OpenPostAboveThreshold",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "budget",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "openPostLimit",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "PickChanged",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "expectedBidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "actualBidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "PosterCannotBid",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "PriceAboveBudget",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "budget",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "QualificationFrozen",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "QualificationNotTighter",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ReentrancyGuardReentrantCall",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "RelayCannotBid",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "who",
+    "type": "address",
+    "internalType": "address"
+   }
+  ]
+ },
+ {
+  "name": "RevealClosed",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "RevealNotOpen",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "revealStart",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "SignatureExpired",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "deadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "SkipBatchSize",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "count",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "SkipClosed",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "StringTooLong",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "str",
+    "type": "string",
+    "internalType": "string"
+   }
+  ]
+ },
+ {
+  "name": "SyncNeeded",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "TermsHashMismatch",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "expected",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "actual",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ]
+ },
+ {
+  "name": "TooCloseToDeadline",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "latestFunding",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ]
+ },
+ {
+  "name": "UnknownBid",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "UnknownJob",
+  "type": "error",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ]
+ },
+ {
+  "name": "ZeroAddress",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "ZeroHash",
+  "type": "error",
+  "inputs": []
+ },
+ {
+  "name": "AllowListChanged",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "who",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "allowed",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "ArbiterAccepted",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "arbiter",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "AwardLapsed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "reason",
+    "type": "uint8",
+    "indexed": false,
+    "internalType": "enum IOnChainJobBoardV2.LapseReason"
+   },
+   {
+    "name": "at",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "BidCommitted",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "commitHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "BidRevealed",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "offerExpiry",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "feeBps",
+    "type": "uint16",
+    "indexed": false,
+    "internalType": "uint16"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "label",
+    "type": "string",
+    "indexed": false,
+    "internalType": "string"
+   },
+   {
+    "name": "arbiterWindow",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "arbiterThreshold",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "BidWithdrawn",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "at",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "CommitCloseExtended",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "newCommitEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "newRevealStart",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "newRevealEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "DealFunded",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "provider",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "indexed": false,
+    "internalType": "bytes32"
+   },
+   {
+    "name": "deliveryDeadline",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "latestRelease",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "EIP712DomainChanged",
+  "type": "event",
+  "inputs": [],
+  "anonymous": false
+ },
+ {
+  "name": "JobCancelled",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "JobPosted",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "buyer",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "budget",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "feeCeilingBps",
+    "type": "uint16",
+    "indexed": false,
+    "internalType": "uint16"
+   },
+   {
+    "name": "commitEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "revealStart",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "revealEnd",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "arbiter",
+    "type": "address",
+    "indexed": false,
+    "internalType": "address"
+   },
+   {
+    "name": "label",
+    "type": "string",
+    "indexed": false,
+    "internalType": "string"
+   },
+   {
+    "name": "arbiterWindow",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "longestHold",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   },
+   {
+    "name": "lateReviewExtension",
+    "type": "uint32",
+    "indexed": false,
+    "internalType": "uint32"
+   },
+   {
+    "name": "arbiterThreshold",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "NoAward",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "PickSkipped",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "buyer",
+    "type": "address",
+    "indexed": true,
+    "internalType": "address"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "indexed": false,
+    "internalType": "address"
+   },
+   {
+    "name": "at",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "Picked",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fundBy",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "QualificationSet",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "minCompletedValue",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "allowListOn",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "QualificationTightened",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "minCompletedValue",
+    "type": "uint256",
+    "indexed": false,
+    "internalType": "uint256"
+   },
+   {
+    "name": "allowListOn",
+    "type": "bool",
+    "indexed": false,
+    "internalType": "bool"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "StepInAccepted",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "fundBy",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "StepInOffered",
+  "type": "event",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "indexed": true,
+    "internalType": "uint256"
+   },
+   {
+    "name": "acceptBy",
+    "type": "uint64",
+    "indexed": false,
+    "internalType": "uint64"
+   }
+  ],
+  "anonymous": false
+ },
+ {
+  "name": "ARBITER_ACCEPTANCE_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "ARBITER_THRESHOLD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "AWARD_WINDOW",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "COMMIT_TAG",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "DEAL_TERMS_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "DEFAULT_DISPUTE_TIMEOUT",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "ESCROW",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IJobBoardEscrowV1"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "FEE_GUARD_CEILING_BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "FEE_POLICY",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IFeePolicyV2"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MARS_DELAY",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_AMOUNT",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_DEADLINE_LEAD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_DELIVERY_DURATION",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_DISPUTE_TIMEOUT",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_HOLD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_OFFER_LEAD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_POSTING_LEAD",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_REVIEW_WINDOW",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "MAX_TOTAL_FEE_BPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint16",
+    "internalType": "uint16"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "OPEN_POST_LIMIT",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "OWNER_POWERS_HASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "RECORDER",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IJobOutcomeRecorder"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "RELAY_OPERATOR",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "STEP_IN_TYPEHASH",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "SYNC_STEPS",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TIME_FLOOR",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "TOKEN",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "contract IERC20"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "UNFUNDED_LABEL",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "VERSION",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "string",
+    "internalType": "string"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "allowed",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "anyArbiterAccepted",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "arbiterAccept",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "arbiterAccepted",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "awardEnd",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "bidOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "bidderHistory",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "a",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "commits",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "reveals",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "withdrawals",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "awards",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.BidderHistory"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "buyerHistory",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "a",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "postings",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "funded",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "lapses",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "noAwards",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "cancelled",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.BuyerHistory"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "cancelJob",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "commit",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "commitHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "commitHashOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "offerExpiry",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "bidDocHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "committedRevealEnd",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "domainSeparator",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "eip712Domain",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "fields",
+    "type": "bytes1",
+    "internalType": "bytes1"
+   },
+   {
+    "name": "name",
+    "type": "string",
+    "internalType": "string"
+   },
+   {
+    "name": "version",
+    "type": "string",
+    "internalType": "string"
+   },
+   {
+    "name": "chainId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "verifyingContract",
+    "type": "address",
+    "internalType": "address"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "extensions",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "finalizeNoAward",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "fund",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedTermsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "arbiterSig",
+    "type": "bytes",
+    "internalType": "bytes"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "fundBid",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedTermsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "sigDeadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidderSig",
+    "type": "bytes",
+    "internalType": "bytes"
+   },
+   {
+    "name": "arbiterSig",
+    "type": "bytes",
+    "internalType": "bytes"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "fundingStatus",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "phase",
+    "type": "uint8",
+    "internalType": "enum IOnChainJobBoardV2.Phase"
+   },
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "needsSync",
+    "type": "bool",
+    "internalType": "bool"
+   },
+   {
+    "name": "approveSpender",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "getAward",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "bidId",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "phase",
+      "type": "uint8",
+      "internalType": "enum IOnChainJobBoardV2.Phase"
+     },
+     {
+      "name": "picked",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "winnerFound",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "windowEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "nextStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.Award"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "getBid",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "bidder",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "revealed",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "withdrawn",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "feeBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "committedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "deadline",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "offerExpiry",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "withdrawnAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "feeRecipient",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "commitHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "price",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "bidDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "next",
+      "type": "uint256",
+      "internalType": "uint256"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.Bid"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "getCounts",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "commits",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "reveals",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "withdrawals",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "lapses",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "skips",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.JobCounts"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "getJob",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "buyer",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "state",
+      "type": "uint8",
+      "internalType": "enum IOnChainJobBoardV2.JobState"
+     },
+     {
+      "name": "setup",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "allowListOn",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "feeCeilingBps",
+      "type": "uint16",
+      "internalType": "uint16"
+     },
+     {
+      "name": "postedAt",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "offerValidity",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minDeliveryDuration",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "extensions",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "budget",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "minCompletedValue",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "arbiterWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.Job"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "hashTypedData",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "structHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "headOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "isQualified",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "bidder",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "isRelayAffiliate",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "",
+    "type": "address",
+    "internalType": "address"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "lateReviewExtension",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint32",
+    "internalType": "uint32"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "latestFunding",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "offerExpiry",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "longestHoldOf",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint64",
+    "internalType": "uint64"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "nextJobId",
+  "type": "function",
+  "inputs": [],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "view"
+ },
+ {
+  "name": "postJob",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "p",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "budget",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "offerValidity",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "minDeliveryDuration",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minCompletedValue",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "allowListOn",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "setup",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "funded",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "bond",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "arbiterWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.Posting"
+   },
+   {
+    "name": "allowList",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "postQualifiedJob",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "p",
+    "type": "tuple",
+    "components": [
+     {
+      "name": "budget",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "specHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "termsDocHash",
+      "type": "bytes32",
+      "internalType": "bytes32"
+     },
+     {
+      "name": "commitEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealStart",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "revealEnd",
+      "type": "uint64",
+      "internalType": "uint64"
+     },
+     {
+      "name": "offerValidity",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "reviewWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "disputeTimeout",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "arbiter",
+      "type": "address",
+      "internalType": "address"
+     },
+     {
+      "name": "minDeliveryDuration",
+      "type": "uint32",
+      "internalType": "uint32"
+     },
+     {
+      "name": "minCompletedValue",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "allowListOn",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "setup",
+      "type": "uint8",
+      "internalType": "uint8"
+     },
+     {
+      "name": "funded",
+      "type": "bool",
+      "internalType": "bool"
+     },
+     {
+      "name": "bond",
+      "type": "uint256",
+      "internalType": "uint256"
+     },
+     {
+      "name": "arbiterWindow",
+      "type": "uint32",
+      "internalType": "uint32"
+     }
+    ],
+    "internalType": "struct IOnChainJobBoardV2.Posting"
+   },
+   {
+    "name": "allowList",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "raiseMinCompletedValue",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "newMin",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "reaccept",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "sigDeadline",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "sig",
+    "type": "bytes",
+    "internalType": "bytes"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "reveal",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "price",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "deadline",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "offerExpiry",
+    "type": "uint64",
+    "internalType": "uint64"
+   },
+   {
+    "name": "bidDocHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "salt",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   },
+   {
+    "name": "hint",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "termsHash",
+    "type": "bytes32",
+    "internalType": "bytes32"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "skipPick",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedBidId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "done",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "skipPicks",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "expectedBidIds",
+    "type": "uint256[]",
+    "internalType": "uint256[]"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "done",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "sync",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "maxSteps",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [
+   {
+    "name": "done",
+    "type": "bool",
+    "internalType": "bool"
+   }
+  ],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "tightenAllowList",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   },
+   {
+    "name": "list",
+    "type": "address[]",
+    "internalType": "address[]"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ },
+ {
+  "name": "withdrawBid",
+  "type": "function",
+  "inputs": [
+   {
+    "name": "jobId",
+    "type": "uint256",
+    "internalType": "uint256"
+   }
+  ],
+  "outputs": [],
+  "stateMutability": "nonpayable"
+ }
+]
